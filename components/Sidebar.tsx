@@ -1,14 +1,15 @@
+
 import React from 'react';
 import { NavItem } from '../types';
-import { Database, FileText } from 'lucide-react';
+import { Database, FileText, ClipboardList, File } from 'lucide-react';
 
 interface SidebarProps {
   navItems: NavItem[];
   activeId: string;
   onSelect: (id: string) => void;
   isOpen: boolean;
-  currentView: 'protocol' | 'dictionary';
-  onChangeView: (view: 'protocol' | 'dictionary') => void;
+  currentView: 'protocol' | 'dictionary' | 'report' | 'document';
+  onChangeView: (view: 'protocol' | 'dictionary' | 'report' | 'document') => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ navItems, activeId, onSelect, isOpen, currentView, onChangeView }) => {
@@ -32,6 +33,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ navItems, activeId, onSelect, 
           方案文档 Protocol
         </button>
         <button
+          onClick={() => onChangeView('report')}
+          className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+            currentView === 'report'
+              ? 'bg-blue-600 text-white shadow-sm'
+              : 'text-gray-700 hover:bg-gray-100'
+          }`}
+        >
+          <ClipboardList size={18} />
+          报告文档 Report
+        </button>
+        <button
           onClick={() => onChangeView('dictionary')}
           className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
             currentView === 'dictionary'
@@ -41,6 +53,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ navItems, activeId, onSelect, 
         >
           <Database size={18} />
           数据映射字典 Dictionary
+        </button>
+        <button
+          onClick={() => onChangeView('document')}
+          className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+            currentView === 'document'
+              ? 'bg-blue-600 text-white shadow-sm'
+              : 'text-gray-700 hover:bg-gray-100'
+          }`}
+        >
+          <File size={18} />
+          实验数据文档 Experimental Data Document
         </button>
       </div>
 
@@ -66,10 +89,20 @@ export const Sidebar: React.FC<SidebarProps> = ({ navItems, activeId, onSelect, 
               ))}
             </nav>
           </>
-        ) : (
+        ) : currentView === 'report' ? (
+          <div className="px-4 py-4 text-sm text-gray-500 text-center">
+            查看报告文档内容。<br/>
+            View report document content.
+          </div>
+        ) : currentView === 'dictionary' ? (
           <div className="px-4 py-4 text-sm text-gray-500 text-center">
             查看所有系统变量与前端映射关系。<br/>
             View all system variables and their UI mappings.
+          </div>
+        ) : (
+          <div className="px-4 py-4 text-sm text-gray-500 text-center">
+            查看实验数据文档内容。<br/>
+            View experimental data document content.
           </div>
         )}
       </div>

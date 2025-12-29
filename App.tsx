@@ -4,8 +4,10 @@ import { getSections } from './data/protocolData';
 import { Sidebar } from './components/Sidebar';
 import { ProtocolHeader } from './components/ProtocolHeader';
 import { DataMappingDictionary } from './components/DataMappingDictionary';
+import { ReportDocument } from './components/ReportDocument';
+import { DocumentPage } from './components/DocumentPage';
 import { Menu } from 'lucide-react';
-import { NavItem } from './types';
+import { NavItem, Personnel, ValidationOptions } from './types';
 
 export interface GradientRow {
   time: string;
@@ -135,7 +137,7 @@ export interface PrerequisiteState {
 }
 
 const App: React.FC = () => {
-  const [currentView, setCurrentView] = useState<'protocol' | 'dictionary'>('protocol');
+  const [currentView, setCurrentView] = useState<'protocol' | 'dictionary' | 'report' | 'document'>('protocol');
   const [activeSectionId, setActiveSectionId] = useState<string>('cover');
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [productId, setProductId] = useState<string>("HY130225");
@@ -343,7 +345,7 @@ const App: React.FC = () => {
   }, [productId]);
 
   // Validation Items State
-  const [validationOptions, setValidationOptions] = useState({
+  const [validationOptions, setValidationOptions] = useState<ValidationOptions>({
     systemSuitability: true, // mandatory
     specificity: true,
     linearity: true,
@@ -352,7 +354,7 @@ const App: React.FC = () => {
     stability: true
   });
 
-  // Personnel State
+  // Personnel State (PROTOCOL) - These are separate from Report Personnel
   const [preparerName, setPreparerName] = useState<string>("龙慧\nHui Long");
   const [preparerDept, setPreparerDept] = useState<string>("QC");
   const [preparerPosition, setPreparerPosition] = useState<string>("QC 工程师\nQC Engineer");
@@ -368,6 +370,26 @@ const App: React.FC = () => {
   const [approverName, setApproverName] = useState<string>("刘钟华\nZhonghua Liu");
   const [approverDept, setApproverDept] = useState<string>("QA");
   const [approverPos, setApproverPos] = useState<string>("QA 经理\nQA Manager");
+
+  // Personnel State (REPORT - Independent/Decoupled)
+  // Initialize with Report preset data as requested
+  const [reportPreparer, setReportPreparer] = useState<Personnel>({ 
+    name: '龙慧\nHui Long', 
+    dept: 'QC', 
+    pos: 'QC工程师\nQC Engineer' 
+  });
+
+  const [reportReviewers, setReportReviewers] = useState<Personnel[]>([
+    { name: '李利娜\nLina Li', dept: 'QC', pos: 'QC组长\nQC Group Leader' },
+    { name: '顾玉豪\nYuhao Gu', dept: 'QC', pos: 'QC经理\nQC Manager' },
+    { name: '叶文\nWen Ye', dept: 'QA', pos: 'QA工程师\nQA Engineer' },
+  ]);
+
+  const [reportApprover, setReportApprover] = useState<Personnel>({ 
+    name: '刘钟华\nZhonghua Liu', 
+    dept: 'QA', 
+    pos: 'QA经理\nQA Manager' 
+  });
 
   const protocolNumber = (
     <span>
@@ -539,9 +561,17 @@ const App: React.FC = () => {
     return () => observer.disconnect();
   }, [sections, currentView]);
 
-  const currentSectionTitle = currentView === 'protocol' 
-    ? (sections.find(s => s.id === activeSectionId)?.title || "Protocol")
-    : "Data Mapping Dictionary";
+  const currentSectionTitle = useMemo(() => {
+    if (currentView === 'protocol') {
+      return (sections.find(s => s.id === activeSectionId)?.title || "Protocol");
+    } else if (currentView === 'report') {
+      return "Report Document";
+    } else if (currentView === 'dictionary') {
+      return "Data Mapping Dictionary";
+    } else {
+      return "Experimental Data Document";
+    }
+  }, [currentView, sections, activeSectionId]);
 
   return (
     <div className="flex h-screen bg-gray-100 overflow-hidden text-gray-900">
@@ -591,8 +621,24 @@ const App: React.FC = () => {
                 </div>
               </div>
             </div>
-          ) : (
+          ) : currentView === 'report' ? (
+            <ReportDocument 
+              productId={productId}
+              protocolCode={protocolCode}
+              protocolVersion={protocolVersion}
+              projectNumber={projectNumber}
+              preparer={reportPreparer}
+              setPreparer={setReportPreparer}
+              reviewers={reportReviewers}
+              setReviewers={setReportReviewers}
+              approver={reportApprover}
+              setApprover={setReportApprover}
+              validationOptions={validationOptions}
+            />
+          ) : currentView === 'dictionary' ? (
             <DataMappingDictionary />
+          ) : (
+            <DocumentPage />
           )}
         </main>
       </div>

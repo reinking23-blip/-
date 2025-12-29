@@ -594,11 +594,16 @@ export const getSections = (
                                 </tr>
                              </tbody>
                         </table>
-                        
-                        <h4 className="font-bold mb-1 mt-4">2.4 可接受标准 Acceptance Criteria</h4>
-                        <p>同方案“4.5 系统适用性”章节要求的标准。<br/>Same as the criteria required in section "4.5 System Suitability" of the protocol.</p>
+                        <p className="mt-2 text-gray-600 italic">
+                            注：进样序列可根据实际情况进行调整。<br/>
+                            Note: Sequence can be adjusted according to the actual situation.
+                        </p>
                      </div>
                   </div>
+               </div>
+               <div>
+                  <h3 className="font-bold border-b border-gray-200 pb-1 mb-2">3. 可接受标准 Acceptance Criteria</h3>
+                  {renderSysSuitRequirementsContent()}
                </div>
             </div>
           )
