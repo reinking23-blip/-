@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Search, Eye, ArrowLeft, FileText, MapPin, AlignLeft } from 'lucide-react';
 
@@ -50,6 +51,7 @@ const MAPPINGS: MappingEntry[] = [
   { category: 'Product Info', variableKey: 'productId', inputLocation: '封面 Cover', description: 'Product Catalog Number', uiLabel: '2.2 溶液配制 Acc (CN)', location: 'Val Proc Accuracy', context: '取 [productId] 对照品适量', example: 'HY130225' },
   { category: 'Product Info', variableKey: 'productId', inputLocation: '封面 Cover', description: 'Product Catalog Number', uiLabel: '2.2 溶液配制 Acc (EN)', location: 'Val Proc Accuracy', context: 'Take appropriate amount of [productId] reference standard', example: 'HY130225' },
   { category: 'Product Info', variableKey: 'productId', inputLocation: '封面 Cover', description: 'Product Catalog Number', uiLabel: '精密度Proc表格名称', location: 'Val Proc Precision (Table)', context: 'Table Row Name: [productId]', example: 'HY130225' },
+  { category: 'Product Info', variableKey: 'productId', inputLocation: '封面 Cover', description: 'Product Catalog Number', uiLabel: '公式定义 W_STD1', location: 'Val Proc Precision (Calc)', context: 'W_STD1：对照品溶液1中 [productId] 对照品的称样量', example: 'HY130225' },
   { category: 'Product Info', variableKey: 'productId', inputLocation: '封面 Cover', description: 'Product Catalog Number', uiLabel: '1. 目的 (CN)', location: 'Val Proc Stability (Obj)', context: '观察 [productId] 峰的变化情况', example: 'HY130225' },
   { category: 'Product Info', variableKey: 'productId', inputLocation: '封面 Cover', description: 'Product Catalog Number', uiLabel: '1. Objective (EN)', location: 'Val Proc Stability (Obj)', context: 'The change of [productId] peak was observed', example: 'HY130225' },
   { category: 'Product Info', variableKey: 'productId', inputLocation: '封面 Cover', description: 'Product Catalog Number', uiLabel: '3. 标准 供试品 (CN)', location: 'Val Proc Stability (Acc)', context: '考察 [productId] 的峰面积', example: 'HY130225' },
@@ -105,7 +107,9 @@ const MAPPINGS: MappingEntry[] = [
   { category: 'Testing Conditions', variableKey: 'testingConditions[method].value', inputLocation: '4. 检验方法描述 - 4.2 仪器及检测条件', description: 'Method Name', uiLabel: '方法名称', location: '4.2 Instruments', context: 'Method name: [value]', example: 'TM-A316-LC-02.00' },
   { category: 'Testing Conditions', variableKey: 'testingConditions[instrument].value', inputLocation: '4. 检验方法描述 - 4.2 仪器及检测条件', description: 'Instrument', uiLabel: '仪器', location: '4.2 Instruments', context: 'Instrument: [value]', example: '高效液相色谱仪 HPLC' },
   { category: 'Testing Conditions', variableKey: 'testingConditions[column].value', inputLocation: '4. 检验方法描述 - 4.2 仪器及检测条件', description: 'Column', uiLabel: '色谱柱', location: '4.2 Instruments', context: 'Column: [value]', example: 'Waters_Xbridge Shield RP18...' },
+  { category: 'Testing Conditions', variableKey: 'testingConditions[column].value', inputLocation: '4. 检验方法描述 - 4.2 仪器及检测条件', description: 'Column', uiLabel: '色谱柱型号', location: 'Prerequisite 2', context: 'Model: [value] (Supplier: Waters)', example: 'Waters_Xbridge...' },
   { category: 'Testing Conditions', variableKey: 'testingConditions[ghostBuster].value', inputLocation: '4. 检验方法描述 - 4.2 仪器及检测条件', description: 'Ghost-Buster', uiLabel: '捕集小柱', location: '4.2 Instruments', context: 'Ghost-Buster column: [value]', example: 'Welch Ghost Buster_50mm×4.6mm' },
+  { category: 'Testing Conditions', variableKey: 'testingConditions[ghostBuster].value', inputLocation: '4. 检验方法描述 - 4.2 仪器及检测条件', description: 'Ghost-Buster', uiLabel: '捕集小柱型号', location: 'Prerequisite 2', context: 'Model: [value] (Supplier: Welch)', example: 'Welch Ghost Buster...' },
   { category: 'Testing Conditions', variableKey: 'testingConditions[detector].value', inputLocation: '4. 检验方法描述 - 4.2 仪器及检测条件', description: 'Detector', uiLabel: '检测器', location: '4.2 Instruments', context: 'Detection: [value]', example: 'DAD' },
   { category: 'Testing Conditions', variableKey: 'testingConditions[colTemp].value', inputLocation: '4. 检验方法描述 - 4.2 仪器及检测条件', description: 'Column Temp', uiLabel: '柱温', location: '4.2 Instruments', context: 'Column temperature: [value]', example: '40℃' },
   { category: 'Testing Conditions', variableKey: 'testingConditions[samplerTemp].value', inputLocation: '4. 检验方法描述 - 4.2 仪器及检测条件', description: 'Sampler Temp', uiLabel: '样品盘温度', location: '4.2 Instruments', context: 'Sampler temperature: [value]', example: '5℃' },
@@ -151,6 +155,7 @@ const MAPPINGS: MappingEntry[] = [
   { category: 'Solution Prep', variableKey: 'solutionPreps.diluent.descEn', inputLocation: '4. 检验方法描述 - 4.3 溶液配制', description: 'Diluent Name (EN)', uiLabel: 'Diluent Name (EN)', location: 'Val Proc Linearity', context: 'Diluent(Blank): [descEn]', example: 'Acetonitrile' },
   { category: 'Solution Prep', variableKey: 'solutionPreps.diluent.descEn', inputLocation: '4. 检验方法描述 - 4.3 溶液配制', description: 'Diluent Name (EN)', uiLabel: 'Diluent Name (EN)', location: 'Val Proc Precision', context: 'Diluent(Blank): [descEn]', example: 'Acetonitrile' },
   { category: 'Solution Prep', variableKey: 'solutionPreps.diluent.descEn', inputLocation: '4. 检验方法描述 - 4.3 溶液配制', description: 'Diluent Name (EN)', uiLabel: 'Diluent Name (EN)', location: 'Val Proc Stability', context: 'Blank/diluent: [descEn]', example: 'Acetonitrile' },
+  { category: 'Solution Prep', variableKey: 'solutionPreps.diluent.detail', inputLocation: '4. 检验方法描述 - 4.3 溶液配制', description: 'Diluent Detail', uiLabel: '稀释剂配制详情', location: '4.3 Solution Prep', context: 'Detail block: [detail]', example: '...' },
 
   { category: 'Solution Detail', variableKey: 'solDetail.stdWeight', inputLocation: '4. 检验方法描述 - 4.3 溶液配制', description: 'Standard Weight', uiLabel: '对照品称样量', location: '4.3 Solution Prep', context: '取 ... 约 [stdWeight] mg', example: '20' },
   { category: 'Solution Detail', variableKey: 'solDetail.stdWeight', inputLocation: '4. 检验方法描述 - 4.3 溶液配制', description: 'Standard Weight', uiLabel: '对照品称样量', location: 'Val Proc Sys Suit', context: '取 ... 约 [stdWeight] mg', example: '20' },
@@ -230,12 +235,12 @@ const MAPPINGS: MappingEntry[] = [
 
   { category: 'System Suitability', variableKey: 'sysSuitability.controlInjectionCount', inputLocation: '4. 检验方法描述 - 4.5 系统适用性要求', description: 'Control Injection Count', uiLabel: '对照RSD针数', location: '4.5 Sys Suit', context: '和对照品溶液1连续 [controlInjectionCount] 针', example: '5' },
   { category: 'System Suitability', variableKey: 'sysSuitability.controlInjectionCount', inputLocation: '4. 检验方法描述 - 4.5 系统适用性要求', description: 'Control Injection Count', uiLabel: 'Control Injection Count (EN)', location: '4.5 Sys Suit', context: '... and [controlInjectionCount] consecutive standard solution 1', example: '5' },
-  { category: 'System Suitability', variableKey: 'sysSuitability.controlInjectionCount', inputLocation: '4. 检验方法描述 - 4.5 系统适用性要求', description: '对照RSD针数 (6.1)', uiLabel: '对照RSD针数 (6.1)', location: '6.1 System Suitability', context: '和对照品溶液1连续 [controlInjectionCount] 针', example: '5' },
+  { category: 'System Suitability', variableKey: 'sysSuitability.controlInjectionCount', inputLocation: '4. 检验方法描述 - 4.5 系统适用性要求', description: 'Control Injection Count', uiLabel: '对照RSD针数 (6.1)', location: '6.1 System Suitability', context: '和对照品溶液1连续 [controlInjectionCount] 针', example: '5' },
   { category: 'System Suitability', variableKey: 'sysSuitability.controlInjectionCount', inputLocation: '4. 检验方法描述 - 4.5 系统适用性要求', description: 'Control Injection Count', uiLabel: 'Control Injection Count (6.1)', location: '6.1 System Suitability', context: '... and [controlInjectionCount] consecutive standard solution 1', example: '5' },
 
   { category: 'System Suitability', variableKey: 'sysSuitability.controlAreaRSD', inputLocation: '4. 检验方法描述 - 4.5 系统适用性要求', description: 'Control Area RSD', uiLabel: '对照RSD限度', location: '4.5 Sys Suit', context: '峰面积的RSD应≤ [controlAreaRSD] %', example: '2.0' },
   { category: 'System Suitability', variableKey: 'sysSuitability.controlAreaRSD', inputLocation: '4. 检验方法描述 - 4.5 系统适用性要求', description: 'Control Area RSD', uiLabel: 'Control Area RSD (EN)', location: '4.5 Sys Suit', context: 'should be NMT [controlAreaRSD] %', example: '2.0' },
-  { category: 'System Suitability', variableKey: 'sysSuitability.controlAreaRSD', inputLocation: '4. 检验方法描述 - 4.5 系统适用性要求', description: '对照RSD限度 (6.1)', uiLabel: '对照RSD限度 (6.1)', location: '6.1 System Suitability', context: '峰面积的RSD应≤ [controlAreaRSD] %', example: '2.0' },
+  { category: 'System Suitability', variableKey: 'sysSuitability.controlAreaRSD', inputLocation: '4. 检验方法描述 - 4.5 系统适用性要求', description: 'Control Area RSD', uiLabel: '对照RSD限度 (6.1)', location: '6.1 System Suitability', context: '峰面积的RSD应≤ [controlAreaRSD] %', example: '2.0' },
   { category: 'System Suitability', variableKey: 'sysSuitability.controlAreaRSD', inputLocation: '4. 检验方法描述 - 4.5 系统适用性要求', description: 'Control Area RSD', uiLabel: 'Control Area RSD (6.1)', location: '6.1 System Suitability', context: 'should be NMT [controlAreaRSD] %', example: '2.0' },
 
   // ==================================================================================
@@ -251,7 +256,8 @@ const MAPPINGS: MappingEntry[] = [
   // ==================================================================================
   { category: 'Acceptance Criteria', variableKey: 'acceptanceCriteria[0].criteria', inputLocation: '4. 检验方法描述 - 4.8 可接受标准', description: 'Assay Criteria', uiLabel: '含量标准', location: '4.8 Acceptance Criteria', context: '含量（按无水物计）: [criteria]', example: 'NLT 95.0%' },
   { category: 'Acceptance Criteria', variableKey: 'acceptanceCriteria[1].criteria', inputLocation: '4. 检验方法描述 - 4.8 可接受标准', description: 'Identification Criteria', uiLabel: '鉴别标准', location: '4.8 Acceptance Criteria', context: '鉴别: [criteria]', example: '供试品溶液中主峰保留时间...' },
-  { category: 'Acceptance Criteria', variableKey: 'acceptanceCriteria[i].criteria', inputLocation: '4. 检验方法描述 - 4.8 可接受标准', description: 'Other Criteria', uiLabel: '其他标准', location: '4.8 Acceptance Criteria', context: '[Name]: [criteria]', example: '...' },
+  { category: 'Acceptance Criteria', variableKey: 'acceptanceCriteria[i].name', inputLocation: '4. 检验方法描述 - 4.8 可接受标准', description: 'Other Criteria Name', uiLabel: '其他标准名称', location: '4.8 Acceptance Criteria', context: '[name]: [criteria]', example: '...' },
+  { category: 'Acceptance Criteria', variableKey: 'acceptanceCriteria[i].criteria', inputLocation: '4. 检验方法描述 - 4.8 可接受标准', description: 'Other Criteria', uiLabel: '其他标准', location: '4.8 Acceptance Criteria', context: '[name]: [criteria]', example: '...' },
 
   // ==================================================================================
   // 6.x VALIDATION PARAMETERS
@@ -265,7 +271,7 @@ const MAPPINGS: MappingEntry[] = [
   // Linearity
   { category: 'Linearity', variableKey: 'linearityState.solutions[i].conc', inputLocation: '6. 验证内容 - 6.x 线性和范围', description: 'Solution Conc Label', uiLabel: '线性浓度标签', location: '6.x Linearity', context: '配制成 [conc] ... 浓度水平', example: '80%' },
   { category: 'Linearity', variableKey: 'linearityState.solutions[i].conc', inputLocation: '6. 验证内容 - 6.x 线性和范围', description: 'Solution Conc Label', uiLabel: '线性浓度标签 (Proc)', location: 'Val Proc Linearity', context: ' [conc]线性溶液...', example: '80%' },
-
+  
   // Precision
   { category: 'Validation Params', variableKey: 'precisionState.precisionLimit', inputLocation: '6. 验证内容 - 6.x 精密度', description: 'Precision RSD Limit', uiLabel: '精密度RSD限度', location: '6.x Precision (Table)', context: 'Table Cell: [precisionLimit]', example: 'NMT 2.0%' },
   { category: 'Validation Params', variableKey: 'precisionState.precisionLimit', inputLocation: '6. 验证内容 - 6.x 精密度', description: 'Precision RSD Limit', uiLabel: '精密度RSD限度', location: 'Val Proc Precision (Acc Table)', context: 'Table Cell: [precisionLimit]', example: 'NMT 2.0%' },
@@ -289,7 +295,7 @@ const MAPPINGS: MappingEntry[] = [
 
   { category: 'Validation Params', variableKey: 'stabilityState.sampleRecovery', inputLocation: '6. 验证内容 - 6.x 溶液稳定性', description: 'Stability Sample Rec', uiLabel: '稳定性供试品回收率 (CN)', location: '6.x Stability', context: '回收率应在 [sampleRecovery] 之间', example: '98.0%~102.0%' },
   { category: 'Validation Params', variableKey: 'stabilityState.sampleRecovery', inputLocation: '6. 验证内容 - 6.x 溶液稳定性', description: 'Stability Sample Rec', uiLabel: 'Stability Sample Rec (EN)', location: '6.x Stability', context: 'recovery ... should be [sampleRecovery]', example: '98.0%~102.0%' },
-  { category: 'Validation Params', variableKey: 'stabilityState.sampleRecovery', inputLocation: '6. 验证内容 - 6.x 溶液稳定性', description: '稳定性供试品回收率 (CN)', uiLabel: '稳定性供试品回收率 (CN)', location: 'Val Proc Stability (Acc)', context: '回收率应在 [sampleRecovery] 之间', example: '98.0%~102.0%' },
+  { category: 'Validation Params', variableKey: 'stabilityState.sampleRecovery', inputLocation: '6. 验证内容 - 6.x 溶液稳定性', description: 'Stability Sample Rec', uiLabel: '稳定性供试品回收率 (CN)', location: 'Val Proc Stability (Acc)', context: '回收率应在 [sampleRecovery] 之间', example: '98.0%~102.0%' },
   { category: 'Validation Params', variableKey: 'stabilityState.sampleRecovery', inputLocation: '6. 验证内容 - 6.x 溶液稳定性', description: 'Stability Sample Rec', uiLabel: 'Stability Sample Rec (EN)', location: 'Val Proc Stability (Acc)', context: 'recovery ... should be [sampleRecovery]', example: '98.0%~102.0%' },
 
   { category: 'Validation Params', variableKey: 'stabilityState.standardTemp', inputLocation: '6. 验证内容 - 6.x 溶液稳定性', description: 'Stability Standard Temp', uiLabel: '稳定性对照品温度 (CN)', location: '6.x Stability', context: '对照品溶液在 [standardTemp] ℃条件下', example: '5±3' },
@@ -309,6 +315,7 @@ const MAPPINGS: MappingEntry[] = [
   // ==================================================================================
   { category: 'Prerequisites', variableKey: 'prerequisiteState.columnSuppliers.column', inputLocation: '验证步骤 - 先决条件 2', description: 'Column Supplier', uiLabel: '色谱柱厂家', location: 'Prerequisite 2', context: 'Column: [value] (Supplier)', example: 'Waters' },
   { category: 'Prerequisites', variableKey: 'prerequisiteState.columnSuppliers.ghostBuster', inputLocation: '验证步骤 - 先决条件 2', description: 'Ghost-Buster Supplier', uiLabel: '捕集小柱厂家', location: 'Prerequisite 2', context: 'Ghost-Buster: [value] (Supplier)', example: 'Welch' },
+  { category: 'Prerequisites', variableKey: 'prerequisiteState.columnSuppliers[dynamic_id]', inputLocation: '验证步骤 - 先决条件 2', description: 'Additional Column Supplier', uiLabel: '额外色谱柱厂家', location: 'Prerequisite 2', context: 'Column: [value] (Supplier)', example: 'Agilent' },
   { category: 'Prerequisites', variableKey: 'prerequisiteState.reagentRows[i].name', inputLocation: '验证步骤 - 先决条件 2', description: 'Reagent Name', uiLabel: '试剂名称', location: 'Prerequisite 2', context: 'Name: [name]', example: 'Potassium ...' },
   { category: 'Prerequisites', variableKey: 'prerequisiteState.reagentRows[i].grade', inputLocation: '验证步骤 - 先决条件 2', description: 'Reagent Grade', uiLabel: '试剂级别', location: 'Prerequisite 2', context: 'Grade: [grade]', example: 'HPLC' },
 
