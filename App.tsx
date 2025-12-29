@@ -4,132 +4,25 @@ import { Sidebar } from './components/Sidebar';
 import { ProtocolHeader } from './components/ProtocolHeader';
 import { DataMappingDictionary } from './components/DataMappingDictionary';
 import { Menu } from 'lucide-react';
-import { NavItem } from './types';
-
-export interface GradientRow {
-  time: string;
-  phaseA: string;
-}
-
-export interface TestingCondition {
-  id: string;
-  labelZh: string;
-  labelEn: string;
-  value: string;
-  isOptional?: boolean;
-  isCustom?: boolean;
-}
-
-export interface SolutionPrep {
-  descZh: string;
-  descEn: string;
-  detail: string;
-}
-
-export interface SolutionPrepsState {
-  phaseA: SolutionPrep;
-  phaseB: SolutionPrep;
-  needleWash: SolutionPrep;
-  diluent: SolutionPrep;
-  standard: SolutionPrep;
-  sample: SolutionPrep;
-}
-
-export interface SolutionDetailState {
-  stdWeight: string;
-  stdVolume: string;
-  stdMethodZh: string;
-  stdMethodEn: string;
-  stdCount: string;
-  splWeight: string;
-  splVolume: string;
-  splMethodZh: string;
-  splMethodEn: string;
-  splCount: string;
-}
-
-export interface SequenceState {
-  std1Count: string;
-  std2Count: string;
-  spl1Count: string;
-  spl2Count: string;
-  controlCount: string;
-}
-
-export interface ValProcSysSuitState {
-  std1Count: string;
-  std2Count: string;
-  controlCount: string;
-}
-
-export interface ValProcPrecisionState {
-  precisionStd1Count: string;
-  precisionStd2Count: string;
-}
-
-export interface SystemSuitabilityState {
-  plateNumber: string;
-  tailingFactor: string;
-  injectionCount: string;
-  areaRSD: string;
-  retentionRSD: string;
-  recoveryRange: string;
-  controlInjectionCount: string;
-  controlAreaRSD: string;
-}
-
-export interface CalculationState {
-  kf: boolean;
-  lod: boolean;
-  sr: boolean;
-  tga: boolean;
-}
-
-export interface AcceptanceCriterion {
-  id: string;
-  name: string;
-  criteria: string;
-}
-
-export interface SpecificityState {
-  retentionDevLimit: string;
-}
-
-export interface LinearityState {
-  concentrations: string[];
-  l1: { name: string; weight: string; volume: string };
-  l2: { name: string; weight: string; volume: string };
-  l3: { name: string; weight: string; volume: string };
-  l4: { name: string; weight: string; volume: string };
-  l5: { name: string; weight: string; volume: string };
-}
-
-export interface PrecisionState {
-  precisionLimit: string;
-}
-
-export interface AccuracyState {
-  recoveryRange: string;
-  rsdLimit: string;
-}
-
-export interface StabilityState {
-  sampleTemp: string;
-  sampleRecovery: string;
-  standardTemp: string;
-  standardRecovery: string;
-}
-
-export interface ReagentConfirmationRow {
-  id: string;
-  name: string;
-  grade: string;
-}
-
-export interface PrerequisiteState {
-  columnSuppliers: Record<string, string>;
-  reagentRows: ReagentConfirmationRow[];
-}
+import { 
+  NavItem, 
+  GradientRow, 
+  TestingCondition, 
+  SolutionPrepsState, 
+  SolutionDetailState, 
+  SequenceState, 
+  ValProcSysSuitState, 
+  ValProcPrecisionState, 
+  SystemSuitabilityState, 
+  CalculationState, 
+  AcceptanceCriterion, 
+  SpecificityState, 
+  LinearityState, 
+  PrecisionState, 
+  AccuracyState, 
+  StabilityState, 
+  PrerequisiteState 
+} from './types';
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<'protocol' | 'dictionary'>('protocol');
@@ -138,6 +31,7 @@ const App: React.FC = () => {
   const [productId, setProductId] = useState<string>("HY130225");
   const [protocolCode, setProtocolCode] = useState<string>("A316");
   const [protocolVersion, setProtocolVersion] = useState<string>("02");
+  const [projectNumber, setProjectNumber] = useState<string>("00");
   
   // Product Details State
   const [chemicalFormula, setChemicalFormula] = useState<string>("");
@@ -284,12 +178,13 @@ const App: React.FC = () => {
 
   // Linearity State for 6.x
   const [linearityState, setLinearityState] = useState<LinearityState>({
-    concentrations: ["80%"],
-    l1: { name: "80%", weight: "16", volume: "100" },
-    l2: { name: "90%", weight: "18", volume: "100" },
-    l3: { name: "100%", weight: "20", volume: "100" },
-    l4: { name: "110%", weight: "22", volume: "100" },
-    l5: { name: "120%", weight: "24", volume: "100" },
+    solutions: [
+      { id: '1', conc: "80%", weight: "16", volume: "100" },
+      { id: '2', conc: "90%", weight: "18", volume: "100" },
+      { id: '3', conc: "100%", weight: "20", volume: "100" },
+      { id: '4', conc: "110%", weight: "22", volume: "100" },
+      { id: '5', conc: "120%", weight: "24", volume: "100" },
+    ]
   });
 
   // Precision State for 6.x
@@ -366,7 +261,7 @@ const App: React.FC = () => {
 
   const protocolNumber = (
     <span>
-      AVP-{protocolCode || <span className="text-red-500">N/A</span>}-{protocolVersion || <span className="text-red-500">N/A</span>}.00
+      AVP-{protocolCode || <span className="text-red-500">N/A</span>}-{protocolVersion || <span className="text-red-500">N/A</span>}.{projectNumber}
     </span>
   );
 
@@ -377,6 +272,7 @@ const App: React.FC = () => {
     setProtocolCode, 
     protocolVersion, 
     setProtocolVersion,
+    projectNumber,
     {
       preparer: { name: preparerName, dept: preparerDept, pos: preparerPosition },
       setPreparer: { setName: setPreparerName, setDept: setPreparerDept, setPos: setPreparerPosition },
@@ -461,7 +357,7 @@ const App: React.FC = () => {
       prerequisiteState,
       setPrerequisiteState
     }
-  ), [productId, protocolCode, protocolVersion, preparerName, preparerDept, preparerPosition, rev1Name, rev1Dept, rev1Pos, rev2Name, rev2Dept, rev2Pos, rev3Name, rev3Dept, rev3Pos, approverName, approverDept, approverPos, validationOptions, chemicalFormula, chemicalName, gradientData, testingConditions, solutionPreps, solDetail, sequenceState, valProcSysSuitState, valProcPrecisionState, sysSuitability, calculationState, acceptanceCriteria, specificityState, linearityState, precisionState, accuracyState, stabilityState, prerequisiteState]);
+  ), [productId, protocolCode, protocolVersion, projectNumber, preparerName, preparerDept, preparerPosition, rev1Name, rev1Dept, rev1Pos, rev2Name, rev2Dept, rev2Pos, rev3Name, rev3Dept, rev3Pos, approverName, approverDept, approverPos, validationOptions, chemicalFormula, chemicalName, gradientData, testingConditions, solutionPreps, solDetail, sequenceState, valProcSysSuitState, valProcPrecisionState, sysSuitability, calculationState, acceptanceCriteria, specificityState, linearityState, precisionState, accuracyState, stabilityState, prerequisiteState]);
 
   const filteredNavItems = useMemo(() => {
     const items: NavItem[] = [
@@ -572,7 +468,7 @@ const App: React.FC = () => {
                     const isSub = section.level === 2;
                     return (
                       <div key={section.id} id={section.id} className={`scroll-mt-8 ${!isSub ? 'border-t-2 border-dashed border-gray-200 pt-16 mt-16 first:border-t-0 first:pt-0 first:mt-0' : 'pl-6 pt-4'}`}>
-                        <h2 className={`${isSub ? 'text-lg font-semibold text-blue-700 mb-4' : 'text-2xl font-bold text-gray-800 border-b pb-2 mb-6'}`}>
+                        <h2 className={`${isSub ? 'text-lg font-semibold text-blue-700 mb-4' : 'text-2xl font-bold text-gray-800 border-b pb-2 mb-6'} ${section.id === 'cover' ? 'hidden' : ''}`}>
                           {section.title}
                         </h2>
                         {section.subtitle && <h3 className="text-lg text-gray-600 mb-4">{section.subtitle}</h3>}

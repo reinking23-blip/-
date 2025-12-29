@@ -1,7 +1,7 @@
 import React from 'react';
 import { Section } from '../types';
 import { Plus, Trash2 } from 'lucide-react';
-import { GradientRow, TestingCondition, SolutionPrepsState, SolutionDetailState, SequenceState, ValProcSysSuitState, ValProcPrecisionState, SystemSuitabilityState, CalculationState, AcceptanceCriterion, SpecificityState, LinearityState, PrecisionState, AccuracyState, StabilityState, PrerequisiteState } from '../App';
+import { GradientRow, TestingCondition, SolutionPrepsState, SolutionDetailState, SequenceState, ValProcSysSuitState, ValProcPrecisionState, SystemSuitabilityState, CalculationState, AcceptanceCriterion, SpecificityState, LinearityState, LinearitySolution, PrecisionState, AccuracyState, StabilityState, PrerequisiteState } from '../types';
 
 interface PersonnelData {
   preparer: { name: string; dept: string; pos: string };
@@ -119,6 +119,7 @@ export const getSections = (
   setProtocolCode: (val: string) => void,
   protocolVersion: string,
   setProtocolVersion: (val: string) => void,
+  projectNumber: string,
   personnel: PersonnelData,
   validationOptions: ValidationOptions,
   setValidationOptions: (options: ValidationOptions) => void,
@@ -150,24 +151,26 @@ export const getSections = (
     sysSuitState.setSysSuitability(prev => ({ ...prev, [key]: val }));
   };
 
-  const handleAddLinearityConcentration = () => {
+  const handleAddLinearitySolution = () => {
     linState.setLinearityState(prev => ({
       ...prev,
-      concentrations: [...prev.concentrations, ""]
+      solutions: [...prev.solutions, { id: Date.now().toString(), conc: "", weight: "", volume: "100" }]
     }));
   };
 
-  const handleRemoveLinearityConcentration = (index: number) => {
+  const handleRemoveLinearitySolution = (index: number) => {
     linState.setLinearityState(prev => ({
       ...prev,
-      concentrations: prev.concentrations.filter((_, i) => i !== index)
+      solutions: prev.solutions.filter((_, i) => i !== index)
     }));
   };
 
-  const handleUpdateLinearityConcentration = (index: number, val: string) => {
-    const newConcs = [...linState.linearityState.concentrations];
-    newConcs[index] = val;
-    linState.setLinearityState(prev => ({ ...prev, concentrations: newConcs }));
+  const handleUpdateLinearitySolution = (index: number, field: keyof LinearitySolution, value: string) => {
+    linState.setLinearityState(prev => {
+        const newSolutions = [...prev.solutions];
+        newSolutions[index] = { ...newSolutions[index], [field]: value };
+        return { ...prev, solutions: newSolutions };
+    });
   };
 
   const renderEditableCell = (value: string, onChange: (v: string) => void, placeholder: string = "请输入") => {
@@ -217,13 +220,6 @@ export const getSections = (
       />
     </div>
   );
-
-  const handleUpdateLinSol = (key: 'l1' | 'l2' | 'l3' | 'l4' | 'l5', field: 'name' | 'weight' | 'volume', value: string) => {
-    linState.setLinearityState(prev => ({
-      ...prev,
-      [key]: { ...prev[key], [field]: value }
-    }));
-  };
 
   const handleAddReagentRow = () => {
     preState.setPrerequisiteState(prev => ({
@@ -759,41 +755,41 @@ export const getSections = (
           content: (
             <div className="space-y-4 text-sm leading-relaxed">
                <p>取本品对照品，精密称定，配制成
-                {linState.linearityState.concentrations.map((conc, idx) => (
-                  <React.Fragment key={idx}>
+                {linState.linearityState.solutions.map((sol, idx) => (
+                  <React.Fragment key={sol.id}>
                     <span className="relative inline-block group mx-1 align-baseline">
                       <YellowInput 
-                        value={conc} 
-                        onChange={(v) => handleUpdateLinearityConcentration(idx, v)} 
+                        value={sol.conc} 
+                        onChange={(v) => handleUpdateLinearitySolution(idx, 'conc', v)} 
                         width="w-16" 
                       />
-                      {linState.linearityState.concentrations.length > 1 && (
+                      {linState.linearityState.solutions.length > 1 && (
                           <button 
-                              onClick={() => handleRemoveLinearityConcentration(idx)}
+                              onClick={() => handleRemoveLinearitySolution(idx)}
                               className="absolute -top-2 -right-2 text-red-500 bg-white rounded-full shadow hover:bg-red-50 z-10 opacity-0 group-hover:opacity-100 transition-opacity"
                           >
                               <Trash2 size={10} />
                           </button>
                       )}
                     </span>
-                    {idx < linState.linearityState.concentrations.length - 1 && "、"}
+                    {idx < linState.linearityState.solutions.length - 1 && "、"}
                   </React.Fragment>
                 ))}
                 <button 
-                  onClick={handleAddLinearityConcentration}
+                  onClick={handleAddLinearitySolution}
                   className="inline-flex items-center justify-center p-0.5 bg-blue-100 text-blue-600 rounded hover:bg-blue-200 mx-1 align-middle"
                   title="Add"
                 >
                   <Plus size={12} />
                 </button>
-                <span className="font-bold underline mx-1">{linState.linearityState.concentrations.length}</span>
+                <span className="font-bold underline mx-1">{linState.linearityState.solutions.length}</span>
                个浓度水平的线性溶液，计算浓度与峰面积的线性关系，X轴代表浓度，Y轴代表峰面积，线性相关系数r≥0.998，Y轴截距的绝对值与100%线性溶液峰面积的比≤2%。报告主成分相关系数、相对截距、线性方程、残差平方和、浓度及相对供试品溶液浓度的比例。<br/>
-               Weigh RS, accurately weighed, and prepared into {linState.linearityState.concentrations.map((conc, idx) => (
-                    <React.Fragment key={idx}>
-                      <span className="font-bold border-b border-black px-1 mx-0.5 bg-yellow-300">{conc}</span>
-                      {idx < linState.linearityState.concentrations.length - 1 ? ", " : ""}
+               Weigh RS, accurately weighed, and prepared into {linState.linearityState.solutions.map((sol, idx) => (
+                    <React.Fragment key={sol.id}>
+                      <span className="font-bold border-b border-black px-1 mx-0.5 bg-yellow-300">{sol.conc}</span>
+                      {idx < linState.linearityState.solutions.length - 1 ? ", " : ""}
                     </React.Fragment>
-               ))} of <span className="font-bold underline mx-1">{linState.linearityState.concentrations.length}</span> concentration levels of linear solution,The linear relationship between concentration and peak area was calculated, with the X-axis representing the concentraion and the Y-axis representing the peak area, and the linear correlation coefficient r≥0.998. The ratio of the absolute value of the Y-axis intercept to the peak area of 100% linear solution is less than 2%. Report principal component correlation coefficient, relative intercept, linear equation, residual sum of squares, concentration, and ratio to concentration of sample solution</p>
+               ))} of <span className="font-bold underline mx-1">{linState.linearityState.solutions.length}</span> concentration levels of linear solution,The linear relationship between concentration and peak area was calculated, with the X-axis representing the concentraion and the Y-axis representing the peak area, and the linear correlation coefficient r≥0.998. The ratio of the absolute value of the Y-axis intercept to the peak area of 100% linear solution is less than 2%. Report principal component correlation coefficient, relative intercept, linear equation, residual sum of squares, concentration, and ratio to concentration of sample solution</p>
             </div>
           )
         },
@@ -822,22 +818,24 @@ export const getSections = (
                                 <span className="font-semibold">Diluent(Blank): </span>{spState.solutionPreps.diluent.descEn}
                              </p>
                              
-                             {(['l1', 'l2', 'l3', 'l4', 'l5'] as const).map((key, idx) => {
-                               const sol = linState.linearityState[key];
-                               const solName = key.toUpperCase();
-                               const concDisplay = `(${sol.weight}/${sol.volume} mg/ml)`;
+                             {linState.linearityState.solutions.map((sol, idx) => {
+                               const solIndex = idx + 1;
+                               // Safe calculation for display
+                               const w = parseFloat(sol.weight);
+                               const v = parseFloat(sol.volume);
+                               // Updated to show calculated concentration instead of fraction
+                               const calculatedConc = (isNaN(w) || isNaN(v) || v === 0) ? "N/A" : parseFloat((w / v).toFixed(4)).toString();
                                
                                return (
-                               <div key={key} className="bg-gray-50 p-2 rounded border border-gray-200">
+                               <div key={sol.id} className="bg-gray-50 p-2 rounded border border-gray-200">
                                   <p className="font-semibold text-blue-800 mb-1">
-                                     <YellowInput value={sol.name} onChange={(v) => handleUpdateLinSol(key, 'name', v)} width="w-16" />线性溶液{solName}/
-                                    <span className="font-bold border-b border-black px-1 mx-1 bg-yellow-300">{sol.name}</span> linear solution {solName}
+                                     {sol.conc}线性溶液L{solIndex}/{sol.conc} linear solution L{solIndex}
                                   </p>
                                   <p className="mb-1 leading-relaxed">
-                                    取 {productId} 对照品约 <YellowInput value={sol.weight} onChange={(v) => handleUpdateLinSol(key, 'weight', v)} />mg，精密称定，置 <YellowInput value={sol.volume} onChange={(v) => handleUpdateLinSol(key, 'volume', v)} />ml 量瓶中，加入稀释剂振摇溶解并稀释至刻度，摇匀。{concDisplay}
+                                    取 {productId} 对照品约 <YellowInput value={sol.weight} onChange={(v) => handleUpdateLinearitySolution(idx, 'weight', v)} />mg，精密称定，置 <YellowInput value={sol.volume} onChange={(v) => handleUpdateLinearitySolution(idx, 'volume', v)} />ml 量瓶中，加入稀释剂振摇溶解并稀释至刻度，摇匀。（{calculatedConc} mg/ml）
                                   </p>
                                   <p className="italic text-gray-600 leading-relaxed">
-                                    Accurately weigh about <span className="font-bold border-b border-black px-1 mx-1 bg-yellow-300">{sol.weight}</span>mg of {productId} reference standard into a <span className="font-bold border-b border-black px-1 mx-1 bg-yellow-300">{sol.volume}</span>ml volumetric flask, shake to dissolve and dilute to volume with diluent, mix well. {concDisplay}
+                                    Accurately weigh about <span className="font-bold border-b border-black px-1 mx-1 bg-yellow-300">{sol.weight}</span>mg of {productId} reference standard into a <span className="font-bold border-b border-black px-1 mx-1 bg-yellow-300">{sol.volume}</span>ml volumetric flask, shake to dissolve and dilute to volume with diluent, mix well.（{calculatedConc} mg/ml）
                                   </p>
                                </div>
                                );
@@ -859,9 +857,9 @@ export const getSections = (
                                     <td className="border p-2">空白溶液 Blank solution</td>
                                     <td className="border p-2">≥ 1</td>
                                 </tr>
-                                {["L1", "L2", "L3", "L4", "L5"].map(l => (
-                                    <tr key={l}>
-                                        <td className="border p-2">{l}</td>
+                                {linState.linearityState.solutions.map((sol, idx) => (
+                                    <tr key={sol.id}>
+                                        <td className="border p-2">L{idx + 1}</td>
                                         <td className="border p-2">1</td>
                                     </tr>
                                 ))}
@@ -930,32 +928,16 @@ export const getSections = (
           title: '6.x 精密度 Precision',
           level: 2,
           content: (
-            <div className="space-y-4 text-sm leading-relaxed">
+             <div className="space-y-4 text-sm leading-relaxed">
                <p>
-                 平行配制6份供试品溶液，规定条件进行测定，6份供试品溶液，应符合以下要求。<br/>
-                 Prepare 6 sample solution in parallel, 6 samples of solution should meet the following requirements.
+                 取本品，配制6份供试品溶液，进样测定，计算6份供试品溶液含量的RSD，RSD应
+                 <YellowInput value={precState.precisionState.precisionLimit} onChange={(v) => precState.setPrecisionState({...precState.precisionState, precisionLimit: v})} width="w-24" />
+                 。<br/>
+                 Prepare 6 sample solutions, inject and determine, calculate the RSD of the assay of 6 sample solutions, RSD should be 
+                 <YellowInput value={precState.precisionState.precisionLimit} onChange={(v) => precState.setPrecisionState({...precState.precisionState, precisionLimit: v})} width="w-24" />
+                 .
                </p>
-               <table className="w-full border-collapse border border-gray-300 text-center text-sm">
-                  <thead>
-                    <tr className="bg-gray-100">
-                      <th className="border border-gray-300 p-2">名称<br/>Name</th>
-                      <th className="border border-gray-300 p-2">相对标准偏差RSD%<br/>Relative standard deviation RSD%</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td className="border border-gray-300 p-2">{displayId}</td>
-                      <td className="border border-gray-300 p-2">
-                         <textarea 
-                            value={precState.precisionState.precisionLimit}
-                            onChange={(e) => precState.setPrecisionState({precisionLimit: e.target.value})}
-                            className="w-full bg-yellow-300 border-b border-black outline-none px-1 py-0.5 text-black text-center resize-y min-h-[2rem]"
-                         />
-                      </td>
-                    </tr>
-                  </tbody>
-               </table>
-            </div>
+             </div>
           )
         },
         {
@@ -966,14 +948,14 @@ export const getSections = (
             <div className="space-y-6 text-sm">
                <div>
                   <h3 className="font-bold border-b border-gray-200 pb-1 mb-2">1. 目的 Objective</h3>
-                  <p>通过重复性实验考察本方法测定结果的精密程度。<br/>The precision of the results was investigated by repeated experiments.</p>
+                  <p>验证该方法测定结果的重现性。<br/>To validate the repeatability of the results measured by this method.</p>
                </div>
                <div>
                   <h3 className="font-bold border-b border-gray-200 pb-1 mb-2">2. 操作 Operation</h3>
                   <div className="space-y-4">
                      <div>
                         <h4 className="font-bold mb-1">2.1 色谱条件 Chromatographic conditions</h4>
-                        <p>同“检验方法描述”里“4.2仪器及检测条件”<br/>Same as "4.2 Instruments and Testing Conditions" in the test method description</p>
+                        <p>同检验方法描述里“4.2仪器及检测条件”<br/>Same as "4.2 Instruments and Testing Conditions" in the Test Method Description .</p>
                      </div>
                      <div>
                         <h4 className="font-bold mb-1">2.2 溶液配制 Solution Preparation</h4>
@@ -987,33 +969,21 @@ export const getSections = (
                                 <span className="font-semibold">Standard solution: </span>Prepare the same Standard Solution as under "System Suitability"
                              </p>
                              <p>
-                                <span className="font-semibold"> 精密度溶液 Precision solution</span>
+                                <span className="font-semibold"> 供试品溶液 Sample solution</span>
                              </p>
                              <div className="pl-4 border-l-2 border-gray-200">
                                 <p className="mb-1">
-                                  称取供试品约 
-                                  <YellowInput value={sdState.solDetail.splWeight} onChange={(v) => handleUpdateSolDetail('splWeight', v)} /> 
-                                  mg，精密称定，置 
-                                  <YellowInput value={sdState.solDetail.splVolume} onChange={(v) => handleUpdateSolDetail('splVolume', v)} /> 
-                                  ml 量瓶中，
-                                  <YellowTextareaInline value={sdState.solDetail.splMethodZh} onChange={(v) => handleUpdateSolDetail('splMethodZh', v)} className="w-64" />
-                                  ，摇匀，平行配制6份。（{splConc} mg/ml）
+                                  称取供试品约 {sdState.solDetail.splWeight} mg，精密称定，置 {sdState.solDetail.splVolume} ml 量瓶中，{sdState.solDetail.splMethodZh}，摇匀。平行配制 6 份。（{splConc} mg/ml）
                                 </p>
                                 <p className="italic text-gray-600">
-                                  Accurately weigh about 
-                                  <YellowInput value={sdState.solDetail.splWeight} onChange={(v) => handleUpdateSolDetail('splWeight', v)} /> 
-                                  mg of Sample into a 
-                                  <YellowInput value={sdState.solDetail.splVolume} onChange={(v) => handleUpdateSolDetail('splVolume', v)} /> 
-                                  ml volumetric flask, 
-                                  <YellowTextareaInline value={sdState.solDetail.splMethodEn} onChange={(v) => handleUpdateSolDetail('splMethodEn', v)} className="w-64" />
-                                  , mix well. Prepare 6 solutions in parallel.（{splConc} mg/ml）
+                                  Accurately weigh about {sdState.solDetail.splWeight} mg of Sample into a {sdState.solDetail.splVolume} ml volumetric flask, {sdState.solDetail.splMethodEn}, mix well. Prepare 6 solutions in parallel.（{splConc} mg/ml）
                                 </p>
                              </div>
                         </div>
                      </div>
                      <div>
                         <h4 className="font-bold mb-1">2.3 测定步骤 Procedure</h4>
-                        <p className="mb-2">取各精密度溶液直接进样，记录色谱图：<br/>Directly inject each precision solution and record chromatogram</p>
+                        <p className="mb-2">在仪器系统适用性通过后，按下述顺序进样，记录色谱图：<br/>After the suitability of the instrument system is approved, inject solutions according to the sequence and record chromatogram</p>
                         <table className="w-full border border-gray-300 text-center text-xs">
                              <thead>
                                <tr className="bg-gray-100">
@@ -1023,15 +993,20 @@ export const getSections = (
                                </tr>
                              </thead>
                              <tbody>
-                                <tr><td className="border p-2">1</td><td className="border p-2">空白溶液 Blank solution</td><td className="border p-2">≥ 1</td></tr>
+                                <tr>
+                                    <td className="border p-2">1</td>
+                                    <td className="border p-2">空白溶液<br/>Blank solution</td>
+                                    <td className="border p-2">≥ 1</td>
+                                </tr>
                                 <tr>
                                     <td className="border p-2">2</td>
                                     <td className="border p-2">STD1</td>
                                     <td className="border p-2">
-                                        <YellowInput 
-                                            value={vppState.valProcPrecisionState.precisionStd1Count} 
-                                            onChange={(v) => vppState.setValProcPrecisionState({...vppState.valProcPrecisionState, precisionStd1Count: v})}
-                                            width="w-16"
+                                        <textarea
+                                            value={vppState.valProcPrecisionState.precisionStd1Count}
+                                            onChange={(e) => vppState.setValProcPrecisionState({...vppState.valProcPrecisionState, precisionStd1Count: e.target.value})}
+                                            className="w-full bg-yellow-300 border-b border-black outline-none px-1 py-0.5 text-center resize-none min-h-[1.5rem]"
+                                            rows={1}
                                         />
                                     </td>
                                 </tr>
@@ -1039,60 +1014,40 @@ export const getSections = (
                                     <td className="border p-2">3</td>
                                     <td className="border p-2">STD2</td>
                                     <td className="border p-2">
-                                        <YellowInput 
-                                            value={vppState.valProcPrecisionState.precisionStd2Count} 
-                                            onChange={(v) => vppState.setValProcPrecisionState({...vppState.valProcPrecisionState, precisionStd2Count: v})}
-                                            width="w-16"
+                                        <textarea
+                                            value={vppState.valProcPrecisionState.precisionStd2Count}
+                                            onChange={(e) => vppState.setValProcPrecisionState({...vppState.valProcPrecisionState, precisionStd2Count: e.target.value})}
+                                            className="w-full bg-yellow-300 border-b border-black outline-none px-1 py-0.5 text-center resize-none min-h-[1.5rem]"
+                                            rows={1}
                                         />
                                     </td>
                                 </tr>
-                                {[1, 2, 3, 4, 5, 6].map(num => (
-                                    <tr key={num}>
-                                        <td className="border p-2">{3 + num}</td>
-                                        <td className="border p-2">Precision-{num}</td>
-                                        <td className="border p-2">1</td>
-                                    </tr>
-                                ))}
+                                <tr>
+                                    <td className="border p-2">4</td>
+                                    <td className="border p-2">6份供试品溶液<br/>6 Sample solutions</td>
+                                    <td className="border p-2">1</td>
+                                </tr>
+                                <tr>
+                                    <td className="border p-2">5</td>
+                                    <td className="border p-2 text-left">随行对照，不超过12针回进一次，并且序列结束回进一次<br/>Accompanying control, no more than 12 needles back once, and at the end of the sequence back once</td>
+                                    <td className="border p-2">1</td>
+                                </tr>
                              </tbody>
                         </table>
-                        <p className="mt-2 text-gray-600 italic">
-                            注：进样序列可根据实际情况进行调整。<br/>
-                            Note: Sequence can be adjusted according to the actual situation.
-                        </p>
-                     </div>
-                     <div>
-                        <h4 className="font-bold mb-1">2.4 计算 Calculation</h4>
-                        {renderAssayCalculationContent()}
                      </div>
                   </div>
                </div>
                <div>
-                  <h3 className="font-bold border-b border-gray-200 pb-1 mb-2">3. 可接受标准 Acceptance criteria</h3>
-                  <div className="space-y-4">
+                  <h3 className="font-bold border-b border-gray-200 pb-1 mb-2">3. 可接受标准 Acceptance Criteria</h3>
+                  <div className="space-y-3">
                     <p>
-                        重复性：平行配制6份精密度溶液，规定条件进行测定，6份精密度溶液检测结果应符合以下要求。<br/>
-                        Repeatability: Prepare 6 sample solutions in parallel, determine the conditions, 6 precision solution test results should meet the following requirements
+                        计算6份供试品溶液含量的RSD，RSD应
+                        <YellowInput value={precState.precisionState.precisionLimit} onChange={(v) => precState.setPrecisionState({...precState.precisionState, precisionLimit: v})} width="w-24" />
+                        。<br/>
+                        Calculate the RSD of the assay of 6 sample solutions, RSD should be
+                        <YellowInput value={precState.precisionState.precisionLimit} onChange={(v) => precState.setPrecisionState({...precState.precisionState, precisionLimit: v})} width="w-24" />
+                        .
                     </p>
-                    <table className="w-full border-collapse border border-gray-300 text-center text-sm">
-                      <thead>
-                        <tr className="bg-gray-100">
-                          <th className="border border-gray-300 p-2">名称<br/>Name</th>
-                          <th className="border border-gray-300 p-2">相对标准偏差（RSD）<br/>Relative standard deviation（RSD）</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        <tr>
-                          <td className="border border-gray-300 p-2">{displayId}</td>
-                          <td className="border border-gray-300 p-2">
-                             <textarea 
-                                value={precState.precisionState.precisionLimit}
-                                onChange={(e) => precState.setPrecisionState({precisionLimit: e.target.value})}
-                                className="w-full bg-yellow-300 border-b border-black outline-none px-1 py-0.5 text-black text-center resize-y min-h-[2rem]"
-                             />
-                          </td>
-                        </tr>
-                      </tbody>
-                   </table>
                   </div>
                </div>
             </div>
@@ -1108,20 +1063,20 @@ export const getSections = (
           title: '6.x 准确度 Accuracy',
           level: 2,
           content: (
-            <div className="space-y-4 text-sm leading-relaxed">
+             <div className="space-y-4 text-sm leading-relaxed">
                <p>
-                 在专属性、线性和精密度满足的情况推论而得，主成分回收率均应在
-                 <YellowInput value={accState.accuracyState.recoveryRange} onChange={(v) => accState.setAccuracyState({...accState.accuracyState, recoveryRange: v})} width="w-32" />
-                 范围内，RSD≤
-                 <YellowInput value={accState.accuracyState.rsdLimit} onChange={(v) => accState.setAccuracyState({...accState.accuracyState, rsdLimit: v})} width="w-16" />
+                 取本品对照品，按80%、100%、120%三个浓度水平，每个浓度水平配制3份，共9份溶液，进样测定，计算回收率，回收率均应在
+                 <YellowInput value={accState.accuracyState.recoveryRange} onChange={(v) => accState.setAccuracyState({...accState.accuracyState, recoveryRange: v})} width="w-24" />
+                 范围内，9份样品回收率的RSD≤
+                 <YellowInput value={accState.accuracyState.rsdLimit} onChange={(v) => accState.setAccuracyState({...accState.accuracyState, rsdLimit: v})} width="w-12" />
                  。<br/>
-                 If specificity, linearity and precision were satisfied, the recovery of principal components should be in the range of 
-                 <YellowInput value={accState.accuracyState.recoveryRange} onChange={(v) => accState.setAccuracyState({...accState.accuracyState, recoveryRange: v})} width="w-32" />
-                 , RSD≤
-                 <YellowInput value={accState.accuracyState.rsdLimit} onChange={(v) => accState.setAccuracyState({...accState.accuracyState, rsdLimit: v})} width="w-16" />
+                 Weigh RS, prepare 3 solutions for each concentration level at 80%, 100% and 120%, a total of 9 solutions. Inject and determine, calculate the recovery, the recovery of each solution should be in the range of
+                 <YellowInput value={accState.accuracyState.recoveryRange} onChange={(v) => accState.setAccuracyState({...accState.accuracyState, recoveryRange: v})} width="w-24" />
+                 , and the RSD of the 9 recovery should be ≤
+                 <YellowInput value={accState.accuracyState.rsdLimit} onChange={(v) => accState.setAccuracyState({...accState.accuracyState, rsdLimit: v})} width="w-12" />
                  .
                </p>
-            </div>
+             </div>
           )
         },
         {
@@ -1132,85 +1087,80 @@ export const getSections = (
             <div className="space-y-6 text-sm">
                <div>
                   <h3 className="font-bold border-b border-gray-200 pb-1 mb-2">1. 目的 Objective</h3>
-                  <p>通过准确度和精密度试验结果考察本方法测定结果与真实值接近程度，确定该方法的准确性。<br/>Through the accuracy and precision experimental results, the closeness of the measurement results of this method to the true value was examined to determine the accuracy of the method.</p>
+                  <p>验证该方法测定结果的准确性。<br/>Verify the accuracy of the results measured by this method.</p>
                </div>
                <div>
                   <h3 className="font-bold border-b border-gray-200 pb-1 mb-2">2. 操作 Operation</h3>
-                  <p>在专属性、线性和精密度满足的情况推论而得。<br/>Derived when specificity, linearity and precision are satisfied.</p>
-               </div>
-               <div>
-                  <h3 className="font-bold border-b border-gray-200 pb-1 mb-2">3. 计算 Calculation</h3>
-                  <div className="bg-green-50 p-4 border border-green-200 space-y-4">
-                     <p>在线性和范围项下得出线性方程为：y=ax+b<br/>Linear equation under linear and range terms: y=ax+b</p>
-                     
-                     <div className="space-y-4 pl-2 border-l-2 border-green-300">
-                        <div>
-                            <div className="flex items-center gap-2 mb-1">
-                                <span>供试品浓度 x (μg/ml) = </span>
-                                <div className="flex flex-col items-center text-center leading-tight">
-                                    <span className="border-b border-black w-full px-1">y - b</span>
-                                    <span>a</span>
-                                </div>
-                            </div>
-                            <p className="text-gray-600 italic text-xs">Sample concentration x (μg/ml) = (y - b) / a</p>
-                        </div>
-                        
-                        <div>
-                            <p>供试品测定量（μg）= x × Vs<br/><span className="text-gray-600 italic text-xs">Sample measured quantity （μg）= x × Vs</span></p>
-                        </div>
-                        
-                        <div>
-                             <p>供试品理论量（μg）= Ws × P × 1000<br/><span className="text-gray-600 italic text-xs">Sample theoretical quantity （μg）= Ws × P × 1000</span></p>
-                        </div>
-
-                        <div>
-                            <div className="flex items-center gap-2 mb-1">
-                                <span>回收率 = </span>
-                                <div className="flex flex-col items-center text-center leading-tight">
-                                    <span className="border-b border-black w-full px-1">测定量</span>
-                                    <span>理论量</span>
-                                </div>
-                                <span>× 100%</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-xs italic text-gray-600">
-                                <span>Percent Recovery = </span>
-                                <div className="flex flex-col items-center text-center leading-tight">
-                                    <span className="border-b border-gray-400 w-full px-1">measured quantity</span>
-                                    <span>theoretical quantity</span>
-                                </div>
-                                <span>× 100%</span>
-                            </div>
+                  <div className="space-y-4">
+                     <div>
+                        <h4 className="font-bold mb-1">2.1 色谱条件 Chromatographic conditions</h4>
+                        <p>同检验方法描述里“4.2仪器及检测条件”<br/>Same as "4.2 Instruments and Testing Conditions" in the Test Method Description .</p>
+                     </div>
+                     <div>
+                        <h4 className="font-bold mb-1">2.2 溶液配制 Solution Preparation</h4>
+                        <div className="pl-2 space-y-2">
+                             <p>
+                                <span className="font-semibold"> 稀释剂（空白）：</span>{spState.solutionPreps.diluent.descZh}<br/>
+                                <span className="font-semibold">Diluent(Blank): </span>{spState.solutionPreps.diluent.descEn}
+                             </p>
+                             <p>
+                                <span className="font-semibold"> 准确度溶液 Accuracy solutions</span>
+                             </p>
+                             <div className="pl-4 border-l-2 border-gray-200">
+                                <p className="mb-1">
+                                  取 {productId} 对照品适量，精密称定，分别按预计浓度的80%、100%、120%三个水平制备供试液，每个水平制备3份，共9份。<br/>
+                                  Take appropriate amount of {productId} reference standard, accurately weighed, prepare sample solutions at 80%, 100%, and 120% of the expected concentration, 3 preparations for each level, total 9 preparations.
+                                </p>
+                             </div>
                         </div>
                      </div>
-
-                     <div className="mt-4">
-                        <p className="font-bold mb-2">式中 In formula：</p>
-                        <ul className="list-none space-y-2 text-sm">
-                           <li><span className="font-bold">Ws：</span>精密度溶液中供试品的称样量，mg；<br/><span className="text-gray-600 italic">Ws：The weight of test sample in precision solution，mg;</span></li>
-                           <li><span className="font-bold">Vs：</span>精密度溶液的稀释体积，ml；<br/><span className="text-gray-600 italic">Vs：Dilution volume of precision solution,ml;</span></li>
-                           <li><span className="font-bold">P：</span>精密度项下测定的主峰平均含量,%；<br/><span className="text-gray-600 italic">P：The average assay of the main peak measured under the precision item,%;</span></li>
-                           <li><span className="font-bold">y：</span>精密度溶液的峰面积；<br/><span className="text-gray-600 italic">y：peak area of precision solution;</span></li>
-                           <li><span className="font-bold">x：</span>浓度，μg/ml；<br/><span className="text-gray-600 italic">x：Concentration, μg/ml;</span></li>
-                           <li><span className="font-bold">a：</span>线性方程斜率；<br/><span className="text-gray-600 italic">a：Liear equation slope;</span></li>
-                           <li><span className="font-bold">b：</span>线性方程截距。<br/><span className="text-gray-600 italic">b：Liear equation intercept.</span></li>
-                        </ul>
+                     <div>
+                        <h4 className="font-bold mb-1">2.3 测定步骤 Procedure</h4>
+                        <p className="mb-2">在仪器系统适用性通过后，按下述顺序进样，记录色谱图：<br/>After the suitability of the instrument system is approved, inject solutions according to the sequence and record chromatogram</p>
+                        <table className="w-full border border-gray-300 text-center text-xs">
+                             <thead>
+                               <tr className="bg-gray-100">
+                                 <th className="border p-2">序号 No.</th>
+                                 <th className="border p-2">溶液名称 Solution name</th>
+                                 <th className="border p-2">进样针数 Count of injection</th>
+                               </tr>
+                             </thead>
+                             <tbody>
+                                <tr>
+                                    <td className="border p-2">1</td>
+                                    <td className="border p-2">空白溶液<br/>Blank solution</td>
+                                    <td className="border p-2">≥ 1</td>
+                                </tr>
+                                <tr>
+                                    <td className="border p-2">2</td>
+                                    <td className="border p-2">对照品溶液<br/>Standard solution</td>
+                                    <td className="border p-2">1</td>
+                                </tr>
+                                <tr>
+                                    <td className="border p-2">3</td>
+                                    <td className="border p-2">9份准确度溶液<br/>9 Accuracy solutions</td>
+                                    <td className="border p-2">1</td>
+                                </tr>
+                                <tr>
+                                    <td className="border p-2">4</td>
+                                    <td className="border p-2 text-left">随行对照，不超过12针回进一次，并且序列结束回进一次<br/>Accompanying control, no more than 12 needles back once, and at the end of the sequence back once</td>
+                                    <td className="border p-2">1</td>
+                                </tr>
+                             </tbody>
+                        </table>
                      </div>
                   </div>
                </div>
                <div>
-                  <h3 className="font-bold border-b border-gray-200 pb-1 mb-2">4. 可接受标准 Acceptance criteria</h3>
-                  <p>
-                    主成分回收率均应在
-                    <YellowInput value={accState.accuracyState.recoveryRange} onChange={(v) => accState.setAccuracyState({...accState.accuracyState, recoveryRange: v})} width="w-32" />
-                    范围内，RSD≤
-                    <YellowInput value={accState.accuracyState.rsdLimit} onChange={(v) => accState.setAccuracyState({...accState.accuracyState, rsdLimit: v})} width="w-16" />
-                    。<br/>
-                    The main component recovery rates should be within the range of 
-                    <YellowInput value={accState.accuracyState.recoveryRange} onChange={(v) => accState.setAccuracyState({...accState.accuracyState, recoveryRange: v})} width="w-32" />
-                    , RSD≤
-                    <YellowInput value={accState.accuracyState.rsdLimit} onChange={(v) => accState.setAccuracyState({...accState.accuracyState, rsdLimit: v})} width="w-16" />
-                    .
-                  </p>
+                  <h3 className="font-bold border-b border-gray-200 pb-1 mb-2">3. 可接受标准 Acceptance Criteria</h3>
+                  <div className="space-y-3">
+                    <p>
+                        回收率均应在 <YellowInput value={accState.accuracyState.recoveryRange} onChange={(v) => accState.setAccuracyState({...accState.accuracyState, recoveryRange: v})} width="w-24" /> 范围内，
+                        9份样品回收率的RSD≤ <YellowInput value={accState.accuracyState.rsdLimit} onChange={(v) => accState.setAccuracyState({...accState.accuracyState, rsdLimit: v})} width="w-12" />。<br/>
+                        The recovery of each solution should be in the range of <YellowInput value={accState.accuracyState.recoveryRange} onChange={(v) => accState.setAccuracyState({...accState.accuracyState, recoveryRange: v})} width="w-24" />
+                        , and the RSD of the 9 recovery should be ≤ <YellowInput value={accState.accuracyState.rsdLimit} onChange={(v) => accState.setAccuracyState({...accState.accuracyState, rsdLimit: v})} width="w-12" />.
+                    </p>
+                  </div>
                </div>
             </div>
           )
@@ -1222,113 +1172,77 @@ export const getSections = (
       sections: [
         {
           id: 'val-stab',
-          title: '6.x 溶液稳定性 Stability',
+          title: '6.x 溶液稳定性 Solution stability',
           level: 2,
           content: (
-            <div className="space-y-4 text-sm leading-relaxed">
+             <div className="space-y-4 text-sm leading-relaxed">
                <p>
-                 供试品溶液
+                 取对照品溶液和供试品溶液，
                  <YellowInput value={stabState.stabilityState.sampleTemp} onChange={(v) => stabState.setStabilityState({...stabState.stabilityState, sampleTemp: v})} width="w-16" />
-                 ℃条件下，密闭保存，分别于各时间点进样，考察{displayId}的峰面积，与0h相比，{displayId}峰面积的回收率应在
-                 <YellowInput value={stabState.stabilityState.sampleRecovery} onChange={(v) => stabState.setStabilityState({...stabState.stabilityState, sampleRecovery: v})} width="w-32" />
+                 ℃条件下放置，分别在0h, Xh, Xh...进样，考察 {productId} 的峰面积，与0h相比，{productId} 峰面积的回收率应在
+                 <YellowInput value={stabState.stabilityState.sampleRecovery} onChange={(v) => stabState.setStabilityState({...stabState.stabilityState, sampleRecovery: v})} width="w-24" />
                  之间。<br/>
-                 Sample solution: Sealed and stored at 
+                 Take the standard solution and sample solution, stored under at 
                  <YellowInput value={stabState.stabilityState.sampleTemp} onChange={(v) => stabState.setStabilityState({...stabState.stabilityState, sampleTemp: v})} width="w-16" />
-                 ℃ temperature condition，the solution should be injected at the each point, the peak area of {displayId} should be evaluated, compared with that of 0h ,the recovery for peak area of {displayId} at each point should be 
-                 <YellowInput value={stabState.stabilityState.sampleRecovery} onChange={(v) => stabState.setStabilityState({...stabState.stabilityState, sampleRecovery: v})} width="w-32" />
+                 ℃, injected at 0h, Xh, Xh..., respectively, the peak area of {productId} should be evaluated. Compared with 0h, the recovery for peak area of {productId} at each point should be 
+                 <YellowInput value={stabState.stabilityState.sampleRecovery} onChange={(v) => stabState.setStabilityState({...stabState.stabilityState, sampleRecovery: v})} width="w-24" />
                  .
                </p>
-               <p>
-                 对照品溶液在
-                 <YellowInput value={stabState.stabilityState.standardTemp} onChange={(v) => stabState.setStabilityState({...stabState.stabilityState, standardTemp: v})} width="w-16" />
-                 ℃条件下，密闭保存，分别于各时间点进样，考察{displayId}的峰面积，与0h相比，{displayId}峰面积的回收率应在
-                 <YellowInput value={stabState.stabilityState.standardRecovery} onChange={(v) => stabState.setStabilityState({...stabState.stabilityState, standardRecovery: v})} width="w-32" />
-                 之间。<br/>
-                 Standard solution: Sealed and stored at 
-                 <YellowInput value={stabState.stabilityState.standardTemp} onChange={(v) => stabState.setStabilityState({...stabState.stabilityState, standardTemp: v})} width="w-16" />
-                 ℃ temperature condition，the solution should be injected at the each point, the peak area of {displayId} should be evaluated, compared with that of 0h ,the recovery for peak area of {displayId} at each point should be 
-                 <YellowInput value={stabState.stabilityState.standardRecovery} onChange={(v) => stabState.setStabilityState({...stabState.stabilityState, standardRecovery: v})} width="w-32" />
-                 .
-               </p>
-            </div>
+             </div>
           )
         },
         {
           id: 'val-proc-stab',
-          title: '(六) 溶液稳定性 Stability',
+          title: '(六) 稳定性 Stability',
           level: 2,
           content: (
             <div className="space-y-6 text-sm">
-              <div>
+               <div>
                   <h3 className="font-bold border-b border-gray-200 pb-1 mb-2">1. 目的 Objective</h3>
-                  <p>对照品溶液、供试品溶液在 <YellowInput value={stabState.stabilityState.standardTemp} onChange={(v) => stabState.setStabilityState({...stabState.stabilityState, standardTemp: v})} width="w-16" />℃条件下，密闭保存，分别放置不同时间，用本方法检测，观察{displayId}峰的变化情况，评估对照品溶液和供试品溶液的稳定性。<br/>
-                  The standard solution and the sample solution were Sealed and stored under at <YellowInput value={stabState.stabilityState.standardTemp} onChange={(v) => stabState.setStabilityState({...stabState.stabilityState, standardTemp: v})} width="w-16" />℃ temperature condition for different times respectively. The change of {displayId} peak was observed by this method to evaluate the stability of the standard solution and the sample solution.</p>
-              </div>
-
-              <div>
+                  <p>
+                    考察对照品溶液和供试品溶液在 <YellowInput value={stabState.stabilityState.sampleTemp} onChange={(v) => stabState.setStabilityState({...stabState.stabilityState, sampleTemp: v})} width="w-16" /> ℃条件下的稳定性。<br/>
+                    To investigate the stability of the standard solution and sample solution stored under at <YellowInput value={stabState.stabilityState.sampleTemp} onChange={(v) => stabState.setStabilityState({...stabState.stabilityState, sampleTemp: v})} width="w-16" /> ℃.
+                  </p>
+               </div>
+               <div>
                   <h3 className="font-bold border-b border-gray-200 pb-1 mb-2">2. 操作 Operation</h3>
-                  
-                  <h4 className="font-bold mt-2 mb-1">2.1 色谱条件 Chromatographic conditions</h4>
-                  <p>同“检验方法描述”里“4.2仪器及检测条件”<br/>Same as "4.2 Instruments and Testing Conditions" in the test method description</p>
-                  
-                  <h4 className="font-bold mt-3 mb-1">2.2 溶液配制 Solution Preparation</h4>
-                  <div className="space-y-2 pl-2">
-                      <p> 空白/稀释剂：{spState.solutionPreps.diluent.descZh}<br/>Blank/diluent: {spState.solutionPreps.diluent.descEn}</p>
-                      <p> 对照品溶液：配制同“系统适用性”项下对照品溶液<br/>Standard solution: Prepare the same Standard Solution as under "System Suitability"</p>
-                      <p> 供试品溶液：配制同“专属性”项下供试品溶液<br/>Sample solution: Prepare the same solution as the sample solution under "Specificity"</p>
+                  <div className="space-y-4">
+                     <div>
+                        <h4 className="font-bold mb-1">2.1 色谱条件 Chromatographic conditions</h4>
+                        <p>同检验方法描述里“4.2仪器及检测条件”<br/>Same as "4.2 Instruments and Testing Conditions" in the Test Method Description .</p>
+                     </div>
+                     <div>
+                        <h4 className="font-bold mb-1">2.2 溶液配制 Solution Preparation</h4>
+                        <div className="pl-2 space-y-2">
+                             <p>
+                                <span className="font-semibold"> 空白/稀释剂：</span>{spState.solutionPreps.diluent.descZh}<br/>
+                                <span className="font-semibold">Blank/diluent: </span>{spState.solutionPreps.diluent.descEn}
+                             </p>
+                             <p>
+                                <span className="font-semibold"> 对照品溶液：</span>配制同“系统适用性”项下对照品溶液<br/>
+                                <span className="font-semibold">Standard solution: </span>Prepare the same Standard Solution as under "System Suitability"
+                             </p>
+                             <p>
+                                <span className="font-semibold"> 供试品溶液：</span>配制同“系统适用性”项下供试品溶液<br/>
+                                <span className="font-semibold">Sample solution: </span>Prepare the same Sample Solution as under "System Suitability"
+                             </p>
+                        </div>
+                     </div>
+                     <div>
+                        <h4 className="font-bold mb-1">2.3 测定步骤 Procedure</h4>
+                        <p className="mb-2">取对照品溶液和供试品溶液，在 <YellowInput value={stabState.stabilityState.sampleTemp} onChange={(v) => stabState.setStabilityState({...stabState.stabilityState, sampleTemp: v})} width="w-16" /> ℃条件下放置，分别在0h, Xh, Xh...进样。<br/>Take the standard solution and sample solution, stored under at <YellowInput value={stabState.stabilityState.sampleTemp} onChange={(v) => stabState.setStabilityState({...stabState.stabilityState, sampleTemp: v})} width="w-16" /> ℃, injected at 0h, Xh, Xh..., respectively.</p>
+                     </div>
                   </div>
-
-                  <h4 className="font-bold mt-3 mb-1">2.3 测定步骤 Procedure</h4>
-                  <p className="mb-2">对照品溶液、供试品溶液分别于各时间点直接进样，记录色谱图。<br/>Directly inject standard solution and sample solution at each point，record chromatogram.</p>
-                  <p className="text-gray-600 italic mb-2">注：考察时长可根据实际情况进行改变。<br/>Note: The duration of the inspection may be changed according to the actual situation</p>
-                  
-                  <table className="w-full border border-gray-300 text-center text-xs mb-2">
-                       <thead>
-                         <tr className="bg-gray-100">
-                           <th className="border p-2">溶液名称 Solution name</th>
-                           <th className="border p-2">进样针数 Count of injection</th>
-                         </tr>
-                       </thead>
-                       <tbody>
-                          <tr>
-                              <td className="border p-2">空白溶液<br/>Blank solution</td>
-                              <td className="border p-2">≥ 1</td>
-                          </tr>
-                          <tr>
-                              <td className="border p-2">对照品溶液（0h）<br/>Standard solution（0h）</td>
-                              <td className="border p-2">1</td>
-                          </tr>
-                          <tr>
-                              <td className="border p-2">供试品溶液（0h）<br/>Sample solution（0h）</td>
-                              <td className="border p-2">1</td>
-                          </tr>
-                          <tr>
-                              <td className="border p-2">……</td>
-                              <td className="border p-2">……</td>
-                          </tr>
-                          <tr>
-                              <td className="border p-2">对照品溶液（各时间点）<br/>Standard solution（Each point）</td>
-                              <td className="border p-2">1</td>
-                          </tr>
-                          <tr>
-                              <td className="border p-2">供试品溶液（各时间点）<br/>Sample solution（Each point）</td>
-                              <td className="border p-2">1</td>
-                          </tr>
-                       </tbody>
-                  </table>
-                  <p className="text-gray-600 italic">注：进样序列可根据实际情况进行调整。<br/>Note: Sequence can be adjusted according to the actual situation.</p>
-              </div>
-
-              <div>
-                  <h3 className="font-bold border-b border-gray-200 pb-1 mb-2">3. 可接受标准 Acceptance criteria</h3>
+               </div>
+               <div>
+                  <h3 className="font-bold border-b border-gray-200 pb-1 mb-2">3. 可接受标准 Acceptance Criteria</h3>
                   <div className="space-y-3">
-                      <p>供试品溶液<YellowInput value={stabState.stabilityState.sampleTemp} onChange={(v) => stabState.setStabilityState({...stabState.stabilityState, sampleTemp: v})} width="w-16" />℃条件下，密闭保存，分别于各时间点进样，考察{displayId}的峰面积，与0h相比，{displayId}峰面积的回收率应在<YellowInput value={stabState.stabilityState.sampleRecovery} onChange={(v) => stabState.setStabilityState({...stabState.stabilityState, sampleRecovery: v})} width="w-32" />之间。<br/>
-                      Sample solution: Sealed and stored at <YellowInput value={stabState.stabilityState.sampleTemp} onChange={(v) => stabState.setStabilityState({...stabState.stabilityState, sampleTemp: v})} width="w-16" />℃ temperature condition，the solution should be injected at the each point, the peak area of {displayId} should be evaluated, compared with that of 0h ,the recovery for peak area of {displayId} at each point should be <YellowInput value={stabState.stabilityState.sampleRecovery} onChange={(v) => stabState.setStabilityState({...stabState.stabilityState, sampleRecovery: v})} width="w-32" />.</p>
-
-                      <p>对照品溶液在<YellowInput value={stabState.stabilityState.standardTemp} onChange={(v) => stabState.setStabilityState({...stabState.stabilityState, standardTemp: v})} width="w-16" />℃条件下，密闭保存，分别于各时间点进样，考察{displayId}的峰面积，与0h相比，{displayId}峰面积的回收率应在<YellowInput value={stabState.stabilityState.standardRecovery} onChange={(v) => stabState.setStabilityState({...stabState.stabilityState, standardRecovery: v})} width="w-32" />之间。<br/>
-                      Standard solution: Sealed and stored at <YellowInput value={stabState.stabilityState.standardTemp} onChange={(v) => stabState.setStabilityState({...stabState.stabilityState, standardTemp: v})} width="w-16" />℃ temperature condition，the solution should be injected at the each point, the peak area of {displayId} should be evaluated, compared with that of 0h ,the recovery for peak area of {displayId} at each point should be <YellowInput value={stabState.stabilityState.standardRecovery} onChange={(v) => stabState.setStabilityState({...stabState.stabilityState, standardRecovery: v})} width="w-32" />.</p>
+                    <p>
+                        与0h相比，{productId} 峰面积的回收率应在 <YellowInput value={stabState.stabilityState.sampleRecovery} onChange={(v) => stabState.setStabilityState({...stabState.stabilityState, sampleRecovery: v})} width="w-24" /> 之间。<br/>
+                        Compared with 0h, the recovery for peak area of {productId} at each point should be <YellowInput value={stabState.stabilityState.sampleRecovery} onChange={(v) => stabState.setStabilityState({...stabState.stabilityState, sampleRecovery: v})} width="w-24" />.
+                    </p>
                   </div>
-              </div>
+               </div>
             </div>
           )
         }
@@ -1355,7 +1269,7 @@ export const getSections = (
               <tr>
                 <td className="border border-gray-400 p-2 bg-gray-50 font-bold">方案号 <br/> Protocol #</td>
                 <td className="border border-gray-400 p-2 font-mono">
-                  AVP-<YellowInput value={protocolCode} onChange={setProtocolCode} />-<YellowInput value={protocolVersion} onChange={setProtocolVersion} width="w-10" />.00
+                  AVP-<YellowInput value={protocolCode} onChange={setProtocolCode} />-<YellowInput value={protocolVersion} onChange={setProtocolVersion} width="w-10" />.{projectNumber}
                 </td>
               </tr>
               <tr>
@@ -1603,8 +1517,9 @@ export const getSections = (
                 {tcState.testingConditions.map((condition, idx) => {
                   const isEmpty = condition.value.trim() === "";
                   const isNeedleWash = condition.id === 'needleWash' || condition.labelZh.includes('洗针液');
+                  const isMethodRow = condition.id === 'method';
                   const showStrikethrough = isNeedleWash && isEmpty;
-                  const showMandatoryError = !isNeedleWash && isEmpty;
+                  const showMandatoryError = !isNeedleWash && isEmpty && !isMethodRow;
                   
                   const isMainColumn = condition.id === 'column';
                   const isExtraColumn = condition.id.startsWith('column_');
@@ -1657,21 +1572,29 @@ export const getSections = (
                           </button>
                         )}
                       </td>
-                      <td className="border border-gray-300 p-0 relative bg-yellow-300">
-                        <div className="min-h-[2.5rem] flex items-center px-3 text-black font-semibold border-b border-black">
-                          {showMandatoryError ? (
-                            <span className="text-red-600 animate-pulse">请输入</span>
-                          ) : (
-                            condition.value
-                          )}
-                        </div>
-                        <input 
-                          type="text"
-                          value={condition.value}
-                          onChange={(e) => handleUpdateTestingCondition(idx, 'value', e.target.value)}
-                          className="absolute inset-0 w-full h-full opacity-0 focus:opacity-100 bg-yellow-300 outline-none px-3 font-semibold border-b border-black transition-opacity z-10 text-black"
-                          placeholder={isNeedleWash ? "可选 (Optional)" : "请输入"}
-                        />
+                      <td className={`border border-gray-300 p-0 relative ${isMethodRow ? '' : 'bg-yellow-300'}`}>
+                        {isMethodRow ? (
+                          <div className="min-h-[2.5rem] flex items-center px-3 text-black font-semibold">
+                            TM-{protocolCode}-LC-{protocolVersion}.{projectNumber}
+                          </div>
+                        ) : (
+                          <>
+                            <div className="min-h-[2.5rem] flex items-center px-3 text-black font-semibold border-b border-black">
+                              {showMandatoryError ? (
+                                <span className="text-red-600 animate-pulse">请输入</span>
+                              ) : (
+                                condition.value
+                              )}
+                            </div>
+                            <input 
+                              type="text"
+                              value={condition.value}
+                              onChange={(e) => handleUpdateTestingCondition(idx, 'value', e.target.value)}
+                              className="absolute inset-0 w-full h-full opacity-0 focus:opacity-100 bg-yellow-300 outline-none px-3 font-semibold border-b border-black transition-opacity z-10 text-black"
+                              placeholder={isNeedleWash ? "可选 (Optional)" : "请输入"}
+                            />
+                          </>
+                        )}
                       </td>
                     </tr>
                   );
@@ -1881,126 +1804,83 @@ export const getSections = (
           </div>
           <div>
              <h4 className="font-bold mb-2 bg-green-200 inline-block px-1">4.7 计算 Calculation</h4>
-             <div className="bg-green-50 p-4 border border-green-200 space-y-6 text-sm">
-               <div>
-                 <p className="font-bold mb-2">（1）回收率计算 Percent Recovery Calculation</p>
-                 <div className="overflow-x-auto bg-white p-3 border border-gray-300 rounded mb-3">
-                   <div className="flex items-center justify-center font-mono whitespace-nowrap">
-                      <span className="mr-2">回收率 Percent Recovery (%) = </span>
-                      <div className="flex flex-col items-center">
-                        <div className="border-b border-black px-2 pb-1 mb-1">W<sub>STD1</sub> × A<sub>STD2</sub></div>
-                        <div className="px-2">W<sub>STD2</sub> × A<sub>STD1</sub></div>
-                      </div>
-                      <span className="ml-2">× 100%</span>
-                   </div>
-                 </div>
-                 <div className="space-y-1 text-gray-700">
-                   <p className="font-semibold">式中 In formula：</p>
-                   <ul className="list-none space-y-2 pl-2">
-                     <li><span className="font-bold">W<sub>STD1</sub>：</span>对照品溶液1中{displayId}对照品的称样量，mg；</li>
-                     <li><span className="font-bold">W<sub>STD2</sub>：</span>对照品溶液2中{displayId}对照品的称样量，mg；</li>
-                     <li><span className="font-bold">A<sub>STD1</sub>：</span>对照品溶液1中{displayId}连续进样5针的平均峰面积平均峰面积；</li>
-                     <li><span className="font-bold">A<sub>STD2</sub>：</span>对照品溶液2中{displayId}的峰面积。</li>
-                   </ul>
-                 </div>
-               </div>
-               <div>
-                  <p className="font-bold mb-2">（2）含量计算 Assay Calculation</p>
-                  {renderAssayCalculationContent()}
-               </div>
-             </div>
+             {renderAssayCalculationContent()}
           </div>
           <div>
-             <div className="flex justify-between items-center mb-2">
-                <h4 className="font-bold bg-green-200 inline-block px-1">4.8 可接受标准 Acceptance criteria</h4>
-                <button 
-                  onClick={() => accCriteriaState.setAcceptanceCriteria([...accCriteriaState.acceptanceCriteria, { id: Date.now().toString(), name: "", criteria: "" }])}
-                  className="flex items-center gap-1 bg-green-600 text-white px-2 py-1 rounded text-xs hover:bg-green-700 transition-colors shadow-sm"
-                >
-                  <Plus size={14} /> 新增行 Add Row
-                </button>
+             <h4 className="font-bold mb-2 bg-green-200 inline-block px-1">4.8 可接受标准 Acceptance Criteria</h4>
+             <div className="bg-green-50 p-2 border border-green-200 space-y-4">
+               {accCriteriaState.acceptanceCriteria.map((ac, idx) => (
+                 <div key={ac.id} className="grid grid-cols-1 md:grid-cols-3 gap-2 border-b border-gray-300 pb-2 last:border-0 last:pb-0">
+                    <div className="font-bold md:col-span-1 whitespace-pre-wrap">{ac.name}</div>
+                    <div className="md:col-span-2">
+                       <textarea
+                         value={ac.criteria}
+                         onChange={(e) => {
+                            const newArr = [...accCriteriaState.acceptanceCriteria];
+                            newArr[idx] = { ...newArr[idx], criteria: e.target.value };
+                            accCriteriaState.setAcceptanceCriteria(newArr);
+                         }}
+                         className="w-full bg-yellow-300 border-b border-black outline-none px-2 py-1 text-black resize-none min-h-[3rem]"
+                       />
+                    </div>
+                 </div>
+               ))}
              </div>
-             <table className="w-full border-collapse border border-gray-300 text-sm">
-                <thead>
-                  <tr className="bg-gray-100 text-center">
-                    <th className="border border-gray-300 p-2 w-1/3">名称 Name</th>
-                    <th className="border border-gray-300 p-2">接受标准 Acceptance criteria</th>
-                    <th className="border border-gray-300 p-2 w-16">操作</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {accCriteriaState.acceptanceCriteria.map((row, index) => (
-                    <tr key={row.id}>
-                      <td className="border border-gray-300 p-1 bg-white align-top">
-                        <textarea
-                          value={row.name}
-                          onChange={(e) => {
-                            const newRows = [...accCriteriaState.acceptanceCriteria];
-                            newRows[index].name = e.target.value;
-                            accCriteriaState.setAcceptanceCriteria(newRows);
-                          }}
-                          className="w-full bg-yellow-300 border-b border-black outline-none p-1 min-h-[3rem] resize-y"
-                          placeholder="输入名称"
-                        />
-                      </td>
-                      <td className="border border-gray-300 p-1 bg-white align-top">
-                        <textarea
-                           value={row.criteria}
-                           onChange={(e) => {
-                             const newRows = [...accCriteriaState.acceptanceCriteria];
-                             newRows[index].criteria = e.target.value;
-                             accCriteriaState.setAcceptanceCriteria(newRows);
-                           }}
-                           className="w-full bg-yellow-300 border-b border-black outline-none p-1 min-h-[3rem] resize-y"
-                           placeholder="输入标准"
-                        />
-                      </td>
-                      <td className="border border-gray-300 p-2 text-center align-middle">
-                        <button 
-                          onClick={() => {
-                            const newRows = accCriteriaState.acceptanceCriteria.filter((_, i) => i !== index);
-                            accCriteriaState.setAcceptanceCriteria(newRows);
-                          }}
-                          className="text-red-400 hover:text-red-600"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-             </table>
           </div>
         </div>
       )
     },
     {
       id: 'references-5',
-      title: '5. 参考文件 References',
+      title: '5. 参考文件 Reference',
       level: 1,
       content: (
-          <div className="space-y-4 text-sm">
-              <p>SOP SH-QA-6004 分析方法验证/确认。<br/>SOP SH-QA-6004 Analytical method validation/verification</p>
-          </div>
+        <ul className="list-disc ml-6 space-y-2 text-sm">
+           <li>{productId} 质量标准<br/>{productId} Specification</li>
+           <li>分析方法验证/确认（SOP SH-QA-6004）<br/>Analytical Methods Validation/Verification (SOP SH-QA-6004)</li>
+           <li>药品质量标准分析方法验证指导原则<br/>Guidance for Validation of Analysis Methods for Pharmaceutical Quality Standards</li>
+           <li>ICH Q2 (R1): Validation of Analytical Procedures: Text and Methodology</li>
+        </ul>
       )
     },
     {
       id: 'validation-content',
-      title: '6. 验证内容 Validation content',
+      title: '6. 验证内容 Validation Content',
       level: 1,
       content: (
-        <div className="p-4 bg-blue-50 border-l-4 border-blue-400">
-          <p className="text-blue-800 font-medium italic">以下为详细的验证内容各子项：</p>
+        <div className="text-sm">
+          <p>
+            将验证以下参数（如适用）：{dynamicItems.zh}。<br/>
+            The following parameters will be validated (where applicable): {dynamicItems.en}.
+          </p>
         </div>
       )
     },
+  ];
+
+  const staticSectionsAfter: Section[] = [
     {
       id: 'summary-deviations',
       title: '7. 偏差摘要 Summary of Deviations',
       level: 1,
       content: (
-        <div className="space-y-4 text-sm leading-relaxed">
-          <p>方案实施过程中如发生偏差，应做好偏差的记录并进行评估。<br/>If any deviation occurs during the implementation of the protocol, the deviation shall be recorded and evaluated.</p>
+        <div className="space-y-4 text-sm">
+           <p>验证过程中发生的偏差及调查结果总结如下：<br/>Deviations during validation and investigation results are summarized as follows:</p>
+           <table className="w-full border-collapse border border-gray-400 text-center">
+             <thead>
+               <tr className="bg-gray-100">
+                 <th className="border border-gray-400 p-2">偏差编号 Deviation No.</th>
+                 <th className="border border-gray-400 p-2">偏差描述 Description</th>
+                 <th className="border border-gray-400 p-2">调查结果 Investigation Result</th>
+                 <th className="border border-gray-400 p-2">对验证结果的影响 Impact</th>
+               </tr>
+             </thead>
+             <tbody>
+               <tr>
+                 <td className="border border-gray-400 p-4" colSpan={4}>N/A</td>
+               </tr>
+             </tbody>
+           </table>
         </div>
       )
     },
@@ -2009,54 +1889,56 @@ export const getSections = (
       title: '8. 支持性文件 Support Documents',
       level: 1,
       content: (
-        <div className="space-y-4 text-sm leading-relaxed">
-          <p>所有支持性文件均作为附件。<br/>All supporting documents are attached.</p>
-        </div>
+        <ul className="list-disc ml-6 space-y-2 text-sm">
+           <li>色谱图 Chromatograms</li>
+           <li>称量记录 Weighing Records</li>
+           <li>计算表格 Calculation Sheets</li>
+        </ul>
       )
     },
     {
       id: 'acceptance-criteria-9',
-      title: '9. 可接受标准 Acceptance Criteria',
+      title: '9. 验证可接受标准 Acceptance Criteria of Validation',
       level: 1,
       content: (
-        <div className="space-y-4 text-sm leading-relaxed">
-          <p>本方案所要求的测试项目均已完成并符合规定每项的可接受标准，所有要求的支持性文件均已作为附件附入。<br/>All test items required by this protocol have been completed and meet the acceptance criteria specified for each item. All required supporting documents have been attached as annexes.</p>
+        <div className="text-sm">
+           <p>所有验证项目均应符合可接受标准。如有偏差，需进行评估并确认不影响方法的有效性。<br/>All validation items should meet the acceptance criteria. Any deviations should be evaluated to confirm no impact on method validity.</p>
         </div>
       )
     },
     {
       id: 'validation-report',
-      title: '10. 检验方法验证报告 Test Method Validation Report',
+      title: '10. 验证报告 Validation Report',
       level: 1,
       content: (
-        <div className="space-y-4 text-sm leading-relaxed">
-          <p>根据检验方法验证的结果起草一份完整的报告，对 these 验证的结果进行分析和讨论，该报告将描述检验方法的验证状态，并确认本方案测试部分的所有项目均已完成。<br/>Supply a complete report according to the results of the validation of the inspection method. The results of validation will be analyzed and discussed. This report will describe the validation status of the inspection method and confirm that all items of the test part of the protocol have been completed.</p>
+        <div className="text-sm">
+           <p>验证结束后，将起草验证报告，总结验证数据和结果，并由相关人员审核批准。<br/>After validation, a validation report will be drafted to summarize validation data and results, reviewed and approved by relevant personnel.</p>
         </div>
       )
     },
     {
       id: 'history',
-      title: '11. 变更历史 History of Change',
+      title: '11. 变更历史 Change History',
       level: 1,
       content: (
-        <div className="text-sm">
-          <table className="w-full border-collapse border border-gray-300">
-            <thead>
-              <tr className="bg-gray-100 text-center">
-                <th className="border border-gray-300 p-2">版本号 Edition #</th>
-                <th className="border border-gray-300 p-2">变更内容 Summary of Changes</th>
-                <th className="border border-gray-300 p-2">生效日期 Effective Date</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td className="border border-gray-300 p-2 text-center text-blue-600 font-bold">00</td>
-                <td className="border border-gray-300 p-2 text-center text-blue-600 bg-blue-50">首版文件 New</td>
-                <td className="border border-gray-300 p-2"></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <table className="w-full border-collapse border border-gray-400 text-center text-sm">
+           <thead>
+             <tr className="bg-gray-100">
+               <th className="border border-gray-400 p-2">版本 Version</th>
+               <th className="border border-gray-400 p-2">日期 Date</th>
+               <th className="border border-gray-400 p-2">变更原因 Reason for Change</th>
+               <th className="border border-gray-400 p-2">变更内容 Description of Change</th>
+             </tr>
+           </thead>
+           <tbody>
+             <tr>
+               <td className="border border-gray-400 p-2">00</td>
+               <td className="border border-gray-400 p-2">New</td>
+               <td className="border border-gray-400 p-2">首次生效 First Effective</td>
+               <td className="border border-gray-400 p-2">N/A</td>
+             </tr>
+           </tbody>
+        </table>
       )
     },
     {
@@ -2064,195 +1946,155 @@ export const getSections = (
       title: '验证步骤 Validation Procedure',
       level: 1,
       content: (
-        <div className="p-8 text-center border-2 border-dashed border-gray-300 rounded-lg bg-gray-50">
-          <h2 className="text-xl font-bold text-gray-700">验证步骤详细操作规程</h2>
-          <p className="text-gray-500 mt-2">Detailed Validation Operating Procedures</p>
+        <div className="p-4 bg-yellow-50 border border-yellow-200 text-sm">
+           <p className="font-bold mb-2">以下为详细的验证操作步骤。<br/>The following are detailed validation operation procedures.</p>
         </div>
       )
     },
     {
       id: 'val-pre-1',
-      title: '先决条件 1：培训确认 Prerequisite 1: Training check',
+      title: '先决条件 1: 培训 Prerequisite 1: Training',
       level: 2,
       content: (
-         <div className="space-y-6 text-sm">
-           <div>
-             <h3 className="font-bold border-b border-gray-200 pb-1 mb-2">1. 目的 Objective</h3>
-             <p>检查与方案实施的相关人员，是否已经完成本检验方法验证方案的培训。<br/>Check all persons have completed the training of the test method validation plan.</p>
+        <div className="space-y-2 text-sm">
+           <p>参与本次验证的人员已经过相关SOP和本方案的培训。<br/>Personnel involved in this validation have been trained on relevant SOPs and this protocol.</p>
+           <div className="bg-gray-50 p-3 border border-gray-200">
+             <div className="font-bold mb-1">培训记录 Training Record:</div>
+             <div><span className="font-semibold">题目 Title:</span> {productId} 含量和鉴别检验方法验证方案</div>
+             <div><span className="font-semibold">Title (EN):</span> Protocol for Validation of {productId} Assay and Identification Determination</div>
            </div>
-           
-           <div>
-             <h3 className="font-bold border-b border-gray-200 pb-1 mb-2">2. 操作 Operation</h3>
-             <p className="mb-2">检查与方案实施有关人员的培训记录<br/>Check the training records of personnel who participated in the validation process.</p>
-             <table className="w-full border border-gray-300 mt-2 text-center text-xs">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="border p-2">培训内容 Training content</th>
-                    <th className="border p-2 w-32">原件存放位置 Location</th>
-                    <th className="border p-2 w-32">备注 Remark</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td className="border p-2 text-left">
-                      {displayId} 含量和鉴别检验方法验证方案<br/>
-                      Protocol for Validation of {displayId} Assay and Identification Determination
-                    </td>
-                    <td className="border p-2">QA</td>
-                    <td className="border p-2">N/A</td>
-                  </tr>
-                </tbody>
-             </table>
-           </div>
-
-           <div>
-             <h3 className="font-bold border-b border-gray-200 pb-1 mb-2">3. 可接受标准 Acceptance Criteria</h3>
-             <p>所有相关人员均已接受培训，培训记录完整。<br/>All persons have been trained, and the record is complete</p>
-           </div>
-         </div>
+        </div>
       )
     },
     {
       id: 'val-pre-2',
-      title: '先决条件 2：仪器和试剂确认 Prerequisite 2: Instruments and reagents check',
+      title: '先决条件 2: 仪器 Prerequisite 2: Instruments',
       level: 2,
       content: (
-         <div className="space-y-6 text-sm">
-           <div>
-              <h3 className="font-bold border-b border-gray-200 pb-1 mb-2">1. 目的 Objective</h3>
-              <p>检查、确认与方案实施有关的仪器和试剂是否符合要求，并在有效期内。<br/>Check and confirm whether the instruments and reagents related to the implementation of the protocol meet the requirements, and within the validity period.</p>
-           </div>
-           <div>
-              <h3 className="font-bold border-b border-gray-200 pb-1 mb-2">2. 操作 Operation</h3>
-              <h4 className="font-bold mt-4 mb-2">2.1. 仪器确认 Instrument confirmation</h4>
-              <table className="w-full border border-gray-300 text-center text-xs">
-                 <thead>
-                   <tr className="bg-gray-100">
-                     <th className="border p-2">序号 No.</th>
-                     <th className="border p-2">仪器名称 Instrument name</th>
-                     <th className="border p-2">型号 model</th>
-                   </tr>
-                 </thead>
-                 <tbody>
-                   <tr>
-                     <td className="border p-2">1</td>
-                     <td className="border p-2">电子天平 <br/> Electronic Balance</td>
-                     <td className="border p-2">XS105DU或其他等效仪器 <br/> XS105DU or other equivalent instrument</td>
-                   </tr>
-                   <tr>
-                     <td className="border p-2">2</td>
-                     <td className="border p-2">液相色谱仪 <br/> High Performance Liquid</td>
-                     <td className="border p-2">Ultimate 3000 或Agilent 1260 II，或其他等效仪器 <br/> Ultimate 3000 or Agilent 1260 II, or other equivalent instrument</td>
-                   </tr>
-                 </tbody>
-              </table>
-              <h4 className="font-bold mt-4 mb-2">2.2. 色谱柱确认 Column confirmation</h4>
-              <table className="w-full border border-gray-300 text-center text-xs">
-                 <thead>
-                   <tr className="bg-gray-100">
-                     <th className="border p-2 w-1/4">厂家 Supplier</th>
-                     <th className="border p-2">规格 Model</th>
-                   </tr>
-                 </thead>
-                 <tbody>
-                   {tcState.testingConditions.filter(tc => tc.id === 'column' || tc.id === 'ghostBuster' || tc.id.startsWith('column_')).map(col => (
-                    <tr key={col.id}>
-                      <td className="border p-2 text-center align-middle">
-                        <textarea
-                          value={preState.prerequisiteState.columnSuppliers[col.id] || ''}
-                          onChange={(e) => {
-                               const newSuppliers = { ...preState.prerequisiteState.columnSuppliers, [col.id]: e.target.value };
-                               preState.setPrerequisiteState({ ...preState.prerequisiteState, columnSuppliers: newSuppliers });
-                          }}
-                          className="w-full bg-yellow-300 border-b border-black outline-none px-1 py-0.5 text-center resize-none"
-                          rows={1}
-                          placeholder="请输入厂家"
+        <div className="space-y-4 text-sm">
+           <p>确认所使用的仪器均已校验并在有效期内。<br/>Confirm that instruments used are calibrated and within validity period.</p>
+           <table className="w-full border-collapse border border-gray-300 text-xs">
+             <thead>
+               <tr className="bg-gray-100">
+                 <th className="border border-gray-300 p-2">仪器名称 Instrument</th>
+                 <th className="border border-gray-300 p-2">型号 Model</th>
+                 <th className="border border-gray-300 p-2">编号 ID</th>
+                 <th className="border border-gray-300 p-2">校验有效期 Cal. Due Date</th>
+               </tr>
+             </thead>
+             <tbody>
+               <tr>
+                 <td className="border border-gray-300 p-2">HPLC</td>
+                 <td className="border border-gray-300 p-2">Agilent 1260</td>
+                 <td className="border border-gray-300 p-2"><input className="w-full bg-yellow-100" /></td>
+                 <td className="border border-gray-300 p-2"><input className="w-full bg-yellow-100" /></td>
+               </tr>
+               <tr>
+                 <td className="border border-gray-300 p-2">电子天平 Balance</td>
+                 <td className="border border-gray-300 p-2">Mettler Toledo</td>
+                 <td className="border border-gray-300 p-2"><input className="w-full bg-yellow-100" /></td>
+                 <td className="border border-gray-300 p-2"><input className="w-full bg-yellow-100" /></td>
+               </tr>
+             </tbody>
+           </table>
+           
+           <h4 className="font-bold mt-4 mb-2">试剂和色谱柱 Reagents and Column</h4>
+           <div className="mb-2">
+             <div className="flex justify-between items-center mb-1">
+               <span className="font-semibold">试剂清单 Reagent List</span>
+               <button 
+                  onClick={handleAddReagentRow}
+                  className="flex items-center gap-1 bg-green-600 text-white px-2 py-0.5 rounded text-xs hover:bg-green-700 transition-colors"
+                >
+                  <Plus size={12} /> Add
+                </button>
+             </div>
+             <table className="w-full border-collapse border border-gray-300 text-xs">
+               <thead>
+                 <tr className="bg-gray-100">
+                   <th className="border border-gray-300 p-2">名称 Name</th>
+                   <th className="border border-gray-300 p-2">级别 Grade</th>
+                   <th className="border border-gray-300 p-2 w-10">Op</th>
+                 </tr>
+               </thead>
+               <tbody>
+                 {preState.prerequisiteState.reagentRows.map((row, idx) => (
+                    <tr key={row.id}>
+                      <td className="border border-gray-300 p-1">
+                        <input 
+                          value={row.name} 
+                          onChange={(e) => handleUpdateReagentRow(idx, 'name', e.target.value)}
+                          className="w-full bg-yellow-300 px-1 py-0.5 outline-none"
                         />
                       </td>
-                      <td className="border p-2 text-left">{col.value}</td>
+                      <td className="border border-gray-300 p-1">
+                        <input 
+                          value={row.grade} 
+                          onChange={(e) => handleUpdateReagentRow(idx, 'grade', e.target.value)}
+                          className="w-full bg-yellow-300 px-1 py-0.5 outline-none"
+                        />
+                      </td>
+                       <td className="border border-gray-300 p-1 text-center">
+                          <button onClick={() => handleRemoveReagentRow(idx)} className="text-red-500 hover:text-red-700"><Trash2 size={12}/></button>
+                       </td>
                     </tr>
-                   ))}
-                 </tbody>
-              </table>
-              <h4 className="font-bold mt-4 mb-2 flex justify-between items-end">
-                <span>2.3. 试剂确认 Reagent confirmation</span>
-                <button 
-                  onClick={handleAddReagentRow}
-                  className="flex items-center gap-1 bg-green-600 text-white px-2 py-1 rounded text-xs hover:bg-green-700 transition-colors shadow-sm"
-                >
-                  <Plus size={14} /> 新增行 Add Row
-                </button>
-              </h4>
-              <table className="w-full border border-gray-300 text-center text-xs">
-                 <thead>
-                   <tr className="bg-gray-100">
-                     <th className="border p-2">试剂名称 Reagent name</th>
-                     <th className="border p-2 w-1/3">级别 Grade</th>
-                     <th className="border p-2 w-16">操作</th>
-                   </tr>
-                 </thead>
-                 <tbody>
-                   {preState.prerequisiteState.reagentRows.map((row, i) => (
-                     <tr key={row.id}>
-                       <td className="border p-2">
-                          <textarea
-                            value={row.name}
-                            onChange={(e) => handleUpdateReagentRow(i, 'name', e.target.value)}
-                            className="w-full bg-yellow-300 border-b border-black outline-none px-1 py-0.5 resize-none min-h-[1.5rem]"
-                            placeholder="请输入试剂名称"
-                            rows={1}
-                          />
-                       </td>
-                       <td className="border p-2">
-                          <select
-                            value={row.grade}
-                            onChange={(e) => handleUpdateReagentRow(i, 'grade', e.target.value)}
-                            className="w-full bg-white border border-gray-300 rounded px-1 py-1 outline-none"
-                          >
-                            <option value="HPLC或以上级别 HPLC and above level">HPLC或以上级别 HPLC and above level</option>
-                            <option value="超纯水 Ultrapure water">超纯水 Ultrapure water</option>
-                            <option value="AR或以上级别 AR and above level">AR或以上级别 AR and above level</option>
-                          </select>
-                       </td>
-                       <td className="border p-2">
-                          <button 
-                            onClick={() => handleRemoveReagentRow(i)}
-                            className="text-red-400 hover:text-red-600"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                       </td>
-                     </tr>
-                   ))}
-                 </tbody>
-              </table>
+                 ))}
+               </tbody>
+             </table>
            </div>
+
            <div>
-              <h3 className="font-bold border-b border-gray-200 pb-1 mb-2">3. 可接受标准 Acceptance Criteria</h3>
-              <p>与方案实施有关的仪器和试剂均符合要求，且在有效期内。<br/>The instruments and reagents related to the implementation of the protocol meet the requirements and are within the validity period.</p>
+             <span className="font-semibold block mb-1">色谱柱 Column</span>
+             <div className="grid grid-cols-1 gap-2">
+               <div className="flex items-center gap-2 border border-gray-300 p-2 bg-gray-50">
+                 <span className="text-gray-600 w-24 shrink-0">Column:</span>
+                 <span className="flex-1 font-medium">{tcState.testingConditions.find(t => t.id === 'column')?.value || 'N/A'}</span>
+                 <span className="text-gray-500 text-xs mx-2">Supplier:</span>
+                 <input 
+                    value={preState.prerequisiteState.columnSuppliers['column'] || ''}
+                    onChange={(e) => preState.setPrerequisiteState(prev => ({...prev, columnSuppliers: {...prev.columnSuppliers, 'column': e.target.value}}))}
+                    className="w-24 bg-yellow-300 px-1 py-0.5 outline-none text-xs border-b border-black"
+                    placeholder="e.g. Waters"
+                 />
+               </div>
+               {/* Ghost buster */}
+               <div className="flex items-center gap-2 border border-gray-300 p-2 bg-gray-50">
+                 <span className="text-gray-600 w-24 shrink-0">Ghost-Buster:</span>
+                 <span className="flex-1 font-medium">{tcState.testingConditions.find(t => t.id === 'ghostBuster')?.value || 'N/A'}</span>
+                 <span className="text-gray-500 text-xs mx-2">Supplier:</span>
+                 <input 
+                    value={preState.prerequisiteState.columnSuppliers['ghostBuster'] || ''}
+                    onChange={(e) => preState.setPrerequisiteState(prev => ({...prev, columnSuppliers: {...prev.columnSuppliers, 'ghostBuster': e.target.value}}))}
+                    className="w-24 bg-yellow-300 px-1 py-0.5 outline-none text-xs border-b border-black"
+                    placeholder="e.g. Welch"
+                 />
+               </div>
+             </div>
            </div>
-         </div>
+        </div>
       )
-    }
+    },
   ];
 
-  const allSections = [...staticSectionsBefore];
+  const validationResults: Section[] = [];
+  const validationProcedures: Section[] = [];
 
-  const activeModules = validationMap.filter(m => validationOptions[m.option as keyof ValidationOptions]);
-  const valContentIdx = allSections.findIndex(s => s.id === 'validation-content');
-
-  let currentValIndex = 1;
-  const section6Modules = activeModules.map(m => {
-    const s = m.sections[0];
-    return {
-      ...s,
-      title: s.title.replace('6.x', `6.${currentValIndex++}`)
-    };
+  validationMap.forEach(item => {
+    if (validationOptions[item.option as keyof ValidationOptions]) {
+      item.sections.forEach(section => {
+        if (section.id.startsWith('val-proc-')) {
+          validationProcedures.push(section);
+        } else {
+          validationResults.push(section);
+        }
+      });
+    }
   });
-  allSections.splice(valContentIdx + 1, 0, ...section6Modules);
 
-  const valProcedureModules = activeModules.map(m => m.sections[1]);
-  allSections.splice(allSections.findIndex(s => s.id === 'val-pre-2') + 1, 0, ...valProcedureModules);
-
-  return allSections;
-}
+  return [
+    ...staticSectionsBefore,
+    ...validationResults,
+    ...staticSectionsAfter,
+    ...validationProcedures
+  ];
+};
