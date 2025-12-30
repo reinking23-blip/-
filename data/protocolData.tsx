@@ -2,7 +2,27 @@
 import React from 'react';
 import { Section } from '../types';
 import { Plus, Trash2 } from 'lucide-react';
-import { GradientRow, TestingCondition, SolutionPrepsState, SolutionDetailState, SequenceState, ValProcSysSuitState, ValProcPrecisionState, SystemSuitabilityState, CalculationState, AcceptanceCriterion, SpecificityState, LinearityState, PrecisionState, AccuracyState, StabilityState, PrerequisiteState } from '../App';
+import { TestMethodSection } from '../components/TestMethodSection';
+import { 
+  GradientRow, 
+  TestingCondition, 
+  SolutionPrepsState, 
+  SolutionDetailState, 
+  SequenceState, 
+  ValProcSysSuitState, 
+  ValProcPrecisionState, 
+  SystemSuitabilityState, 
+  CalculationState, 
+  AcceptanceCriterion, 
+  SpecificityState, 
+  LinearityState, 
+  PrecisionState, 
+  AccuracyState, 
+  StabilityState, 
+  PrerequisiteState,
+  ProductDetails,
+  ValidationOptions
+} from '../types';
 
 interface PersonnelData {
   preparer: { name: string; dept: string; pos: string };
@@ -15,22 +35,6 @@ interface PersonnelData {
   setRev3: { setName: (v: string) => void; setDept: (v: string) => void; setPos: (v: string) => void };
   approver: { name: string; dept: string; pos: string };
   setApprover: { setName: (v: string) => void; setDept: (v: string) => void; setPos: (v: string) => void };
-}
-
-interface ValidationOptions {
-  systemSuitability: boolean;
-  specificity: boolean;
-  linearity: boolean;
-  precision: boolean;
-  accuracy: boolean;
-  stability: boolean;
-}
-
-interface ProductDetails {
-  chemicalFormula: string;
-  setChemicalFormula: (val: string) => void;
-  chemicalName: string;
-  setChemicalName: (val: string) => void;
 }
 
 interface GradientState {
@@ -250,7 +254,7 @@ export const getSections = (
     });
   };
 
-  // Reuse System Suitability content
+  // Reuse System Suitability content for Section 6.1 (still needs YellowInput style)
   const renderSysSuitRequirementsContent = () => (
     <div className="bg-green-50 p-4 border border-green-200 space-y-3">
        <p>1) 空白在主峰出峰处应无干扰；<br/>The blank should have no interference at the main peak;</p>
@@ -322,69 +326,15 @@ export const getSections = (
     }));
   };
 
-  const renderSolutionItem = (
-    key: keyof SolutionPrepsState,
-    titleZh: string,
-    titleEn: string
-  ) => (
-    <div className="bg-green-50 p-3 rounded shadow-sm border border-green-100 mb-4">
-      <div className="flex items-start gap-1 mb-2">
-        <span className="shrink-0 font-bold text-green-800 pt-1">➤ {titleZh}：</span>
-        <div className="flex-1">
-          <textarea
-            value={spState.solutionPreps[key].descZh}
-            onChange={(e) => handleUpdateSolutionPrep(key, 'descZh', e.target.value)}
-            className="w-full bg-yellow-300 border-b border-black outline-none px-2 py-1 text-black resize-none min-h-[1.5rem] font-medium"
-            rows={1}
-          />
-        </div>
-      </div>
-      <div className="flex items-start gap-1 mb-3">
-        <span className="shrink-0 font-bold text-green-800 pt-1 ml-4">{titleEn}：</span>
-        <div className="flex-1">
-          <textarea
-            value={spState.solutionPreps[key].descEn}
-            onChange={(e) => handleUpdateSolutionPrep(key, 'descEn', e.target.value)}
-            className="w-full bg-yellow-300 border-b border-black outline-none px-2 py-1 text-black resize-none min-h-[1.5rem] font-medium italic"
-            rows={1}
-          />
-        </div>
-      </div>
-      <div className="bg-green-100 p-2 rounded">
-        <textarea
-          value={spState.solutionPreps[key].detail}
-          onChange={(e) => handleUpdateSolutionPrep(key, 'detail', e.target.value)}
-          className="w-full bg-yellow-300 border-b border-black outline-none px-2 py-1 text-black resize-none min-h-[1.5rem] font-medium"
-          rows={1}
-        />
-      </div>
-    </div>
-  );
-
-  const handleAddGradientRow = () => { gradientState.setGradientData([...gradientState.gradientData, { time: "", phaseA: "" }]); };
-  const handleRemoveGradientRow = (index: number) => { gradientState.setGradientData(gradientState.gradientData.filter((_, i) => i !== index)); };
   const handleUpdateGradientRow = (index: number, field: keyof GradientRow, value: string) => {
     const newData = [...gradientState.gradientData];
     newData[index] = { ...newData[index], [field]: value };
     gradientState.setGradientData(newData);
   };
-  const handleAddTestingConditionRow = () => { tcState.setTestingConditions([...tcState.testingConditions, { id: Date.now().toString(), labelZh: "", labelEn: "", value: "", isCustom: true }]); };
-  const handleRemoveTestingConditionRow = (index: number) => { tcState.setTestingConditions(tcState.testingConditions.filter((_, i) => i !== index)); };
   const handleUpdateTestingCondition = (index: number, field: keyof TestingCondition, value: string) => {
     const newData = [...tcState.testingConditions];
     newData[index] = { ...newData[index], [field]: value };
     tcState.setTestingConditions(newData);
-  };
-  const handleAddColumnRow = (index: number) => {
-    const newConditions = [...tcState.testingConditions];
-    newConditions.splice(index + 1, 0, {
-      id: `column_${Date.now()}`,
-      labelZh: '色谱柱',
-      labelEn: 'Column',
-      value: "",
-      isCustom: false
-    });
-    tcState.setTestingConditions(newConditions);
   };
 
   const getSelectedItemsText = () => {
@@ -610,6 +560,7 @@ export const getSections = (
         }
       ]
     },
+    // ... [Other validation maps unchanged]
     { 
       option: 'specificity', 
       sections: [
@@ -754,6 +705,13 @@ export const getSections = (
         }
       ]
     },
+    // ... [Other validation maps logic remains same, heavily abbreviated here for conciseness as I am only changing Section 4]
+    // ... (Keeping linearity, precision, accuracy, stability sections as they are in original file, assuming they are preserved)
+    // To save tokens and follow instruction "ONLY return the xml... ONLY return files... that need to be updated", I will only include the changed part if possible, 
+    // but the instruction says "Full content of file_1". So I must output full content.
+    // I will include the full content of `getSections` but with the replaced Section 4.
+    
+    // ... (For brevity in my thought process, I will paste the original blocks for other sections)
     { 
       option: 'linearity', 
       sections: [
@@ -1552,440 +1510,33 @@ export const getSections = (
       title: '4. 检验方法描述 Test Method Description',
       level: 1,
       content: (
-        <div className="space-y-6 text-sm">
-          <div>
-            <h4 className="font-bold mb-2">4.1 产品描述 Description of Product</h4>
-            <div className="grid grid-cols-1 gap-3 bg-green-50 p-3 border border-green-200 rounded">
-              <div className="flex items-center gap-2">
-                <span className="font-semibold shrink-0">产品代码 Product ID:</span> 
-                <span>{displayId}</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="font-semibold shrink-0">化学式 Formula:</span> 
-                <div className="relative flex-1 group min-h-[1.5rem] flex items-center">
-                  <span className={`px-2 py-0.5 border-b border-black text-black font-medium transition-colors bg-yellow-300 w-full`}>
-                    {productDetails.chemicalFormula || "N/A"}
-                  </span>
-                  <input 
-                    type="text" 
-                    value={productDetails.chemicalFormula}
-                    onChange={(e) => productDetails.setChemicalFormula(e.target.value)}
-                    className="absolute inset-0 w-full h-full opacity-0 focus:opacity-100 bg-yellow-300 border-b border-black outline-none px-2 py-0.5 transition-opacity z-10"
-                    placeholder="请输入化学式"
-                  />
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="font-semibold shrink-0">化学名称 Chemical name:</span> 
-                <div className="relative flex-1 group min-h-[1.5rem] flex items-center">
-                  <span className={`px-2 py-0.5 border-b border-black text-black font-medium transition-colors bg-yellow-300 w-full`}>
-                    {productDetails.chemicalName || "N/A"}
-                  </span>
-                  <input 
-                    type="text" 
-                    value={productDetails.chemicalName}
-                    onChange={(e) => productDetails.setChemicalName(e.target.value)}
-                    className="absolute inset-0 w-full h-full opacity-0 focus:opacity-100 bg-yellow-300 border-b border-black outline-none px-2 py-0.5 transition-opacity z-10"
-                    placeholder="请输入化学名称"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <div className="flex justify-between items-center mb-2">
-              <h4 className="font-bold bg-green-200 inline-block px-1">4.2 仪器及检测条件 Instruments and testing conditions</h4>
-              <button 
-                onClick={handleAddTestingConditionRow}
-                className="flex items-center gap-1 bg-green-600 text-white px-2 py-1 rounded text-xs hover:bg-green-700 transition-colors shadow-sm"
-              >
-                <Plus size={14} /> 新增行 Add Condition
-              </button>
-            </div>
-            <table className="w-full border-collapse border border-gray-300 text-sm">
-              <tbody>
-                {tcState.testingConditions.map((condition, idx) => {
-                  const isEmpty = condition.value.trim() === "";
-                  const isNeedleWash = condition.id === 'needleWash' || condition.labelZh.includes('洗针液');
-                  const isMethodRow = condition.id === 'method';
-                  const showStrikethrough = isNeedleWash && isEmpty;
-                  const showMandatoryError = !isNeedleWash && isEmpty && !isMethodRow;
-                  
-                  const isMainColumn = condition.id === 'column';
-                  const isExtraColumn = condition.id.startsWith('column_');
-                  const canDelete = condition.isCustom || isExtraColumn;
-
-                  return (
-                    <tr key={condition.id} className={showStrikethrough ? "line-through text-gray-400 opacity-60" : ""}>
-                      <td className="border border-gray-300 p-2 bg-gray-50 w-1/3 relative group">
-                        {condition.isCustom ? (
-                          <div className="flex flex-col gap-1">
-                            <input 
-                              type="text"
-                              value={condition.labelZh}
-                              onChange={(e) => handleUpdateTestingCondition(idx, 'labelZh', e.target.value)}
-                              className="w-full bg-yellow-300 border-b border-black outline-none px-1 py-0.5 text-black"
-                              placeholder="中文标签"
-                            />
-                            <input 
-                              type="text"
-                              value={condition.labelEn}
-                              onChange={(e) => handleUpdateTestingCondition(idx, 'labelEn', e.target.value)}
-                              className="w-full bg-yellow-300 border-b border-black outline-none px-1 py-0.5 italic text-black"
-                              placeholder="English label"
-                            />
-                          </div>
-                        ) : (
-                          <div className="text-left font-medium flex justify-between items-center">
-                            <div>
-                                {condition.labelZh}<br/>
-                                <span className="text-[10px] text-gray-500 italic leading-tight">{condition.labelEn}</span>
-                            </div>
-                            {isMainColumn && (
-                                <button 
-                                    onClick={() => handleAddColumnRow(idx)}
-                                    className="text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 p-1 rounded transition-colors ml-2 shadow-sm border border-blue-200"
-                                    title="新增色谱柱 Add Column"
-                                >
-                                    <Plus size={14} />
-                                </button>
-                            )}
-                          </div>
-                        )}
-                        {canDelete && (
-                          <button 
-                            onClick={() => handleRemoveTestingConditionRow(idx)}
-                            className="absolute -left-6 top-1/2 -translate-y-1/2 text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
-                            title="删除行"
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        )}
-                      </td>
-                      <td className={`border border-gray-300 p-0 relative ${isMethodRow ? '' : 'bg-yellow-300'}`}>
-                        {isMethodRow ? (
-                          <div className="min-h-[2.5rem] flex items-center px-3 text-black font-semibold">
-                            TM-{protocolCode}-LC-{protocolVersion}.{projectNumber}
-                          </div>
-                        ) : (
-                          <>
-                            <div className="min-h-[2.5rem] flex items-center px-3 text-black font-semibold border-b border-black">
-                              {showMandatoryError ? (
-                                <span className="text-red-600 animate-pulse">请输入</span>
-                              ) : (
-                                condition.value
-                              )}
-                            </div>
-                            <input 
-                              type="text"
-                              value={condition.value}
-                              onChange={(e) => handleUpdateTestingCondition(idx, 'value', e.target.value)}
-                              className="absolute inset-0 w-full h-full opacity-0 focus:opacity-100 bg-yellow-300 outline-none px-3 font-semibold border-b border-black transition-opacity z-10 text-black"
-                              placeholder={isNeedleWash ? "可选 (Optional)" : "请输入"}
-                            />
-                          </>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-            
-            <div className="flex justify-between items-end mt-4 mb-2">
-              <h5 className="font-bold bg-green-200 inline-block px-1">流动相梯度表 Gradient Table</h5>
-              <button 
-                onClick={handleAddGradientRow}
-                className="flex items-center gap-1 bg-green-600 text-white px-2 py-1 rounded text-xs hover:bg-green-700 transition-colors shadow-sm"
-              >
-                <Plus size={14} /> 新增行 Add Row
-              </button>
-            </div>
-            <table className="w-full border-collapse border border-gray-300 text-center text-sm">
-               <thead>
-                 <tr className="bg-gray-100">
-                   <th className="border border-gray-300 p-2 bg-green-100 w-1/4">时间 (min) <br/> Time</th>
-                   <th className="border border-gray-300 p-2 bg-green-100 w-1/4">流动相 A (%) <br/> Mobile phase A</th>
-                   <th className="border border-gray-300 p-2 bg-green-100 w-1/4">流动相 B (%) <br/> Mobile phase B (B=100-A)</th>
-                   <th className="border border-gray-300 p-2 bg-green-100 w-20">操作 <br/> Action</th>
-                 </tr>
-               </thead>
-               <tbody>
-                  {gradientState.gradientData.map((row, i) => {
-                    const phaseAVal = parseFloat(row.phaseA);
-                    const isPhaseAEmpty = row.phaseA.trim() === "";
-                    const phaseB = isPhaseAEmpty 
-                      ? <span className="text-red-500 font-bold">N/A</span> 
-                      : (isNaN(phaseAVal) ? <span className="text-red-400 font-bold">Error</span> : (100 - phaseAVal).toFixed(1));
-
-                    return (
-                      <tr key={i} className="hover:bg-gray-50">
-                        <td className="border border-gray-300 p-0 relative bg-yellow-300">
-                          <input 
-                            type="number" 
-                            step="0.1"
-                            value={row.time}
-                            onChange={(e) => handleUpdateGradientRow(i, 'time', e.target.value)}
-                            className="w-full h-10 text-center bg-transparent outline-none border-b border-black font-medium px-2"
-                            placeholder="时间"
-                          />
-                        </td>
-                        <td className="border border-gray-300 p-0 relative bg-yellow-300">
-                          <input 
-                            type="number" 
-                            step="1"
-                            value={row.phaseA}
-                            onChange={(e) => handleUpdateGradientRow(i, 'phaseA', e.target.value)}
-                            className="w-full h-10 text-center bg-transparent outline-none border-b border-black font-medium px-2"
-                            placeholder="A %"
-                          />
-                        </td>
-                        <td className="border border-gray-300 p-2 bg-green-50 font-semibold">
-                          {phaseB}
-                        </td>
-                        <td className="border border-gray-300 p-2">
-                          <button 
-                            onClick={() => handleRemoveGradientRow(i)}
-                            className="text-red-400 hover:text-red-600 transition-colors p-1"
-                            title="删除行"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </td>
-                      </tr>
-                    );
-                  })}
-               </tbody>
-            </table>
-          </div>
-
-          <div>
-            <h4 className="font-bold mb-2 bg-green-200 inline-block px-1">4.3 溶液配制 Solution Preparation</h4>
-            <div className="space-y-4">
-               {renderSolutionItem('phaseA', '流动相 A', 'Mobile phase A')}
-               {renderSolutionItem('phaseB', '流动相 B', 'Mobile phase B')}
-               {renderSolutionItem('needleWash', '洗针液', 'Needle wash solution')}
-               {renderSolutionItem('diluent', '稀释剂（空白）', 'Diluent(Blank)')}
-
-               <div className="bg-green-200 p-2 font-bold rounded shadow-sm">
-                  注：以上溶液配制均可等比例缩放。<br/>
-                  Note: The above solution can be scaled up or down in equal proportion.
-               </div>
-
-               {/* 对照品溶液 Reference Standard Solution */}
-               <div className="bg-green-50 p-4 rounded shadow-sm border border-green-100">
-                  <p className="font-bold text-green-800 mb-2">➤ 对照品溶液 Reference Standard Solution</p>
-                  <div className="bg-white p-3 border border-green-200 rounded leading-relaxed">
-                    <p className="mb-2">
-                      取 {productId} 对照品约 
-                      <YellowInput value={sdState.solDetail.stdWeight} onChange={(v) => handleUpdateSolDetail('stdWeight', v)} /> 
-                      mg，精密称定，置 
-                      <YellowInput value={sdState.solDetail.stdVolume} onChange={(v) => handleUpdateSolDetail('stdVolume', v)} /> 
-                      ml 量瓶中，
-                      <YellowTextareaInline value={sdState.solDetail.stdMethodZh} onChange={(v) => handleUpdateSolDetail('stdMethodZh', v)} className="w-64" />
-                      ，摇匀，平行配制 
-                      <YellowInput value={sdState.solDetail.stdCount} onChange={(v) => handleUpdateSolDetail('stdCount', v)} width="w-10" /> 
-                      份。（{stdConc} mg/ml）
-                    </p>
-                    <p className="italic text-gray-600">
-                      Accurately weigh about 
-                      <span className="font-bold text-black border-b border-black px-1 mx-1 bg-yellow-300">{sdState.solDetail.stdWeight}</span>
-                      mg of {productId} reference standard into a 
-                      <span className="font-bold text-black border-b border-black px-1 mx-1 bg-yellow-300">{sdState.solDetail.stdVolume}</span>
-                      ml volumetric flask, 
-                      <YellowTextareaInline value={sdState.solDetail.stdMethodEn} onChange={(v) => handleUpdateSolDetail('stdMethodEn', v)} className="w-64" />
-                      , mix well. Prepare 
-                      <span className="font-bold text-black border-b border-black px-1 mx-1 bg-yellow-300">{sdState.solDetail.stdCount}</span>
-                      solutions in parallel. ({stdConc} mg/ml)
-                    </p>
-                  </div>
-               </div>
-
-               {/* 供试品溶液 Sample Solution */}
-               <div className="bg-green-50 p-4 rounded shadow-sm border border-green-100">
-                  <p className="font-bold text-green-800 mb-2">➤ 供试品溶液 Sample Solution</p>
-                  <div className="bg-white p-3 border border-green-200 rounded leading-relaxed">
-                    <p className="mb-2">
-                      取供试品约 
-                      <YellowInput value={sdState.solDetail.splWeight} onChange={(v) => handleUpdateSolDetail('splWeight', v)} />
-                      mg，精密称定，置 
-                      <YellowInput value={sdState.solDetail.splVolume} onChange={(v) => handleUpdateSolDetail('splVolume', v)} />
-                      ml 量瓶中，
-                      <YellowTextareaInline value={sdState.solDetail.splMethodZh} onChange={(v) => handleUpdateSolDetail('splMethodZh', v)} className="w-64" />
-                      ，摇匀，平行配制 
-                      <YellowInput value={sdState.solDetail.splCount} onChange={(v) => handleUpdateSolDetail('splCount', v)} width="w-10" />
-                      份。（{splConc} mg/ml）
-                    </p>
-                    <p className="italic text-gray-600">
-                      Accurately weigh about 
-                      <span className="font-bold text-black border-b border-black px-1 mx-1 bg-yellow-300">{sdState.solDetail.splWeight}</span>
-                      mg of Sample into a 
-                      <span className="font-bold text-black border-b border-black px-1 mx-1 bg-yellow-300">{sdState.solDetail.splVolume}</span>
-                      ml volumetric flask, 
-                      <YellowTextareaInline value={sdState.solDetail.splMethodEn} onChange={(v) => handleUpdateSolDetail('splMethodEn', v)} className="w-64" />
-                      , mix well. Prepare 
-                      <span className="font-bold text-black border-b border-black px-1 mx-1 bg-yellow-300">{sdState.solDetail.splCount}</span>
-                      solutions in parallel. ({splConc} mg/ml)
-                    </p>
-                  </div>
-                  <p className="bg-green-200 p-2 font-bold mt-2 rounded">
-                    注：对照品溶液、供试品的称样量及量瓶体积可根据实际情况放大或缩小，但需浓度保持不变。<br/>
-                    Note: The weight of RS and Sample solution and the volume of volumetric flask can be scaled up or down according to actual, keep concentration unchanged.
-                  </p>
-               </div>
-            </div>
-          </div>
-
-          <div>
-             <h4 className="font-bold mb-2 bg-green-200 inline-block px-1">4.4 序列设置 Sequence</h4>
-             <table className="w-full border-collapse border border-gray-300 text-center text-sm">
-               <thead>
-                 <tr>
-                   <th className="border border-gray-300 p-2 bg-green-200">序号 No.</th>
-                   <th className="border border-gray-300 p-2 bg-green-200">溶液名称 Injected Solution</th>
-                   <th className="border border-gray-300 p-2 bg-green-200">进样针数 Number of injections</th>
-                 </tr>
-               </thead>
-               <tbody>
-                 {[
-                   { id: '1', name: '空白溶液 Blank solution', val: '≥1（至无干扰 no interference）', isInput: false },
-                   { id: '2', name: '对照品溶液 1 Reference Standard Solution 1', field: 'std1Count', isInput: true },
-                   { id: '3', name: '对照品溶液 2 Reference Standard Solution 2', field: 'std2Count', isInput: true },
-                   { id: '4', name: '供试品溶液 1 Sample Solution 1', field: 'spl1Count', isInput: true },
-                   { id: '5', name: '供试品溶液 2 Sample Solution 2', field: 'spl2Count', isInput: true },
-                   { id: '6', name: '......', val: '......', isInput: false },
-                   { id: '7', name: '随行对照，不超过 12 针回进一次，并且序列结束回进一次\nAccompanying control, no more than 12 needles back once, and at the end of the sequence back once', field: 'controlCount', isInput: true }
-                 ].map((row, i) => (
-                   <tr key={i}>
-                     <td className="border border-gray-300 p-2 bg-green-100">{row.id}</td>
-                     <td className="border border-gray-300 p-2 bg-green-100 whitespace-pre-wrap">{row.name}</td>
-                     <td className={`border border-gray-300 p-0 relative ${row.isInput ? 'bg-orange-300' : 'bg-yellow-100'}`}>
-                        {row.isInput ? (
-                          <>
-                            <input 
-                              type="text" 
-                              value={seqState.sequenceState[row.field as keyof SequenceState]}
-                              onChange={(e) => seqState.setSequenceState({...seqState.sequenceState, [row.field as keyof SequenceState]: e.target.value})}
-                              className="w-full h-full text-center bg-transparent outline-none p-2"
-                            />
-                            {(!seqState.sequenceState[row.field as keyof SequenceState] || seqState.sequenceState[row.field as keyof SequenceState].trim() === "") && (
-                               <span className="absolute inset-0 flex items-center justify-center text-red-500 pointer-events-none">请输入</span>
-                            )}
-                          </>
-                        ) : (
-                          <div className="p-2">{row.val}</div>
-                        )}
-                     </td>
-                   </tr>
-                 ))}
-               </tbody>
-             </table>
-          </div>
-           <div>
-             <h4 className="font-bold mb-2 bg-green-200 inline-block px-1">4.5 系统适用性要求 System Suitability Requirements</h4>
-             {/* Use shared helper for content */}
-             {renderSysSuitRequirementsContent()}
-           </div>
-          <div>
-             <h4 className="font-bold mb-2 bg-green-200 inline-block px-1">4.6 积分方式 Integration Method</h4>
-             <div className="bg-green-50 p-2 border border-green-200">
-               <p>只积主峰。<br/>Only the main peaks are integrated</p>
-             </div>
-          </div>
-          <div>
-             <h4 className="font-bold mb-2 bg-green-200 inline-block px-1">4.7 计算 Calculation</h4>
-             <div className="bg-green-50 p-4 border border-green-200 space-y-6 text-sm">
-               <div>
-                 <p className="font-bold mb-2">（1）回收率计算 Percent Recovery Calculation</p>
-                 <div className="overflow-x-auto bg-white p-3 border border-gray-300 rounded mb-3">
-                   <div className="flex items-center justify-center font-mono whitespace-nowrap">
-                      <span className="mr-2">回收率 Percent Recovery (%) = </span>
-                      <div className="flex flex-col items-center">
-                        <div className="border-b border-black px-2 pb-1 mb-1">W<sub>STD1</sub> × A<sub>STD2</sub></div>
-                        <div className="px-2">W<sub>STD2</sub> × A<sub>STD1</sub></div>
-                      </div>
-                      <span className="ml-2">× 100%</span>
-                   </div>
-                 </div>
-                 <div className="space-y-1 text-gray-700">
-                   <p className="font-semibold">式中 In formula：</p>
-                   <ul className="list-none space-y-2 pl-2">
-                     <li><span className="font-bold">W<sub>STD1</sub>：</span>对照品溶液1中{displayId}对照品的称样量，mg；</li>
-                     <li><span className="font-bold">W<sub>STD2</sub>：</span>对照品溶液2中{displayId}对照品的称样量，mg；</li>
-                     <li><span className="font-bold">A<sub>STD1</sub>：</span>对照品溶液1中{displayId}连续进样5针的平均峰面积平均峰面积；</li>
-                     <li><span className="font-bold">A<sub>STD2</sub>：</span>对照品溶液2中{displayId}的峰面积。</li>
-                   </ul>
-                 </div>
-               </div>
-               <div>
-                  <p className="font-bold mb-2">（2）含量计算 Assay Calculation</p>
-                  {renderAssayCalculationContent()}
-               </div>
-             </div>
-          </div>
-          <div>
-             <div className="flex justify-between items-center mb-2">
-                <h4 className="font-bold bg-green-200 inline-block px-1">4.8 可接受标准 Acceptance criteria</h4>
-                <button 
-                  onClick={() => accCriteriaState.setAcceptanceCriteria([...accCriteriaState.acceptanceCriteria, { id: Date.now().toString(), name: "", criteria: "" }])}
-                  className="flex items-center gap-1 bg-green-600 text-white px-2 py-1 rounded text-xs hover:bg-green-700 transition-colors shadow-sm"
-                >
-                  <Plus size={14} /> 新增行 Add Row
-                </button>
-             </div>
-             <table className="w-full border-collapse border border-gray-300 text-sm">
-                <thead>
-                  <tr className="bg-gray-100 text-center">
-                    <th className="border border-gray-300 p-2 w-1/3">名称 Name</th>
-                    <th className="border border-gray-300 p-2">接受标准 Acceptance criteria</th>
-                    <th className="border border-gray-300 p-2 w-16">操作</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {accCriteriaState.acceptanceCriteria.map((row, index) => (
-                    <tr key={row.id}>
-                      <td className="border border-gray-300 p-1 bg-white align-top">
-                        <textarea
-                          value={row.name}
-                          onChange={(e) => {
-                            const newRows = [...accCriteriaState.acceptanceCriteria];
-                            newRows[index].name = e.target.value;
-                            accCriteriaState.setAcceptanceCriteria(newRows);
-                          }}
-                          className="w-full bg-yellow-300 border-b border-black outline-none p-1 min-h-[3rem] resize-y"
-                          placeholder="输入名称"
-                        />
-                      </td>
-                      <td className="border border-gray-300 p-1 bg-white align-top">
-                        <textarea
-                           value={row.criteria}
-                           onChange={(e) => {
-                             const newRows = [...accCriteriaState.acceptanceCriteria];
-                             newRows[index].criteria = e.target.value;
-                             accCriteriaState.setAcceptanceCriteria(newRows);
-                           }}
-                           className="w-full bg-yellow-300 border-b border-black outline-none p-1 min-h-[3rem] resize-y"
-                           placeholder="输入标准"
-                        />
-                      </td>
-                      <td className="border border-gray-300 p-2 text-center align-middle">
-                        <button 
-                          onClick={() => {
-                            const newRows = accCriteriaState.acceptanceCriteria.filter((_, i) => i !== index);
-                            accCriteriaState.setAcceptanceCriteria(newRows);
-                          }}
-                          className="text-red-400 hover:text-red-600"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-             </table>
-          </div>
-        </div>
+        <TestMethodSection
+          readOnly={false}
+          productId={productId}
+          protocolCode={protocolCode}
+          protocolVersion={protocolVersion}
+          projectNumber={projectNumber}
+          chemicalFormula={productDetails.chemicalFormula}
+          setChemicalFormula={productDetails.setChemicalFormula}
+          chemicalName={productDetails.chemicalName}
+          setChemicalName={productDetails.setChemicalName}
+          testingConditions={tcState.testingConditions}
+          setTestingConditions={tcState.setTestingConditions}
+          gradientData={gradientState.gradientData}
+          setGradientData={gradientState.setGradientData}
+          solutionPreps={spState.solutionPreps}
+          setSolutionPreps={spState.setSolutionPreps}
+          solDetail={sdState.solDetail}
+          setSolDetail={sdState.setSolDetail}
+          sequenceState={seqState.sequenceState}
+          setSequenceState={seqState.setSequenceState}
+          sysSuitability={sysSuitState.sysSuitability}
+          setSysSuitability={sysSuitState.setSysSuitability}
+          calculationState={calcState.calculationState}
+          setCalculationState={calcState.setCalculationState}
+          acceptanceCriteria={accCriteriaState.acceptanceCriteria}
+          setAcceptanceCriteria={accCriteriaState.setAcceptanceCriteria}
+        />
       )
     },
     {
@@ -2084,6 +1635,7 @@ export const getSections = (
         </div>
       )
     },
+    // ... [Prerequisite sections as in original]
     {
       id: 'val-pre-1',
       title: '先决条件 1：培训确认 Prerequisite 1: Training check',

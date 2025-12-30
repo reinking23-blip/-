@@ -1,6 +1,20 @@
 
 import React from 'react';
-import { Personnel, ValidationOptions } from '../types';
+import { 
+  Personnel, 
+  ValidationOptions,
+  TestingCondition,
+  GradientRow,
+  SolutionPrepsState,
+  SolutionDetailState,
+  SequenceState,
+  SystemSuitabilityState,
+  CalculationState,
+  AcceptanceCriterion,
+  EquipmentConfirmationRow,
+  PrerequisiteState
+} from '../types';
+import { TestMethodSection } from './TestMethodSection';
 
 interface ReportDocumentProps {
   productId: string;
@@ -14,6 +28,43 @@ interface ReportDocumentProps {
   approver: Personnel;
   setApprover: (a: Personnel) => void;
   validationOptions: ValidationOptions;
+
+  // Training Date State
+  trainingDate: string;
+  setTrainingDate: (date: string) => void;
+
+  // Equipment Confirmation State
+  reportEquipment: EquipmentConfirmationRow[];
+  setReportEquipment: React.Dispatch<React.SetStateAction<EquipmentConfirmationRow[]>>;
+
+  // Column Serial Numbers
+  reportColumnSerials: Record<string, string>;
+  setReportColumnSerials: React.Dispatch<React.SetStateAction<Record<string, string>>>;
+
+  // Prerequisites for referencing columns
+  prerequisiteState: PrerequisiteState;
+
+  // New props for Method Description
+  chemicalFormula: string;
+  setChemicalFormula: (val: string) => void;
+  chemicalName: string;
+  setChemicalName: (val: string) => void;
+  testingConditions: TestingCondition[];
+  setTestingConditions: React.Dispatch<React.SetStateAction<TestingCondition[]>>;
+  gradientData: GradientRow[];
+  setGradientData: React.Dispatch<React.SetStateAction<GradientRow[]>>;
+  solutionPreps: SolutionPrepsState;
+  setSolutionPreps: React.Dispatch<React.SetStateAction<SolutionPrepsState>>;
+  solDetail: SolutionDetailState;
+  setSolDetail: React.Dispatch<React.SetStateAction<SolutionDetailState>>;
+  sequenceState: SequenceState;
+  setSequenceState: React.Dispatch<React.SetStateAction<SequenceState>>;
+  sysSuitability: SystemSuitabilityState;
+  setSysSuitability: React.Dispatch<React.SetStateAction<SystemSuitabilityState>>;
+  calculationState: CalculationState;
+  setCalculationState: React.Dispatch<React.SetStateAction<CalculationState>>;
+  acceptanceCriteria: AcceptanceCriterion[];
+  setAcceptanceCriteria: React.Dispatch<React.SetStateAction<AcceptanceCriterion[]>>;
 }
 
 export const ReportDocument: React.FC<ReportDocumentProps> = ({
@@ -27,20 +78,50 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
   setReviewers,
   approver,
   setApprover,
-  validationOptions
+  validationOptions,
+  
+  trainingDate,
+  setTrainingDate,
+
+  reportEquipment,
+  setReportEquipment,
+
+  reportColumnSerials,
+  setReportColumnSerials,
+  prerequisiteState,
+
+  chemicalFormula,
+  setChemicalFormula,
+  chemicalName,
+  setChemicalName,
+  testingConditions,
+  setTestingConditions,
+  gradientData,
+  setGradientData,
+  solutionPreps,
+  setSolutionPreps,
+  solDetail,
+  setSolDetail,
+  sequenceState,
+  setSequenceState,
+  sysSuitability,
+  setSysSuitability,
+  calculationState,
+  setCalculationState,
+  acceptanceCriteria,
+  setAcceptanceCriteria
 }) => {
   const displayId = productId || "N/A";
 
   const renderEditableCell = (value: string, onChange: (val: string) => void) => {
     return (
-      <td className="border border-gray-400 p-0 relative group align-top bg-transparent">
+      <td className="border border-gray-400 p-2 align-middle">
         <textarea
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="w-full h-full bg-transparent outline-none text-center resize-none min-h-[3rem] font-medium p-2 block"
+          className="w-full bg-white border border-gray-300 rounded text-center outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none font-medium p-1 text-sm"
           rows={value.split('\n').length > 1 ? value.split('\n').length : 2}
         />
-        <div className="absolute top-0 right-0 p-0.5 text-[8px] text-gray-400 opacity-0 group-hover:opacity-100 pointer-events-none">✎</div>
       </td>
     );
   };
@@ -89,18 +170,57 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
 
   // Helper for Status Select in Report
   const StatusSelect = () => (
-    <div className="h-full flex items-center justify-center">
-      <select className="bg-transparent font-bold cursor-pointer outline-none text-center w-full text-black h-full appearance-none">
-        <option value="Pass">Pass</option>
-        <option value="Fail">Fail</option>
-      </select>
+    <div className="w-full h-full flex items-center justify-center p-2">
+      <div className="relative w-full">
+        <select className="block w-full appearance-none bg-white border border-gray-300 hover:border-gray-400 px-3 py-1.5 pr-8 rounded leading-tight focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 font-bold text-center text-sm cursor-pointer shadow-sm transition-colors text-gray-800">
+          <option value="Pass">Pass</option>
+          <option value="Fail">Fail</option>
+        </select>
+        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+          <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
+        </div>
+      </div>
     </div>
   );
 
-  // Helper for Editable Input Inline (Clean Style)
-  const InlineInput = ({ value, width="w-full", className="" }: { value: string, width?: string, className?: string }) => (
-    <input type="text" defaultValue={value} className={`bg-transparent border-none outline-none text-center font-medium ${width} ${className}`} />
+  // Helper for Editable Input Inline (Clean Style) for Results tables
+  const InlineInput = ({ value, onChange, width="w-full", className="" }: { value: string, onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void, width?: string, className?: string }) => (
+    <input 
+      type="text" 
+      value={value} 
+      onChange={onChange}
+      readOnly={!onChange}
+      className={`bg-transparent border-none outline-none text-center font-medium ${width} ${className}`} 
+    />
   );
+
+  // Helper for Bordered Input (Form Style) for Confirmation sections
+  const BorderedInput = ({ 
+    value, 
+    onChange, 
+    type="text" 
+  }: { 
+    value: string, 
+    onChange: (e: React.ChangeEvent<HTMLInputElement>) => void, 
+    type?: string 
+  }) => (
+    <input 
+      type={type}
+      value={value} 
+      onChange={onChange}
+      className="w-full p-1 border border-gray-300 rounded text-center outline-none focus:border-blue-500 bg-white"
+    />
+  );
+
+  const handleUpdateReportEquipment = (index: number, field: keyof EquipmentConfirmationRow, value: string) => {
+    const newData = [...reportEquipment];
+    newData[index] = { ...newData[index], [field]: value };
+    setReportEquipment(newData);
+  };
+
+  const handleUpdateColumnSerial = (id: string, value: string) => {
+    setReportColumnSerials(prev => ({ ...prev, [id]: value }));
+  };
 
   return (
     <div className="p-8 bg-gray-50 min-h-full">
@@ -190,11 +310,12 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
         <div className="mb-8">
            <h3 className="font-bold text-xl mb-4 text-gray-800 border-b pb-2">3. 验证结果综述 Results For Validation</h3>
            <table className="w-full border-collapse border border-gray-400 text-sm table-fixed">
+            {/* ... (Table content unchanged) */}
             <thead>
               <tr className="bg-gray-100">
                 <th className="border border-gray-400 p-2 text-center w-[15%]">验证项目 Item</th>
-                <th className="border border-gray-400 p-2 text-center w-[40%]">可接受标准 Acceptance criteria</th>
-                <th className="border border-gray-400 p-2 text-center w-[35%]">验证结果 Results</th>
+                <th className="border border-gray-400 p-2 text-center w-[25%]">可接受标准 Acceptance criteria</th>
+                <th className="border border-gray-400 p-2 text-center w-[50%]">验证结果 Results</th>
                 <th className="border border-gray-400 p-2 text-center w-[10%]">Pass/Fail</th>
               </tr>
             </thead>
@@ -378,11 +499,11 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
                   </div>
                 </td>
                 <td className="border border-gray-400 p-0 align-middle">
-                  <table className="w-full border-collapse h-full">
+                  <table className="w-full h-full border-collapse">
                     <tbody>
                       <tr>
-                        <td className="p-2 w-1/2 border-r border-gray-400 text-center font-bold align-middle">RSD</td>
-                        <td className="p-2 w-1/2 text-center align-middle"><InlineInput value="0.84%" /></td>
+                         <td className="p-2 w-1/2 border-r border-gray-400 text-center font-bold align-middle">RSD</td>
+                         <td className="p-2 w-1/2 text-center align-middle"><InlineInput value="0.84%" /></td>
                       </tr>
                     </tbody>
                   </table>
@@ -400,7 +521,7 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
                   If specificity, linearity and precision were satisfied, the recovery of principal components should be in the range of 98.0%-102.0%, RSD≤2.0%.
                 </td>
                 <td className="border border-gray-400 p-0 align-middle">
-                  <table className="w-full border-collapse h-full">
+                  <table className="w-full h-full border-collapse">
                     <tbody>
                       <tr className="border-b border-gray-400">
                         <td className="p-2 w-1/2 border-r border-gray-400 text-center font-bold align-middle">回收率<br/>Recovery rate</td>
@@ -427,21 +548,21 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
                 </td>
                 <td className="border border-gray-400 p-0 align-middle">
                   <div className="w-full text-center p-2 font-bold border-b border-gray-400">供试品溶液 Sample solution</div>
-                  <table className="w-full border-collapse border-b border-gray-400">
+                  <table className="w-full border-collapse border-b border-gray-400 text-xs">
                     <thead>
                       <tr className="border-b border-gray-400">
-                        <th className="p-1 border-r border-gray-400 w-1/3">时间<br/>Time(h)</th>
-                        <th className="p-1 border-r border-gray-400 w-1/3 text-center">0</th>
-                        <th className="p-1 border-r border-gray-400 w-1/3 text-center">6</th>
-                        <th className="p-1 w-1/3 text-center">12</th>
+                        <th className="p-1 border-r border-gray-400 w-[25%]">时间<br/>Time(h)</th>
+                        <th className="p-1 border-r border-gray-400 w-[25%] text-center">0</th>
+                        <th className="p-1 border-r border-gray-400 w-[25%] text-center">6</th>
+                        <th className="p-1 w-[25%] text-center">12</th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr>
-                        <td className="p-1 border-r border-gray-400 w-1/3 text-center">回收率 (%)<br/>recovery (%)</td>
-                        <td className="p-1 border-r border-gray-400 w-1/3 text-center">-</td>
-                        <td className="p-1 border-r border-gray-400 w-1/3 text-center"><InlineInput value="99.5" /></td>
-                        <td className="p-1 w-1/3 text-center"><InlineInput value="99.5" /></td>
+                        <td className="p-1 border-r border-gray-400 w-[25%] text-center">回收率 (%)<br/>recovery (%)</td>
+                        <td className="p-1 border-r border-gray-400 w-[25%] text-center">-</td>
+                        <td className="p-1 border-r border-gray-400 w-[25%] text-center"><InlineInput value="99.5" className="text-center w-full text-xs" /></td>
+                        <td className="p-1 w-[25%] text-center"><InlineInput value="99.5" className="text-center w-full text-xs" /></td>
                       </tr>
                     </tbody>
                   </table>
@@ -459,23 +580,23 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
                 </td>
                 <td className="border border-gray-400 p-0 align-middle">
                   <div className="w-full text-center p-2 font-bold border-b border-gray-400">对照品溶液 Standard solution</div>
-                  <table className="w-full border-collapse border-b border-gray-400">
+                  <table className="w-full border-collapse border-b border-gray-400 text-xs">
                     <thead>
                       <tr className="border-b border-gray-400">
-                        <th className="p-1 border-r border-gray-400 w-1/4">时间<br/>Time(h)</th>
-                        <th className="p-1 border-r border-gray-400 w-1/4 text-center">0</th>
-                        <th className="p-1 border-r border-gray-400 w-1/4 text-center">4</th>
-                        <th className="p-1 border-r border-gray-400 w-1/4 text-center">10</th>
-                        <th className="p-1 w-1/4 text-center">16</th>
+                        <th className="p-1 border-r border-gray-400 w-[20%]">时间<br/>Time(h)</th>
+                        <th className="p-1 border-r border-gray-400 w-[20%] text-center">0</th>
+                        <th className="p-1 border-r border-gray-400 w-[20%] text-center">4</th>
+                        <th className="p-1 border-r border-gray-400 w-[20%] text-center">10</th>
+                        <th className="p-1 w-[20%] text-center">16</th>
                       </tr>
                     </thead>
                     <tbody>
                       <tr>
-                        <td className="p-1 border-r border-gray-400 w-1/4 text-center">回收率 (%)<br/>recovery (%)</td>
-                        <td className="p-1 border-r border-gray-400 w-1/4 text-center">-</td>
-                        <td className="p-1 border-r border-gray-400 w-1/4 text-center"><InlineInput value="100.2" /></td>
-                        <td className="p-1 border-r border-gray-400 w-1/4 text-center"><InlineInput value="99.8" /></td>
-                        <td className="p-1 w-1/4 text-center"><InlineInput value="100.1" /></td>
+                        <td className="p-1 border-r border-gray-400 w-[20%] text-center">回收率 (%)<br/>recovery (%)</td>
+                        <td className="p-1 border-r border-gray-400 w-[20%] text-center">-</td>
+                        <td className="p-1 border-r border-gray-400 w-[20%] text-center"><InlineInput value="100.2" className="text-center w-full text-xs" /></td>
+                        <td className="p-1 border-r border-gray-400 w-[20%] text-center"><InlineInput value="99.8" className="text-center w-full text-xs" /></td>
+                        <td className="p-1 w-[20%] text-center"><InlineInput value="100.1" className="text-center w-full text-xs" /></td>
                       </tr>
                     </tbody>
                   </table>
@@ -488,6 +609,155 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
               </tr>
             </tbody>
           </table>
+        </div>
+
+        {/* 4. Test Method Description (Dynamic Read-Only Section) */}
+        <div className="mb-8 pt-8 border-t-2 border-dashed border-gray-200">
+          <h3 className="font-bold text-xl mb-6 text-gray-800 border-b pb-2">4. 检验方法描述 Test Method Description</h3>
+          <TestMethodSection
+            readOnly={true}
+            productId={productId}
+            protocolCode={protocolCode}
+            protocolVersion={protocolVersion}
+            projectNumber={projectNumber}
+            chemicalFormula={chemicalFormula}
+            setChemicalFormula={setChemicalFormula}
+            chemicalName={chemicalName}
+            setChemicalName={setChemicalName}
+            testingConditions={testingConditions}
+            setTestingConditions={setTestingConditions}
+            gradientData={gradientData}
+            setGradientData={setGradientData}
+            solutionPreps={solutionPreps}
+            setSolutionPreps={setSolutionPreps}
+            solDetail={solDetail}
+            setSolDetail={setSolDetail}
+            sequenceState={sequenceState}
+            setSequenceState={setSequenceState}
+            sysSuitability={sysSuitability}
+            setSysSuitability={setSysSuitability}
+            calculationState={calculationState}
+            setCalculationState={setCalculationState}
+            acceptanceCriteria={acceptanceCriteria}
+            setAcceptanceCriteria={setAcceptanceCriteria}
+          />
+        </div>
+
+        {/* 5. Validation Content (New Section) */}
+        <div className="mb-8 pt-8 border-t-2 border-dashed border-gray-200">
+          <h3 className="font-bold text-xl mb-4 text-gray-800 border-b pb-2">5. 验证内容 Validation content</h3>
+          
+          {/* 5.1 Training Confirmation */}
+          <div className="mb-6">
+            <h4 className="font-bold text-lg text-gray-800 mb-2">5.1 培训确认 Training Confirmation</h4>
+            <div className="text-sm text-gray-700 mb-4 space-y-1">
+              <p>所有相关人员均已接受培训，培训记录完整。</p>
+              <p>All persons have been trained, and the record is complete.</p>
+            </div>
+
+            <table className="w-full border-collapse border border-gray-400 text-sm text-center">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border border-gray-400 p-2 w-[40%]">培训内容<br/><span className="text-xs font-normal">Training content</span></th>
+                  <th className="border border-gray-400 p-2 w-[20%]">培训日期<br/><span className="text-xs font-normal">Date</span></th>
+                  <th className="border border-gray-400 p-2 w-[20%]">原件存放位置<br/><span className="text-xs font-normal">File storage location</span></th>
+                  <th className="border border-gray-400 p-2 w-[20%]">备注<br/><span className="text-xs font-normal">Note</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td className="border border-gray-400 p-2 text-left align-middle">
+                    <div className="space-y-1">
+                      <div>{displayId}含量和鉴别检验方法验证方案</div>
+                      <div className="text-xs text-gray-500">Protocol for Validation of {displayId} Assay and Identification Determination</div>
+                      <div className="font-mono text-xs mt-1">AVP-{protocolCode}-{protocolVersion}.{projectNumber}</div>
+                    </div>
+                  </td>
+                  <td className="border border-gray-400 p-2 align-middle">
+                     <BorderedInput 
+                       type="date" 
+                       value={trainingDate}
+                       onChange={(e) => setTrainingDate(e.target.value)}
+                     />
+                  </td>
+                  <td className="border border-gray-400 p-2 align-middle">QA</td>
+                  <td className="border border-gray-400 p-2 align-middle">N/A</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          {/* 5.2 Equipment and Reagent Confirmation */}
+          <div className="mb-6">
+            <h4 className="font-bold text-lg text-gray-800 mb-2">5.2 仪器和试剂确认 Equipment and Reagent confirmation</h4>
+            
+            <div className="mb-4">
+              <h5 className="font-bold text-md text-gray-800 mb-2 ml-2">5.2.1 仪器确认 Equipment confirmation</h5>
+              <table className="w-full border-collapse border border-gray-400 text-sm text-center">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="border border-gray-400 p-2">仪器名称<br/><span className="text-xs font-normal">Equipment name</span></th>
+                    <th className="border border-gray-400 p-2">厂家<br/><span className="text-xs font-normal">Supplier</span></th>
+                    <th className="border border-gray-400 p-2">设备位号<br/><span className="text-xs font-normal">Equipment number</span></th>
+                    <th className="border border-gray-400 p-2">型号<br/><span className="text-xs font-normal">Model</span></th>
+                    <th className="border border-gray-400 p-2">有效期<br/><span className="text-xs font-normal">Retest Date</span></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {reportEquipment.map((row, index) => (
+                    <tr key={row.id}>
+                      <td className="border border-gray-400 p-2 whitespace-pre-wrap">{row.name}</td>
+                      <td className="border border-gray-400 p-2">
+                        <BorderedInput value={row.supplier} onChange={(e) => handleUpdateReportEquipment(index, 'supplier', e.target.value)} />
+                      </td>
+                      <td className="border border-gray-400 p-2">
+                        <BorderedInput value={row.equipmentNumber} onChange={(e) => handleUpdateReportEquipment(index, 'equipmentNumber', e.target.value)} />
+                      </td>
+                      <td className="border border-gray-400 p-2">
+                        <BorderedInput value={row.model} onChange={(e) => handleUpdateReportEquipment(index, 'model', e.target.value)} />
+                      </td>
+                      <td className="border border-gray-400 p-2">
+                        <BorderedInput 
+                          type="date" 
+                          value={row.retestDate}
+                          onChange={(e) => handleUpdateReportEquipment(index, 'retestDate', e.target.value)}
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="mb-4">
+              <h5 className="font-bold text-md text-gray-800 mb-2 ml-2">5.2.2 色谱柱确认 Column confirmation</h5>
+              <table className="w-full border-collapse border border-gray-400 text-sm text-center">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="border border-gray-400 p-2 w-5/12">型号<br/><span className="text-xs font-normal">Model</span></th>
+                    <th className="border border-gray-400 p-2 w-3/12">厂家<br/><span className="text-xs font-normal">Supplier</span></th>
+                    <th className="border border-gray-400 p-2 w-4/12">编号<br/><span className="text-xs font-normal">Serial number</span></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {testingConditions
+                    .filter(tc => tc.id === 'column' || tc.id === 'ghostBuster' || tc.id.startsWith('column_'))
+                    .map(col => (
+                      <tr key={col.id}>
+                        <td className="border border-gray-400 p-2 text-left">{col.value}</td>
+                        <td className="border border-gray-400 p-2 text-center">{prerequisiteState.columnSuppliers[col.id] || ''}</td>
+                        <td className="border border-gray-400 p-2">
+                          <BorderedInput 
+                            value={reportColumnSerials[col.id] || ''} 
+                            onChange={(e) => handleUpdateColumnSerial(col.id, e.target.value)} 
+                          />
+                        </td>
+                      </tr>
+                    ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
 
         <div className="text-center text-xs text-gray-400 mt-12 border-t pt-4">

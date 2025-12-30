@@ -7,134 +7,28 @@ import { DataMappingDictionary } from './components/DataMappingDictionary';
 import { ReportDocument } from './components/ReportDocument';
 import { DocumentPage } from './components/DocumentPage';
 import { Menu } from 'lucide-react';
-import { NavItem, Personnel, ValidationOptions } from './types';
-
-export interface GradientRow {
-  time: string;
-  phaseA: string;
-}
-
-export interface TestingCondition {
-  id: string;
-  labelZh: string;
-  labelEn: string;
-  value: string;
-  isOptional?: boolean;
-  isCustom?: boolean;
-}
-
-export interface SolutionPrep {
-  descZh: string;
-  descEn: string;
-  detail: string;
-}
-
-export interface SolutionPrepsState {
-  phaseA: SolutionPrep;
-  phaseB: SolutionPrep;
-  needleWash: SolutionPrep;
-  diluent: SolutionPrep;
-  standard: SolutionPrep;
-  sample: SolutionPrep;
-}
-
-export interface SolutionDetailState {
-  stdWeight: string;
-  stdVolume: string;
-  stdMethodZh: string;
-  stdMethodEn: string;
-  stdCount: string;
-  splWeight: string;
-  splVolume: string;
-  splMethodZh: string;
-  splMethodEn: string;
-  splCount: string;
-}
-
-export interface SequenceState {
-  std1Count: string;
-  std2Count: string;
-  spl1Count: string;
-  spl2Count: string;
-  controlCount: string;
-}
-
-export interface ValProcSysSuitState {
-  std1Count: string;
-  std2Count: string;
-  controlCount: string;
-}
-
-export interface ValProcPrecisionState {
-  precisionStd1Count: string;
-  precisionStd2Count: string;
-}
-
-export interface SystemSuitabilityState {
-  plateNumber: string;
-  tailingFactor: string;
-  injectionCount: string;
-  areaRSD: string;
-  retentionRSD: string;
-  recoveryRange: string;
-  controlInjectionCount: string;
-  controlAreaRSD: string;
-}
-
-export interface CalculationState {
-  kf: boolean;
-  lod: boolean;
-  sr: boolean;
-  tga: boolean;
-}
-
-export interface AcceptanceCriterion {
-  id: string;
-  name: string;
-  criteria: string;
-}
-
-export interface SpecificityState {
-  retentionDevLimit: string;
-}
-
-export interface LinearitySolution {
-  id: string;
-  conc: string;
-  weight: string;
-  volume: string;
-}
-
-export interface LinearityState {
-  solutions: LinearitySolution[];
-}
-
-export interface PrecisionState {
-  precisionLimit: string;
-}
-
-export interface AccuracyState {
-  recoveryRange: string;
-  rsdLimit: string;
-}
-
-export interface StabilityState {
-  sampleTemp: string;
-  sampleRecovery: string;
-  standardTemp: string;
-  standardRecovery: string;
-}
-
-export interface ReagentConfirmationRow {
-  id: string;
-  name: string;
-  grade: string;
-}
-
-export interface PrerequisiteState {
-  columnSuppliers: Record<string, string>;
-  reagentRows: ReagentConfirmationRow[];
-}
+import { 
+  NavItem, 
+  Personnel, 
+  ValidationOptions,
+  GradientRow,
+  TestingCondition,
+  SolutionPrepsState,
+  SolutionDetailState,
+  SequenceState,
+  ValProcSysSuitState,
+  ValProcPrecisionState,
+  SystemSuitabilityState,
+  CalculationState,
+  AcceptanceCriterion,
+  SpecificityState,
+  LinearityState,
+  PrecisionState,
+  AccuracyState,
+  StabilityState,
+  PrerequisiteState,
+  EquipmentConfirmationRow
+} from './types';
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<'protocol' | 'dictionary' | 'report' | 'document'>('protocol');
@@ -145,6 +39,18 @@ const App: React.FC = () => {
   const [protocolVersion, setProtocolVersion] = useState<string>("02");
   const [projectNumber, setProjectNumber] = useState<string>("00");
   
+  // Training Date State for Report
+  const [trainingDate, setTrainingDate] = useState<string>("");
+
+  // Report Equipment Confirmation State
+  const [reportEquipment, setReportEquipment] = useState<EquipmentConfirmationRow[]>([
+    { id: 'balance', name: '电子天平\nElectronic Balance', supplier: 'Mettler', equipmentNumber: 'EB301', model: 'XS105DU', retestDate: '2025-02-14' },
+    { id: 'hplc', name: '液相色谱仪\nHigh Performance Liquid Chromatography', supplier: 'Thermo', equipmentNumber: 'LC312', model: 'Ultimate 3000', retestDate: '2025-05-24' }
+  ]);
+
+  // Report Column Confirmation Serial Numbers State
+  const [reportColumnSerials, setReportColumnSerials] = useState<Record<string, string>>({});
+
   // Product Details State
   const [chemicalFormula, setChemicalFormula] = useState<string>("");
   const [chemicalName, setChemicalName] = useState<string>("");
@@ -634,6 +540,38 @@ const App: React.FC = () => {
               approver={reportApprover}
               setApprover={setReportApprover}
               validationOptions={validationOptions}
+              // Pass training date state
+              trainingDate={trainingDate}
+              setTrainingDate={setTrainingDate}
+              // Pass report equipment state
+              reportEquipment={reportEquipment}
+              setReportEquipment={setReportEquipment}
+              // Pass column serials
+              reportColumnSerials={reportColumnSerials}
+              setReportColumnSerials={setReportColumnSerials}
+              // Pass prerequisites for columns
+              prerequisiteState={prerequisiteState}
+              // Pass state required for Method Description in Report
+              chemicalFormula={chemicalFormula}
+              setChemicalFormula={setChemicalFormula}
+              chemicalName={chemicalName}
+              setChemicalName={setChemicalName}
+              testingConditions={testingConditions}
+              setTestingConditions={setTestingConditions}
+              gradientData={gradientData}
+              setGradientData={setGradientData}
+              solutionPreps={solutionPreps}
+              setSolutionPreps={setSolutionPreps}
+              solDetail={solDetail}
+              setSolDetail={setSolDetail}
+              sequenceState={sequenceState}
+              setSequenceState={setSequenceState}
+              sysSuitability={sysSuitability}
+              setSysSuitability={setSysSuitability}
+              calculationState={calculationState}
+              setCalculationState={setCalculationState}
+              acceptanceCriteria={acceptanceCriteria}
+              setAcceptanceCriteria={setAcceptanceCriteria}
             />
           ) : currentView === 'dictionary' ? (
             <DataMappingDictionary />
