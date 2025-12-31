@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { 
   Personnel, 
   ValidationOptions,
@@ -12,9 +12,17 @@ import {
   CalculationState,
   AcceptanceCriterion,
   EquipmentConfirmationRow,
-  PrerequisiteState
+  PrerequisiteState,
+  ReportReagentValues,
+  ReportSampleRSState,
+  ExperimentalDataState,
+  SpecificityState,
+  PrecisionState,
+  AccuracyState,
+  StabilityState
 } from '../types';
 import { TestMethodSection } from './TestMethodSection';
+import { LinearityChart } from './DocumentPage';
 
 interface ReportDocumentProps {
   productId: string;
@@ -41,6 +49,14 @@ interface ReportDocumentProps {
   reportColumnSerials: Record<string, string>;
   setReportColumnSerials: React.Dispatch<React.SetStateAction<Record<string, string>>>;
 
+  // Reagent Confirmation Values
+  reportReagentValues: Record<string, ReportReagentValues>;
+  setReportReagentValues: React.Dispatch<React.SetStateAction<Record<string, ReportReagentValues>>>;
+
+  // Sample & RS Confirmation Values
+  reportSampleRS: ReportSampleRSState;
+  setReportSampleRS: React.Dispatch<React.SetStateAction<ReportSampleRSState>>;
+
   // Prerequisites for referencing columns
   prerequisiteState: PrerequisiteState;
 
@@ -65,6 +81,25 @@ interface ReportDocumentProps {
   setCalculationState: React.Dispatch<React.SetStateAction<CalculationState>>;
   acceptanceCriteria: AcceptanceCriterion[];
   setAcceptanceCriteria: React.Dispatch<React.SetStateAction<AcceptanceCriterion[]>>;
+
+  // Data from Experimental Data Document
+  experimentalData: ExperimentalDataState;
+  
+  // Specificity State for Acceptance Criteria
+  specificityState: SpecificityState;
+  
+  // Precision State
+  precisionState: PrecisionState;
+
+  // Accuracy State
+  accuracyState: AccuracyState;
+
+  // Stability State
+  stabilityState: StabilityState;
+
+  // Report History State
+  reportHistoryDate: string;
+  setReportHistoryDate: (date: string) => void;
 }
 
 export const ReportDocument: React.FC<ReportDocumentProps> = ({
@@ -88,6 +123,10 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
 
   reportColumnSerials,
   setReportColumnSerials,
+  reportReagentValues,
+  setReportReagentValues,
+  reportSampleRS,
+  setReportSampleRS,
   prerequisiteState,
 
   chemicalFormula,
@@ -109,9 +148,39 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
   calculationState,
   setCalculationState,
   acceptanceCriteria,
-  setAcceptanceCriteria
+  setAcceptanceCriteria,
+
+  experimentalData,
+  specificityState,
+  precisionState,
+  accuracyState,
+  stabilityState,
+
+  reportHistoryDate,
+  setReportHistoryDate
 }) => {
   const displayId = productId || "N/A";
+  const [attachmentRef, setAttachmentRef] = useState("1-2");
+  const [specificityAttachmentRef, setSpecificityAttachmentRef] = useState("2-4");
+  const [linearityAttachmentRef, setLinearityAttachmentRef] = useState("5.5.1");
+  const [precisionAttachmentRef, setPrecisionAttachmentRef] = useState("5.6.1");
+  const [accuracyAttachmentRef, setAccuracyAttachmentRef] = useState("5.7.1");
+  const [stabilityAttachmentRef, setStabilityAttachmentRef] = useState("5.8.1");
+  const [deviationSummary, setDeviationSummary] = useState("在验证过程中未发生偏差。\nNo deviation occurred during the validation.");
+  
+  // State for Pass/Fail statuses in Section 3 and referenced in Conclusion
+  const [valStatus, setValStatus] = useState({
+    systemSuitability: 'Pass',
+    specificity: 'Pass',
+    linearity: 'Pass',
+    repeatability: 'Pass',
+    accuracy: 'Pass',
+    stability: 'Pass'
+  });
+
+  const handleStatusChange = (key: keyof typeof valStatus, value: string) => {
+    setValStatus(prev => ({ ...prev, [key]: value }));
+  };
 
   const renderEditableCell = (value: string, onChange: (val: string) => void) => {
     return (
@@ -169,10 +238,14 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
   const fullProtocolNumber = `AVP-${protocolCode}-${protocolVersion}.${projectNumber}`;
 
   // Helper for Status Select in Report
-  const StatusSelect = () => (
+  const StatusSelect = ({ itemKey }: { itemKey: keyof typeof valStatus }) => (
     <div className="w-full h-full flex items-center justify-center p-2">
       <div className="relative w-full">
-        <select className="block w-full appearance-none bg-white border border-gray-300 hover:border-gray-400 px-3 py-1.5 pr-8 rounded leading-tight focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 font-bold text-center text-sm cursor-pointer shadow-sm transition-colors text-gray-800">
+        <select 
+          value={valStatus[itemKey]}
+          onChange={(e) => handleStatusChange(itemKey, e.target.value)}
+          className="block w-full appearance-none bg-white border border-gray-300 hover:border-gray-400 px-3 py-1.5 pr-8 rounded leading-tight focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500 font-bold text-center text-sm cursor-pointer shadow-sm transition-colors text-gray-800"
+        >
           <option value="Pass">Pass</option>
           <option value="Fail">Fail</option>
         </select>
@@ -220,6 +293,16 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
 
   const handleUpdateColumnSerial = (id: string, value: string) => {
     setReportColumnSerials(prev => ({ ...prev, [id]: value }));
+  };
+
+  const handleUpdateReagentValue = (id: string, field: keyof ReportReagentValues, value: string) => {
+    setReportReagentValues(prev => ({
+      ...prev,
+      [id]: {
+        ...prev[id] || { batch: '', supplier: '', expiryDate: '' },
+        [field]: value
+      }
+    }));
   };
 
   return (
@@ -310,7 +393,6 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
         <div className="mb-8">
            <h3 className="font-bold text-xl mb-4 text-gray-800 border-b pb-2">3. 验证结果综述 Results For Validation</h3>
            <table className="w-full border-collapse border border-gray-400 text-sm table-fixed">
-            {/* ... (Table content unchanged) */}
             <thead>
               <tr className="bg-gray-100">
                 <th className="border border-gray-400 p-2 text-center w-[15%]">验证项目 Item</th>
@@ -335,7 +417,7 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
                     <div className="text-left w-full"><InlineInput value="There was no interference in blank solution;" className="text-left w-full" /></div>
                   </div>
                 </td>
-                <td className="border border-gray-400 p-0 text-center align-middle"><StatusSelect /></td>
+                <td className="border border-gray-400 p-0 text-center align-middle" rowSpan={4}><StatusSelect itemKey="systemSuitability" /></td>
               </tr>
               <tr>
                 <td className="border border-gray-400 p-2 text-left align-middle whitespace-pre-wrap">
@@ -356,7 +438,6 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
                     </tbody>
                   </table>
                 </td>
-                <td className="border border-gray-400 p-0 text-center align-middle"><StatusSelect /></td>
               </tr>
               <tr>
                 <td className="border border-gray-400 p-2 text-left align-middle whitespace-pre-wrap">
@@ -382,7 +463,6 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
                     </tbody>
                   </table>
                 </td>
-                <td className="border border-gray-400 p-0 text-center align-middle"><StatusSelect /></td>
               </tr>
               <tr>
                 <td className="border border-gray-400 p-2 text-left align-middle whitespace-pre-wrap">
@@ -399,7 +479,6 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
                     </tbody>
                   </table>
                 </td>
-                <td className="border border-gray-400 p-0 text-center align-middle"><StatusSelect /></td>
               </tr>
 
               {/* Specificity */}
@@ -421,7 +500,7 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
                     </tbody>
                   </table>
                 </td>
-                <td className="border border-gray-400 p-0 text-center align-middle"><StatusSelect /></td>
+                <td className="border border-gray-400 p-0 text-center align-middle" rowSpan={2}><StatusSelect itemKey="specificity" /></td>
               </tr>
               <tr>
                 <td className="border border-gray-400 p-2 text-left align-middle whitespace-pre-wrap">
@@ -438,7 +517,6 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
                     </tbody>
                   </table>
                 </td>
-                <td className="border border-gray-400 p-0 text-center align-middle"><StatusSelect /></td>
               </tr>
 
               {/* Linearity */}
@@ -482,13 +560,13 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
                     </tbody>
                   </table>
                 </td>
-                <td className="border border-gray-400 p-0 text-center align-middle"><StatusSelect /></td>
+                <td className="border border-gray-400 p-0 text-center align-middle"><StatusSelect itemKey="linearity" /></td>
               </tr>
 
               {/* Repeatability */}
               <tr>
                 <td className="border border-gray-400 p-2 text-center align-middle font-bold">
-                  重复性<br/>Repeatability
+                  精密度（重复性）<br/>Precision（repeatability）
                 </td>
                 <td className="border border-gray-400 p-2 text-left align-middle whitespace-pre-wrap">
                   平行配制 6 份精密度溶液，规定条件进行测定，6 份精密度溶液检测结果应符合以下要求。<br/>
@@ -508,7 +586,7 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
                     </tbody>
                   </table>
                 </td>
-                <td className="border border-gray-400 p-0 text-center align-middle"><StatusSelect /></td>
+                <td className="border border-gray-400 p-0 text-center align-middle"><StatusSelect itemKey="repeatability" /></td>
               </tr>
 
               {/* Accuracy */}
@@ -534,7 +612,7 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
                     </tbody>
                   </table>
                 </td>
-                <td className="border border-gray-400 p-0 text-center align-middle"><StatusSelect /></td>
+                <td className="border border-gray-400 p-0 text-center align-middle"><StatusSelect itemKey="accuracy" /></td>
               </tr>
 
               {/* Stability */}
@@ -571,7 +649,7 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
                     The sample solution was stable when sealed and stored under the 5±3℃ condition for 12h.
                   </div>
                 </td>
-                <td className="border border-gray-400 p-0 text-center align-middle"><StatusSelect /></td>
+                <td className="border border-gray-400 p-0 text-center align-middle" rowSpan={2}><StatusSelect itemKey="stability" /></td>
               </tr>
               <tr>
                 <td className="border border-gray-400 p-2 text-left align-middle whitespace-pre-wrap">
@@ -605,7 +683,6 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
                     The standard solution was stable when sealed and stored under the 5±3℃ condition for 16h.
                   </div>
                 </td>
-                <td className="border border-gray-400 p-0 text-center align-middle"><StatusSelect /></td>
               </tr>
             </tbody>
           </table>
@@ -757,7 +834,857 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
                 </tbody>
               </table>
             </div>
+
+            <div className="mb-4">
+              <h5 className="font-bold text-md text-gray-800 mb-2 ml-2">5.2.3 试剂确认 Reagent confirmation</h5>
+              <table className="w-full border-collapse border border-gray-400 text-sm text-center">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="border border-gray-400 p-2 w-[25%]">试剂名称<br/><span className="text-xs font-normal">Reagent name</span></th>
+                    <th className="border border-gray-400 p-2 w-[15%]">批号<br/><span className="text-xs font-normal">Batch</span></th>
+                    <th className="border border-gray-400 p-2 w-[20%]">厂家<br/><span className="text-xs font-normal">Supplier</span></th>
+                    <th className="border border-gray-400 p-2 w-[15%]">级别<br/><span className="text-xs font-normal">Grade</span></th>
+                    <th className="border border-gray-400 p-2 w-[25%]">有效期至<br/><span className="text-xs font-normal">Expiration Date</span></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {prerequisiteState.reagentRows.map((row) => (
+                    <tr key={row.id}>
+                      <td className="border border-gray-400 p-2 whitespace-pre-wrap align-middle">{row.name}</td>
+                      <td className="border border-gray-400 p-2 align-middle">
+                        <BorderedInput 
+                          value={reportReagentValues[row.id]?.batch || ''} 
+                          onChange={(e) => handleUpdateReagentValue(row.id, 'batch', e.target.value)} 
+                        />
+                      </td>
+                      <td className="border border-gray-400 p-2 align-middle">
+                        <BorderedInput 
+                          value={reportReagentValues[row.id]?.supplier || ''} 
+                          onChange={(e) => handleUpdateReagentValue(row.id, 'supplier', e.target.value)} 
+                        />
+                      </td>
+                      <td className="border border-gray-400 p-2 align-middle">{row.grade}</td>
+                      <td className="border border-gray-400 p-2 align-middle">
+                        <BorderedInput 
+                          type="date"
+                          value={reportReagentValues[row.id]?.expiryDate || ''} 
+                          onChange={(e) => handleUpdateReagentValue(row.id, 'expiryDate', e.target.value)} 
+                        />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="mb-4">
+              <h5 className="font-bold text-md text-gray-800 mb-2 ml-2">5.2.4 供试品及对照品确认 Sample and RS confirmation</h5>
+              <table className="w-full border-collapse border border-gray-400 text-sm text-center">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="border border-gray-400 p-2 w-[25%]">名称<br/><span className="text-xs font-normal">Name</span></th>
+                    <th className="border border-gray-400 p-2 w-[20%]">批号<br/><span className="text-xs font-normal">Batch</span></th>
+                    <th className="border border-gray-400 p-2 w-[20%]">复验期<br/><span className="text-xs font-normal">Retest Date</span></th>
+                    <th className="border border-gray-400 p-2 w-[15%]">含量<br/><span className="text-xs font-normal">Assay(%)</span></th>
+                    <th className="border border-gray-400 p-2 w-[20%]">来源<br/><span className="text-xs font-normal">Source</span></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {/* RS Row */}
+                  <tr>
+                    <td className="border border-gray-400 p-2 whitespace-pre-wrap align-middle">
+                      {displayId}对照品<br/>{displayId} RS
+                    </td>
+                    <td className="border border-gray-400 p-2 align-middle">
+                      <BorderedInput 
+                        value={reportSampleRS.rs.batch} 
+                        onChange={(e) => setReportSampleRS({...reportSampleRS, rs: {...reportSampleRS.rs, batch: e.target.value}})} 
+                      />
+                    </td>
+                    <td className="border border-gray-400 p-2 align-middle">
+                      <BorderedInput 
+                        type="date"
+                        value={reportSampleRS.rs.retestDate} 
+                        onChange={(e) => setReportSampleRS({...reportSampleRS, rs: {...reportSampleRS.rs, retestDate: e.target.value}})} 
+                      />
+                    </td>
+                    <td className="border border-gray-400 p-2 align-middle">
+                      <BorderedInput 
+                        value={reportSampleRS.rs.assay} 
+                        onChange={(e) => setReportSampleRS({...reportSampleRS, rs: {...reportSampleRS.rs, assay: e.target.value}})} 
+                      />
+                    </td>
+                    <td className="border border-gray-400 p-2 align-middle">
+                      <textarea
+                        value={reportSampleRS.rs.source}
+                        onChange={(e) => setReportSampleRS({...reportSampleRS, rs: {...reportSampleRS.rs, source: e.target.value}})}
+                        className="w-full bg-white border border-gray-300 rounded text-center outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none p-1 text-sm"
+                        rows={2}
+                      />
+                    </td>
+                  </tr>
+                  {/* Sample Row */}
+                  <tr>
+                    <td className="border border-gray-400 p-2 whitespace-pre-wrap align-middle">
+                      {displayId}供试品<br/>{displayId} Sample
+                    </td>
+                    <td className="border border-gray-400 p-2 align-middle">
+                      <BorderedInput 
+                        value={reportSampleRS.sample.batch} 
+                        onChange={(e) => setReportSampleRS({...reportSampleRS, sample: {...reportSampleRS.sample, batch: e.target.value}})} 
+                      />
+                    </td>
+                    <td className="border border-gray-400 p-2 align-middle">
+                      <BorderedInput 
+                        type="date"
+                        value={reportSampleRS.sample.retestDate} 
+                        onChange={(e) => setReportSampleRS({...reportSampleRS, sample: {...reportSampleRS.sample, retestDate: e.target.value}})} 
+                      />
+                    </td>
+                    <td className="border border-gray-400 p-2 align-middle">
+                      <BorderedInput 
+                        value={reportSampleRS.sample.assay} 
+                        onChange={(e) => setReportSampleRS({...reportSampleRS, sample: {...reportSampleRS.sample, assay: e.target.value}})} 
+                      />
+                    </td>
+                    <td className="border border-gray-400 p-2 align-middle">
+                      <textarea
+                        value={reportSampleRS.sample.source}
+                        onChange={(e) => setReportSampleRS({...reportSampleRS, sample: {...reportSampleRS.sample, source: e.target.value}})}
+                        className="w-full bg-white border border-gray-300 rounded text-center outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none p-1 text-sm"
+                        rows={2}
+                      />
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
+
+          {/* 5.3 System Suitability */}
+          <div className="mb-6">
+            <h4 className="font-bold text-lg text-gray-800 mb-2">5.3 系统适用性 System suitability</h4>
+            <div className="mb-4 text-sm space-y-2 pl-2">
+               <p>
+                 记录：{displayId} 含量和鉴别检验方法验证记录；<br/>
+                 Record：{displayId} Assay and Identification Method Validation Record;
+               </p>
+               <p>
+                 结果谱图：CRM-AVP-{protocolCode}-{protocolVersion}.{projectNumber}；<br/>
+                 Liquid chromatogram: CRM-AVP-{protocolCode}-{protocolVersion}.{projectNumber};
+               </p>
+               <p>
+                 典型附图见 <input 
+                    type="text" 
+                    value={attachmentRef} 
+                    onChange={(e) => setAttachmentRef(e.target.value)} 
+                    className="border border-gray-300 rounded outline-none w-24 text-center mx-1 bg-white focus:border-blue-500 p-1 text-sm"
+                 />。<br/>
+                 Typical chromatogram : attachment <span>{attachmentRef}</span>.
+               </p>
+            </div>
+            
+            <div className="text-center font-bold text-sm mb-2">
+              表 1 系统适用性结果<br/>Table 1 System Suitability Results
+            </div>
+
+            <table className="w-full border-collapse border border-gray-400 text-sm text-center">
+               <tbody>
+                  {/* Row 1: Blank */}
+                  <tr>
+                    <td className="border border-gray-400 p-2 font-bold whitespace-pre-wrap w-[15%]">
+                      空白溶液：{"\n"}Blank
+                    </td>
+                    <td className="border border-gray-400 p-2 text-center" colSpan={6}>
+                      {experimentalData.systemSuitability.blankInterference}
+                    </td>
+                  </tr>
+
+                  {/* STD1 Block */}
+                  {(() => {
+                    const std1Rows = experimentalData.systemSuitability.std1Injections.length;
+                    const std1TotalRows = 4 + std1Rows; // 2 info + 2 header + data rows
+                    
+                    return (
+                      <>
+                        {/* Row 2: Theoretical Plates */}
+                        <tr>
+                          <td className="border border-gray-400 p-2 font-bold whitespace-pre-wrap" rowSpan={std1TotalRows}>
+                            对照品溶液 1{"\n"}Standard solution 1
+                          </td>
+                          <td className="border border-gray-400 p-2 text-center" colSpan={6}>
+                            <span className="font-bold">理论塔板数 Theoretical plates:</span> {experimentalData.systemSuitability.theoreticalPlates}
+                          </td>
+                        </tr>
+                        {/* Row 3: Tailing Factor */}
+                        <tr>
+                          <td className="border border-gray-400 p-2 text-center" colSpan={6}>
+                            <span className="font-bold">拖尾因子 Tailing factor:</span> {experimentalData.systemSuitability.tailingFactor}
+                          </td>
+                        </tr>
+                        {/* Row 4: Data Header 1 */}
+                        <tr className="bg-gray-100 font-bold">
+                          <td className="border border-gray-400 p-2" rowSpan={2}>
+                            溶液名称{"\n"}Solution name
+                          </td>
+                          <td className="border border-gray-400 p-2" rowSpan={2}>
+                            Amount{"\n"}(mg)
+                          </td>
+                          <td className="border border-gray-400 p-2" colSpan={2}>
+                            峰面积 Peak area
+                          </td>
+                          <td className="border border-gray-400 p-2" colSpan={2}>
+                            保留时间 Retention Time
+                          </td>
+                        </tr>
+                        {/* Row 5: Data Header 2 */}
+                        <tr className="bg-gray-100 font-bold">
+                          <td className="border border-gray-400 p-2">Peak area{"\n"}(mAU*s)</td>
+                          <td className="border border-gray-400 p-2">RSD{"\n"}(%)</td>
+                          <td className="border border-gray-400 p-2">Retention Time{"\n"}(min)</td>
+                          <td className="border border-gray-400 p-2">RSD{"\n"}(%)</td>
+                        </tr>
+                        {/* Rows 6+: Data */}
+                        {experimentalData.systemSuitability.std1Injections.map((inj, idx) => (
+                          <tr key={idx}>
+                            <td className="border border-gray-400 p-2">STD1-{idx + 1}</td>
+                            {idx === 0 && (
+                              <td className="border border-gray-400 p-2 align-middle" rowSpan={std1Rows}>
+                                {experimentalData.systemSuitability.std1Weight}
+                              </td>
+                            )}
+                            <td className="border border-gray-400 p-2">{inj.peakArea}</td>
+                            {idx === 0 && (
+                              <td className="border border-gray-400 p-2 align-middle" rowSpan={std1Rows}>
+                                {experimentalData.systemSuitability.std1AreaRSD}
+                              </td>
+                            )}
+                            <td className="border border-gray-400 p-2">{inj.rt}</td>
+                            {idx === 0 && (
+                              <td className="border border-gray-400 p-2 align-middle" rowSpan={std1Rows}>
+                                {experimentalData.systemSuitability.std1RtRSD}
+                              </td>
+                            )}
+                          </tr>
+                        ))}
+                      </>
+                    );
+                  })()}
+
+                  {/* STD2 Block */}
+                  {/* Row Header */}
+                  <tr>
+                      <td className="border border-gray-400 p-2 font-bold whitespace-pre-wrap" rowSpan={2}>
+                          对照品溶液 2{"\n"}Standard solution 2
+                      </td>
+                      <td className="border border-gray-400 p-2 font-bold bg-gray-100">
+                          溶液名称{"\n"}Solution name
+                      </td>
+                      <td className="border border-gray-400 p-2 font-bold bg-gray-100">
+                          Amount{"\n"}(mg)
+                      </td>
+                      <td className="border border-gray-400 p-2 font-bold bg-gray-100" colSpan={2}>
+                          Peak area (mAU*s)
+                      </td>
+                      <td className="border border-gray-400 p-2 font-bold bg-gray-100" colSpan={2}>
+                          回收率 (%){"\n"}Recovery (%)
+                      </td>
+                  </tr>
+                  {/* Row Data */}
+                  <tr>
+                      <td className="border border-gray-400 p-2">STD2</td>
+                      <td className="border border-gray-400 p-2">{experimentalData.systemSuitability.std2Weight}</td>
+                      <td className="border border-gray-400 p-2" colSpan={2}>{experimentalData.systemSuitability.std2PeakArea}</td>
+                      <td className="border border-gray-400 p-2" colSpan={2}>{experimentalData.systemSuitability.std2Recovery}</td>
+                  </tr>
+
+                  {/* Control Block */}
+                  {(() => {
+                      const controlRows = experimentalData.systemSuitability.controls.length;
+                      return (
+                          <>
+                              {/* Header */}
+                              <tr>
+                                  <td className="border border-gray-400 p-2 font-bold whitespace-pre-wrap" rowSpan={controlRows + 1}>
+                                      随行对照{"\n"}Contrast check solution
+                                  </td>
+                                  <td className="border border-gray-400 p-2 font-bold bg-gray-100">
+                                      溶液名称{"\n"}Solution name
+                                  </td>
+                                  <td className="border border-gray-400 p-2 font-bold bg-gray-100" colSpan={3}>
+                                      峰面积 (mAU*s){"\n"}Peak area (mAU*s)
+                                  </td>
+                                  <td className="border border-gray-400 p-2 font-bold bg-gray-100" colSpan={2}>
+                                      RSD (%)
+                                  </td>
+                              </tr>
+                              {/* Data */}
+                              {experimentalData.systemSuitability.controls.map((ctrl, idx) => (
+                                  <tr key={idx}>
+                                      <td className="border border-gray-400 p-2">{ctrl.name}</td>
+                                      <td className="border border-gray-400 p-2" colSpan={3}>{ctrl.peakArea}</td>
+                                      <td className="border border-gray-400 p-2" colSpan={2}>{ctrl.rsd}</td>
+                                  </tr>
+                              ))}
+                          </>
+                      )
+                  })()}
+
+                  {/* Acceptance Criteria */}
+                  <tr>
+                      <td className="border border-gray-400 p-2 font-bold whitespace-pre-wrap">
+                          可接受标准{"\n"}Acceptance criteria
+                      </td>
+                      <td className="border border-gray-400 p-2 text-left text-xs leading-relaxed" colSpan={6}>
+                        <p>1) 空白在主峰出峰处应无干扰；The blank should have no interference at the main peak;</p>
+                        <p>2) 对照品溶液1第一针中，主峰理论板数应不低于 {sysSuitability.plateNumber}，拖尾因子应不大于 {sysSuitability.tailingFactor}；The theoretical plate number of the principal peak in the first injection of STD1 should be not less than {sysSuitability.plateNumber}, the trailing factor should not be more than {sysSuitability.tailingFactor};</p>
+                        <p>3) 对照品溶液1连续进样 {sysSuitability.injectionCount} 针，主峰峰面积的RSD应≤ {sysSuitability.areaRSD}%，保留时间的RSD应≤ {sysSuitability.retentionRSD}%；For {sysSuitability.injectionCount} consecutive standard solution1, the RSD of the main peak area should be NMT {sysSuitability.areaRSD}%, the RSD of the retention time should be NMT {sysSuitability.retentionRSD}%;</p>
+                        <p>4) 对照品溶液2与对照品溶液1的回收率在 {sysSuitability.recoveryRange} 之间；The recovery of reference solution 2 to reference solution 1 was between {sysSuitability.recoveryRange};</p>
+                        <p>5) 若有随行对照，取随行对照1针和对照品溶液1连续 {sysSuitability.controlInjectionCount} 针的主峰峰面积的RSD应≤ {sysSuitability.controlAreaRSD}%。If have contrast check solution. GRSD(Global %RSD)of the peak area of check solution and {sysSuitability.controlInjectionCount} consecutive standard solution 1 should be NMT {sysSuitability.controlAreaRSD}%.</p>
+                      </td>
+                  </tr>
+
+                  {/* Conclusion */}
+                  <tr>
+                      <td className="border border-gray-400 p-2 font-bold whitespace-pre-wrap">
+                          结论{"\n"}Conclusion
+                      </td>
+                      <td className="border border-gray-400 p-2 font-bold text-center" colSpan={6}>
+                         {valStatus.systemSuitability}
+                      </td>
+                  </tr>
+
+               </tbody>
+            </table>
+          </div>
+
+          {/* 5.4 Specificity */}
+          <div className="mb-6">
+            <h4 className="font-bold text-lg text-gray-800 mb-2">5.4 专属性 Specificity</h4>
+            
+            <div className="mb-4 text-sm pl-2">
+               {/* Chinese Block */}
+               <div className="space-y-1 mb-4">
+                 <p>记录：{displayId} 含量和鉴别检验方法验证记录；</p>
+                 <p>结果谱图：CRM-AVP-{protocolCode}-{protocolVersion}.{projectNumber}；</p>
+                 <p>
+                   典型附图见 
+                   <input 
+                      type="text" 
+                      value={specificityAttachmentRef} 
+                      onChange={(e) => setSpecificityAttachmentRef(e.target.value)} 
+                      className="border border-gray-300 rounded outline-none w-24 text-center mx-1 bg-white focus:border-blue-500 p-1 text-sm"
+                   />
+                   。
+                 </p>
+               </div>
+               
+               {/* English Block */}
+               <div className="space-y-1">
+                 <p>Record：{displayId} Assay and Identification Method Validation Record;</p>
+                 <p>Liquid chromatogram: CRM-AVP-{protocolCode}-{protocolVersion}.{projectNumber};</p>
+                 <p>Typical chromatogram : attachment <span>{specificityAttachmentRef}</span>.</p>
+               </div>
+            </div>
+
+            <div className="text-center font-bold text-sm mb-2">
+              表 2 专属性结果<br/>Table 2 Specificity Results
+            </div>
+            <table className="w-full border-collapse border border-gray-400 text-sm text-center">
+              <thead>
+                 <tr className="bg-gray-100">
+                    <th className="border border-gray-400 p-2 font-bold w-[20%]">项目 Item</th>
+                    <th className="border border-gray-400 p-2 font-bold" colSpan={2}>结果 Results</th>
+                 </tr>
+              </thead>
+              <tbody>
+                 {/* Standard Solution */}
+                 <tr>
+                    <td className="border border-gray-400 p-2 align-middle">对照品溶液<br/>Standard solution</td>
+                    <td className="border border-gray-400 p-2 align-middle text-left w-[50%]">{displayId}保留时间（min）<br/>{displayId} Retention Time（min）</td>
+                    <td className="border border-gray-400 p-2 align-middle w-[30%]">{experimentalData.specificity.stdRt}</td>
+                 </tr>
+                 {/* Sample Solution Group */}
+                 <tr>
+                    <td className="border border-gray-400 p-2 align-middle" rowSpan={3}>供试品溶液<br/>Sample solution</td>
+                    <td className="border border-gray-400 p-2 align-middle text-left">{displayId}保留时间（min）<br/>{displayId} Retention Time（min）</td>
+                    <td className="border border-gray-400 p-2 align-middle">{experimentalData.specificity.sampleRt}</td>
+                 </tr>
+                 <tr>
+                    <td className="border border-gray-400 p-2 align-middle text-left">{displayId}保留时间相对偏差<br/>The Relative Deviation for {displayId} peak Retention time（%）</td>
+                    <td className="border border-gray-400 p-2 align-middle">{experimentalData.specificity.rtDeviation}</td>
+                 </tr>
+                 <tr>
+                    <td className="border border-gray-400 p-2 align-middle text-left">主峰峰纯度因子<br/>Peak purity factor of Major component</td>
+                    <td className="border border-gray-400 p-2 align-middle">{experimentalData.specificity.peakPurity}</td>
+                 </tr>
+                 {/* Acceptance Criteria */}
+                 <tr>
+                    <td className="border border-gray-400 p-2 font-bold bg-gray-50 text-left align-top">可接受标准<br/>Acceptance criteria</td>
+                    <td className="border border-gray-400 p-2 text-left text-xs leading-relaxed" colSpan={2}>
+                       <p>1) 供试品溶液中主峰的保留时间应与对照品溶液中主峰的保留时间一致，保留时间相对偏差应不大于 {specificityState.retentionDevLimit}%；The retention time of the main peak in the sample solution should be consistent with that of the standard solution, and the relative deviation of the retention time should be not more than {specificityState.retentionDevLimit}%.</p>
+                       <p>2) 供试品溶液中主峰的峰纯度因子应≥990或纯度角小于纯度阈值。The Peak purity factor of major component should be NLT 990 in sample solution，or the purity angle is less than the purity threshold.</p>
+                    </td>
+                 </tr>
+                 {/* Conclusion */}
+                 <tr>
+                    <td className="border border-gray-400 p-2 font-bold bg-gray-50 text-left">结论<br/>Conclusion</td>
+                    <td className="border border-gray-400 p-2 font-bold text-center" colSpan={2}>
+                       {valStatus.specificity}
+                    </td>
+                 </tr>
+              </tbody>
+            </table>
+          </div>
+
+          {/* 5.5 Linearity and Range (New Section) */}
+          <div className="mb-6">
+            <h4 className="font-bold text-lg text-gray-800 mb-2">5.5 线性和范围 Linearity and Range</h4>
+            <div className="mb-4 text-sm pl-2">
+               {/* Chinese Block */}
+               <div className="space-y-1 mb-4">
+                 <p>记录：{displayId} 含量和鉴别检验方法验证记录；</p>
+                 <p>结果谱图：CRM-AVP-{protocolCode}-{protocolVersion}.{projectNumber}；</p>
+                 <p>
+                   典型附图见 
+                   <input 
+                      type="text" 
+                      value={linearityAttachmentRef} 
+                      onChange={(e) => setLinearityAttachmentRef(e.target.value)} 
+                      className="border border-gray-300 rounded outline-none w-24 text-center mx-1 bg-white focus:border-blue-500 p-1 text-sm"
+                   />
+                   。
+                 </p>
+               </div>
+               
+               {/* English Block */}
+               <div className="space-y-1">
+                 <p>Record：{displayId} Assay and Identification Method Validation Record;</p>
+                 <p>Liquid chromatogram: CRM-AVP-{protocolCode}-{protocolVersion}.{projectNumber};</p>
+                 <p>Typical chromatogram : attachment <span>{linearityAttachmentRef}</span>.</p>
+               </div>
+            </div>
+
+            <div className="text-center font-bold text-sm mb-2">
+              表 3 线性结果<br/>Table 3 Linearity Results
+            </div>
+            
+            <table className="w-full border-collapse border border-gray-400 text-sm text-center">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border border-gray-400 p-2 font-bold w-[20%]">溶液名称<br/><span className="text-xs font-normal">Solution Name</span></th>
+                  <th className="border border-gray-400 p-2 font-bold w-[25%]">浓度（μg/ml）<br/><span className="text-xs font-normal">Concentration（μg/ml）</span></th>
+                  <th className="border border-gray-400 p-2 font-bold w-[25%]">峰面积（mAU*s）<br/><span className="text-xs font-normal">Peak Area（mAU*s）</span></th>
+                  <th className="border border-gray-400 p-2 font-bold w-[30%]">实际相当于供试品溶液的浓度水平（%）<br/><span className="text-xs font-normal">Concentration level equivalent to the test solution in practice（%）</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                {experimentalData.linearity.rows.map((row) => (
+                  <tr key={row.id}>
+                    <td className="border border-gray-400 p-2 align-middle">{row.id}</td>
+                    <td className="border border-gray-400 p-2 align-middle">{row.conc}</td>
+                    <td className="border border-gray-400 p-2 align-middle">{row.area}</td>
+                    <td className="border border-gray-400 p-2 align-middle">{row.actualLevel}</td>
+                  </tr>
+                ))}
+                {/* Stats */}
+                <tr>
+                   <td className="border border-gray-400 p-2 text-left" colSpan={2}>
+                      线性方程: {experimentalData.linearity.equation}<br/>
+                      Linearity Equation: {experimentalData.linearity.equation}
+                   </td>
+                   <td className="border border-gray-400 p-2 text-left" colSpan={2}>
+                      相关系数r ：{experimentalData.linearity.statsR}<br/>
+                      Correlation coefficient r: {experimentalData.linearity.statsR}
+                   </td>
+                </tr>
+                <tr>
+                   <td className="border border-gray-400 p-2 text-left" colSpan={2}>
+                      Y轴截距的绝对值: {Math.abs(parseFloat(experimentalData.linearity.statsIntercept || "0")).toFixed(4)}<br/>
+                      |Intercept on Y Axis|: {Math.abs(parseFloat(experimentalData.linearity.statsIntercept || "0")).toFixed(4)}
+                   </td>
+                   <td className="border border-gray-400 p-2 text-left" colSpan={2}>
+                      残差平方和：{experimentalData.linearity.statsRSS}<br/>
+                      residual sum of squares: {experimentalData.linearity.statsRSS}
+                   </td>
+                </tr>
+                <tr>
+                   <td className="border border-gray-400 p-2 text-left" colSpan={4}>
+                      Y轴截距的绝对值与标准为100%时的峰面积的比值：{experimentalData.linearity.statsPercentIntercept}<br/>
+                      Ratio of Y-intercept to 100% response value: {experimentalData.linearity.statsPercentIntercept}
+                   </td>
+                </tr>
+                {/* Inserted Chart Row */}
+                <tr>
+                  <td className="border border-gray-400 p-0" colSpan={4}>
+                    <div className="p-4 bg-white">
+                      <LinearityChart 
+                        rows={experimentalData.linearity.rows}
+                        equation={experimentalData.linearity.equation}
+                        statsR={experimentalData.linearity.statsR}
+                        productId={productId}
+                      />
+                    </div>
+                  </td>
+                </tr>
+                {/* Acceptance Criteria */}
+                <tr>
+                    <td className="border border-gray-400 p-2 font-bold bg-gray-50 text-left align-top">可接受标准<br/>Acceptance criteria</td>
+                    <td className="border border-gray-400 p-2 text-left text-xs leading-relaxed" colSpan={3}>
+                       <p>浓度与面积应成线性，X轴代表浓度，Y轴代表峰面积，线性相关系数r≥ 0.998，Y轴截距的绝对值与100%线性溶液峰面积的比≤ 2%；{"\n"}
+                       报告主成分相关系数、相对截距、线性方程、残差平方和、浓度及相对供试品溶液浓度的比例。</p>
+                       <p>The concentration and area should be linear, the X-axis represents the concentration, the Y-axis represents the peak area, the linear correlation coefficient r≥0.998, and the ratio of the absolute value of the Y-axis intercept to the peak area of 100% linear solution is less than 2%. Report principal component correlation coefficient, relative intercept, linear equation, residual sum of squares, concentration, and ratio to concentration of sample solution.</p>
+                    </td>
+                </tr>
+                {/* Conclusion */}
+                <tr>
+                    <td className="border border-gray-400 p-2 font-bold bg-gray-50 text-left">结论<br/>Conclusion</td>
+                    <td className="border border-gray-400 p-2 font-bold text-center" colSpan={3}>
+                       {valStatus.linearity}
+                    </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          {/* 5.6 Precision (Repeatability) */}
+          <div className="mb-6">
+            <h4 className="font-bold text-lg text-gray-800 mb-2">5.6 精密度（重复性） Precision（repeatability）</h4>
+            
+            <div className="mb-4 text-sm pl-2">
+                {/* Chinese Block */}
+                <div className="space-y-1 mb-4">
+                  <p>记录：{displayId} 含量和鉴别检验方法验证记录；</p>
+                  <p>结果谱图：CRM-AVP-{protocolCode}-{protocolVersion}.{projectNumber}；</p>
+                  <p>
+                    典型附图见 
+                    <input 
+                      type="text" 
+                      value={precisionAttachmentRef} 
+                      onChange={(e) => setPrecisionAttachmentRef(e.target.value)} 
+                      className="border border-gray-300 rounded outline-none w-24 text-center mx-1 bg-white focus:border-blue-500 p-1 text-sm"
+                    />
+                    。
+                  </p>
+                </div>
+                
+                {/* English Block */}
+                <div className="space-y-1">
+                  <p>Record：{displayId} Assay and Identification Method Validation Record;</p>
+                  <p>Liquid chromatogram: CRM-AVP-{protocolCode}-{protocolVersion}.{projectNumber};</p>
+                  <p>Typical chromatogram : attachment <span>{precisionAttachmentRef}</span>.</p>
+                </div>
+            </div>
+
+            <div className="text-center font-bold text-sm mb-2">
+              表 4 重复性结果<br/>Table 4 Repeatability Results
+            </div>
+
+            <table className="w-full border-collapse border border-gray-400 text-sm text-center">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border border-gray-400 p-2 font-bold w-[20%]">样品名<br/><span className="text-xs font-normal">Solution Name</span></th>
+                  <th className="border border-gray-400 p-2 font-bold w-[15%]">称样量 (mg)<br/><span className="text-xs font-normal">Weighed (mg)</span></th>
+                  <th className="border border-gray-400 p-2 font-bold w-[35%]">{displayId} 峰面积 (mAU*s)<br/><span className="text-xs font-normal">Area<sub>{displayId}</sub> (mAU*s)</span></th>
+                  <th className="border border-gray-400 p-2 font-bold w-[15%]">含量 (%)<br/><span className="text-xs font-normal">Assay (%)</span></th>
+                  <th className="border border-gray-400 p-2 font-bold w-[15%]">RSD(%)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {experimentalData.precision.rows.map((row, idx) => (
+                  <tr key={row.id}>
+                    <td className="border border-gray-400 p-2 align-middle">{row.name}</td>
+                    <td className="border border-gray-400 p-2 align-middle">{row.weight}</td>
+                    <td className="border border-gray-400 p-2 align-middle">{row.area}</td>
+                    <td className="border border-gray-400 p-2 align-middle">{row.assay}</td>
+                    {idx === 0 && (
+                      <td className="border border-gray-400 p-2 align-middle" rowSpan={6}>
+                        {experimentalData.precision.rsd}
+                      </td>
+                    )}
+                  </tr>
+                ))}
+                {/* Acceptance Criteria */}
+                <tr>
+                  <td className="border border-gray-400 p-2 font-bold align-middle whitespace-pre-wrap">可接受标准<br/>Acceptance criteria</td>
+                  <td className="border border-gray-400 p-2 text-left text-xs leading-relaxed" colSpan={4}>
+                     <div className="mb-2">
+                        平行配制 6 份精密度溶液，规定条件进行测定，6 份精密度溶液检测结果应符合以下要求。<br/>
+                        Repeatability: Prepare 6 sample solutions in parallel, determine the conditions, 6 samples of solution, should meet the following requirements
+                     </div>
+                     <table className="w-full border-collapse border border-gray-300 text-center">
+                        <thead>
+                            <tr>
+                                <th className="border border-gray-300 p-1 font-bold w-1/2">名称<br/>Name</th>
+                                <th className="border border-gray-300 p-1 font-bold w-1/2">相对标准偏差 (RSD)<br/>Relative standard deviation (RSD)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td className="border border-gray-300 p-1">{displayId}</td>
+                                <td className="border border-gray-300 p-1">{precisionState.precisionLimit}</td>
+                            </tr>
+                        </tbody>
+                     </table>
+                  </td>
+                </tr>
+                {/* Conclusion */}
+                <tr>
+                  <td className="border border-gray-400 p-2 font-bold align-middle">结论 Conclusion</td>
+                  <td className="border border-gray-400 p-2 font-bold text-center align-middle" colSpan={4}>
+                     {valStatus.repeatability}
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          {/* 5.7 Accuracy */}
+          <div className="mb-6">
+            <h4 className="font-bold text-lg text-gray-800 mb-2">5.7 准确度Accuracy</h4>
+            
+            <div className="mb-4 text-sm pl-2">
+                {/* Chinese Block */}
+                <div className="space-y-1 mb-4">
+                  <p>记录：{displayId} 含量和鉴别检验方法验证记录；</p>
+                  <p>结果谱图：CRM-AVP-{protocolCode}-{protocolVersion}.{projectNumber}；</p>
+                  <p>
+                    典型附图见 
+                    <input 
+                      type="text" 
+                      value={accuracyAttachmentRef} 
+                      onChange={(e) => setAccuracyAttachmentRef(e.target.value)} 
+                      className="border border-gray-300 rounded outline-none w-24 text-center mx-1 bg-white focus:border-blue-500 p-1 text-sm"
+                    />
+                    。
+                  </p>
+                </div>
+                
+                {/* English Block */}
+                <div className="space-y-1">
+                  <p>Record：{displayId} Assay and Identification Method Validation Record;</p>
+                  <p>Liquid chromatogram: CRM-AVP-{protocolCode}-{protocolVersion}.{projectNumber};</p>
+                  <p>Typical chromatogram : attachment <span>{accuracyAttachmentRef}</span>.</p>
+                </div>
+            </div>
+
+            <div className="text-center font-bold text-sm mb-2">
+              表 5准确度结果<br/>Table 5 Accuracy Results
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse border border-gray-400 text-sm text-center">
+                <thead>
+                  <tr className="bg-gray-100">
+                    <th className="border border-gray-400 p-2 font-bold w-[12%]">溶液名称<br/><span className="text-xs font-normal">Solution name</span></th>
+                    <th className="border border-gray-400 p-2 font-bold w-[10%]">称样量<br/><span className="text-xs font-normal">Weighed (mg)</span></th>
+                    <th className="border border-gray-400 p-2 font-bold w-[12%]">峰面积<br/><span className="text-xs font-normal">Area (mAU*s)</span></th>
+                    <th className="border border-gray-400 p-2 font-bold w-[12%]">供试品浓度x<br/><span className="text-xs font-normal">Sample concentration (μg/ml)</span></th>
+                    <th className="border border-gray-400 p-2 font-bold w-[12%]">供试品测定量<br/><span className="text-xs font-normal">Sample measured quantity (μg)</span></th>
+                    <th className="border border-gray-400 p-2 font-bold w-[12%]">供试品理论量<br/><span className="text-xs font-normal">Sample theoretical quantity (μg)</span></th>
+                    <th className="border border-gray-400 p-2 font-bold w-[10%]">回收率 (%)<br/><span className="text-xs font-normal">Recovery (%)</span></th>
+                    <th className="border border-gray-400 p-2 font-bold w-[10%]">RSD (%)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {experimentalData.accuracy.rows.map((row, idx) => (
+                    <tr key={row.id}>
+                      <td className="border border-gray-400 p-2 align-middle">{row.name}</td>
+                      <td className="border border-gray-400 p-2 align-middle">{row.weight}</td>
+                      <td className="border border-gray-400 p-2 align-middle">{row.area}</td>
+                      <td className="border border-gray-400 p-2 align-middle">{row.detConc}</td>
+                      <td className="border border-gray-400 p-2 align-middle">{row.detQty}</td>
+                      <td className="border border-gray-400 p-2 align-middle">{row.theoQty}</td>
+                      <td className="border border-gray-400 p-2 align-middle">{row.rec}</td>
+                      {idx === 0 && (
+                        <td className="border border-gray-400 p-2 align-middle" rowSpan={6}>
+                          {experimentalData.accuracy.rsd}
+                        </td>
+                      )}
+                    </tr>
+                  ))}
+                  {/* Acceptance Criteria */}
+                  <tr>
+                    <td className="border border-gray-400 p-2 font-bold align-middle whitespace-pre-wrap">可接受标准<br/>Acceptance criteria</td>
+                    <td className="border border-gray-400 p-2 text-left text-xs leading-relaxed" colSpan={7}>
+                       <p>主成分回收率均应在{accuracyState.recoveryRange}范围内，RSD≤{accuracyState.rsdLimit}。</p>
+                       <p>The main component recovery rates should be within the range of {accuracyState.recoveryRange}, RSD≤{accuracyState.rsdLimit}.</p>
+                    </td>
+                  </tr>
+                  {/* Conclusion */}
+                  <tr>
+                    <td className="border border-gray-400 p-2 font-bold align-middle">结论<br/>Conclusion</td>
+                    <td className="border border-gray-400 p-2 font-bold text-center align-middle" colSpan={7}>
+                       {valStatus.accuracy}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* 5.8 Solution Stability */}
+          <div className="mb-6">
+            <h4 className="font-bold text-lg text-gray-800 mb-2">5.8 溶液稳定性 Solution Stability</h4>
+            
+            <div className="mb-4 text-sm pl-2">
+                {/* Chinese Block */}
+                <div className="space-y-1 mb-4">
+                  <p>记录：{displayId} 含量和鉴别检验方法验证记录；</p>
+                  <p>结果谱图：CRM-AVP-{protocolCode}-{protocolVersion}.{projectNumber}；</p>
+                  <p>
+                    典型附图见 
+                    <input 
+                      type="text" 
+                      value={stabilityAttachmentRef} 
+                      onChange={(e) => setStabilityAttachmentRef(e.target.value)} 
+                      className="border border-gray-300 rounded outline-none w-24 text-center mx-1 bg-white focus:border-blue-500 p-1 text-sm"
+                    />
+                    。
+                  </p>
+                </div>
+                
+                {/* English Block */}
+                <div className="space-y-1">
+                  <p>Record：{displayId} Assay and Identification Method Validation Record;</p>
+                  <p>Liquid chromatogram: CRM-AVP-{protocolCode}-{protocolVersion}.{projectNumber};</p>
+                  <p>Typical chromatogram : attachment <span>{stabilityAttachmentRef}</span>.</p>
+                </div>
+            </div>
+
+            <div className="text-center font-bold text-sm mb-2">
+              表 6 对照品溶液稳定性结果<br/>Table 6 Stability Results of Standard Solution
+            </div>
+
+            <table className="w-full border-collapse border border-gray-400 text-sm text-center mb-6">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border border-gray-400 p-2">时间（h）<br/><span className="text-xs font-normal">Time（h）</span></th>
+                  <th className="border border-gray-400 p-2">峰面积（mAU *s）<br/><span className="text-xs font-normal">Area（mAU *s）</span></th>
+                  <th className="border border-gray-400 p-2">回收率（%）<br/><span className="text-xs font-normal">Recovery（%）</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                {experimentalData.stability.stdPoints.map((pt, idx) => (
+                  <tr key={idx}>
+                    <td className="border border-gray-400 p-2 align-middle">{pt.time}</td>
+                    <td className="border border-gray-400 p-2 align-middle">{pt.area}</td>
+                    <td className="border border-gray-400 p-2 align-middle">{pt.recovery}</td>
+                  </tr>
+                ))}
+                <tr>
+                    <td className="border border-gray-400 p-2 font-bold bg-gray-50 text-left align-top">可接受标准<br/>Acceptance criteria</td>
+                    <td className="border border-gray-400 p-2 text-left text-xs leading-relaxed whitespace-pre-wrap" colSpan={2}>
+                        {experimentalData.stability.stdAcceptanceCriteria}
+                    </td>
+                </tr>
+                <tr>
+                    <td className="border border-gray-400 p-2 font-bold bg-gray-50 text-left align-top">结论<br/>Conclusion</td>
+                    <td className="border border-gray-400 p-2 text-left text-xs leading-relaxed font-bold whitespace-pre-wrap" colSpan={2}>
+                        {experimentalData.stability.stdConclusion}
+                    </td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div className="text-center font-bold text-sm mb-2">
+              表 7 供试品溶液稳定性结果<br/>Table 7 Stability Results of Sample Solution
+            </div>
+
+            <table className="w-full border-collapse border border-gray-400 text-sm text-center">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border border-gray-400 p-2">时间（h）<br/><span className="text-xs font-normal">Time（h）</span></th>
+                  <th className="border border-gray-400 p-2">{displayId}峰面积（mAU *s）<br/><span className="text-xs font-normal">Area{displayId}（mAU *s）</span></th>
+                  <th className="border border-gray-400 p-2">{displayId}回收率（%）<br/><span className="text-xs font-normal">Recovery{displayId}（%）</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                {experimentalData.stability.splPoints.map((pt, idx) => (
+                  <tr key={idx}>
+                    <td className="border border-gray-400 p-2 align-middle">{pt.time}</td>
+                    <td className="border border-gray-400 p-2 align-middle">{pt.area}</td>
+                    <td className="border border-gray-400 p-2 align-middle">{pt.recovery}</td>
+                  </tr>
+                ))}
+                <tr>
+                    <td className="border border-gray-400 p-2 font-bold bg-gray-50 text-left align-top">可接受标准<br/>Acceptance criteria</td>
+                    <td className="border border-gray-400 p-2 text-left text-xs leading-relaxed whitespace-pre-wrap" colSpan={2}>
+                        {experimentalData.stability.splAcceptanceCriteria}
+                    </td>
+                </tr>
+                <tr>
+                    <td className="border border-gray-400 p-2 font-bold bg-gray-50 text-left align-top">结论<br/>Conclusion</td>
+                    <td className="border border-gray-400 p-2 text-left text-xs leading-relaxed font-bold whitespace-pre-wrap" colSpan={2}>
+                        {experimentalData.stability.conclusion}
+                    </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+        </div>
+
+        {/* 6. Summary of Deviations */}
+        <div className="mb-8 pt-8 border-t-2 border-dashed border-gray-200">
+           <h3 className="font-bold text-xl mb-4 text-gray-800 border-b pb-2">6. 偏差摘要 SUMMARY OF DEVIATIONS</h3>
+           <div className="w-full relative group">
+              <textarea
+                value={deviationSummary}
+                onChange={(e) => setDeviationSummary(e.target.value)}
+                className="w-full p-4 border-2 border-gray-300 rounded-lg shadow-inner bg-gray-50 focus:bg-white focus:ring-4 focus:ring-blue-100 focus:border-blue-500 outline-none min-h-[8rem] text-sm resize-y transition-all duration-200 hover:border-blue-400 hover:shadow-md"
+                placeholder="在此处输入偏差摘要... / Enter summary of deviations here..."
+              />
+              <div className="absolute top-2 right-2 text-gray-300 pointer-events-none group-hover:text-blue-400 transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+              </div>
+           </div>
+        </div>
+
+        {/* 7. Conclusion */}
+        <div className="mb-8 pt-8 border-t-2 border-dashed border-gray-200">
+           <h3 className="font-bold text-xl mb-4 text-gray-800 border-b pb-2">7. 结论 CONCLUSION</h3>
+           <div className="text-sm space-y-4 leading-relaxed">
+             <p>
+               该检验方法可以稳定可靠地用于 {displayId} 含量和鉴别的检验。
+             </p>
+             <p>
+               It was stable and reliable that the analysis method was adopted to detect Assay and Identification Determination of {displayId}.
+             </p>
+           </div>
+        </div>
+
+        {/* 8. History of Change */}
+        <div className="mb-8 pt-8 border-t-2 border-dashed border-gray-200">
+           <h3 className="font-bold text-xl mb-4 text-gray-800 border-b pb-2">8. 变更历史 History of Change</h3>
+           <table className="w-full border-collapse border border-gray-400 text-sm text-center">
+             <thead>
+               <tr className="bg-gray-100">
+                 <th className="border border-gray-400 p-2">版本文件<br/><span className="text-xs font-normal">Versions Document</span></th>
+                 <th className="border border-gray-400 p-2">变更原因<br/><span className="text-xs font-normal">Reason of Change</span></th>
+                 <th className="border border-gray-400 p-2">生效日期<br/><span className="text-xs font-normal">Effective Date</span></th>
+               </tr>
+             </thead>
+             <tbody>
+               <tr>
+                 <td className="border border-gray-400 p-2 bg-gray-50">
+                    <div className="font-bold text-gray-800">首版文件</div>
+                    <div className="text-xs text-gray-500">Initial Document</div>
+                 </td>
+                 <td className="border border-gray-400 p-2 bg-gray-50">
+                    <div className="font-bold text-gray-800">新增</div>
+                    <div className="text-xs text-gray-500">New</div>
+                 </td>
+                 <td className="border border-gray-400 p-2 align-middle">
+                    <BorderedInput 
+                      type="date" 
+                      value={reportHistoryDate} 
+                      onChange={(e) => setReportHistoryDate(e.target.value)} 
+                    />
+                 </td>
+               </tr>
+             </tbody>
+           </table>
         </div>
 
         <div className="text-center text-xs text-gray-400 mt-12 border-t pt-4">

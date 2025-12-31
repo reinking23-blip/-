@@ -6,6 +6,7 @@ import { ProtocolHeader } from './components/ProtocolHeader';
 import { DataMappingDictionary } from './components/DataMappingDictionary';
 import { ReportDocument } from './components/ReportDocument';
 import { DocumentPage } from './components/DocumentPage';
+import { ReportDocumentPRD } from './components/ReportDocumentPRD';
 import { Menu } from 'lucide-react';
 import { 
   NavItem, 
@@ -27,11 +28,14 @@ import {
   AccuracyState,
   StabilityState,
   PrerequisiteState,
-  EquipmentConfirmationRow
+  EquipmentConfirmationRow,
+  ReportReagentValues,
+  ReportSampleRSState,
+  ExperimentalDataState
 } from './types';
 
 const App: React.FC = () => {
-  const [currentView, setCurrentView] = useState<'protocol' | 'dictionary' | 'report' | 'document'>('protocol');
+  const [currentView, setCurrentView] = useState<'protocol' | 'dictionary' | 'report' | 'document' | 'prd'>('protocol');
   const [activeSectionId, setActiveSectionId] = useState<string>('cover');
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [productId, setProductId] = useState<string>("HY130225");
@@ -42,6 +46,9 @@ const App: React.FC = () => {
   // Training Date State for Report
   const [trainingDate, setTrainingDate] = useState<string>("");
 
+  // Report History State
+  const [reportHistoryDate, setReportHistoryDate] = useState<string>("");
+
   // Report Equipment Confirmation State
   const [reportEquipment, setReportEquipment] = useState<EquipmentConfirmationRow[]>([
     { id: 'balance', name: '电子天平\nElectronic Balance', supplier: 'Mettler', equipmentNumber: 'EB301', model: 'XS105DU', retestDate: '2025-02-14' },
@@ -50,6 +57,31 @@ const App: React.FC = () => {
 
   // Report Column Confirmation Serial Numbers State
   const [reportColumnSerials, setReportColumnSerials] = useState<Record<string, string>>({});
+
+  // Report Reagent Confirmation State
+  const [reportReagentValues, setReportReagentValues] = useState<Record<string, ReportReagentValues>>({
+    '1': { batch: 'C14175044', supplier: '麦克林\nMacklin', expiryDate: '2024-09-12' },
+    '2': { batch: 'P3134478', supplier: 'GENERAL-REAGENT', expiryDate: '2026-08-06' },
+    '3': { batch: '20240909', supplier: '自制\nHomemade', expiryDate: '2024-09-11' },
+    '4': { batch: 'I1333430412', supplier: '默克\nMerck', expiryDate: '2026-09-04' },
+    '5': { batch: 'I1338907', supplier: '默克\nMerck', expiryDate: '2026-07-04' }
+  });
+
+  // Report Sample & RS Confirmation State
+  const [reportSampleRS, setReportSampleRS] = useState<ReportSampleRSState>({
+    rs: {
+      batch: 'RS324110',
+      retestDate: '2025-07-07',
+      assay: '99.8%',
+      source: '上海皓元医药\nShanghai ChemExpress'
+    },
+    sample: {
+      batch: 'HY-1302_25-20240705',
+      retestDate: '',
+      assay: '-',
+      source: '上海皓元医药\nShanghai ChemExpress'
+    }
+  });
 
   // Product Details State
   const [chemicalFormula, setChemicalFormula] = useState<string>("");
@@ -237,6 +269,123 @@ const App: React.FC = () => {
       { id: '4', name: '乙腈 Acetonitrile', grade: 'HPLC或以上级别 HPLC and above level' },
       { id: '5', name: '甲醇 Methanol', grade: 'HPLC或以上级别 HPLC and above level' }
     ]
+  });
+
+  // Experimental Data State (DocumentPage)
+  const [experimentalData, setExperimentalData] = useState<ExperimentalDataState>({
+    systemSuitability: {
+      sequenceId: "20240909",
+      blankInterference: "空白溶液无干扰\nThere was no interference in blank solution",
+      theoreticalPlates: "169997",
+      tailingFactor: "0.9",
+      std1Weight: "20.48",
+      std1AvgArea: "5209.385",
+      std1AreaRSD: "0.06",
+      std1RtRSD: "0.04",
+      std1Injections: [
+        { peakArea: "5212.52", rt: "18.933" },
+        { peakArea: "5209.067", rt: "18.943" },
+        { peakArea: "5206.288", rt: "18.937" },
+        { peakArea: "5207.091", rt: "18.943" },
+        { peakArea: "5211.958", rt: "18.953" },
+      ],
+      std2Weight: "20.98",
+      std2PeakArea: "5310.797",
+      std2Rt: "18.953",
+      std2Recovery: "99.5",
+      controls: [
+        { name: "STD1-6 (4h)", peakArea: "5223.806", rsd: "0.13" },
+        { name: "STD1-7 (10h)", peakArea: "5204.029", rsd: "0.07" },
+        { name: "STD1-8 (16h)", peakArea: "5219.927", rsd: "0.10" },
+      ],
+      conclusion: "符合规定"
+    },
+    specificity: {
+      sequenceId: "20240909",
+      stdRt: "18.953",
+      sampleRt: "18.957",
+      rtDeviation: "0.02",
+      peakPurity: "1000",
+      conclusion: "符合规定"
+    },
+    linearity: {
+      sequenceId: "20240909",
+      dilutionX1: "100",
+      dilutionX2: "50",
+      assayValue: "0.998",
+      rows: [
+        { id: "L1", level: "0.8", weight: "16.4", conc: "163.67", area: "4144.62", actualLevel: "81.84" },
+        { id: "L2", level: "0.9", weight: "19.02", conc: "189.82", area: "4851.21", actualLevel: "94.91" },
+        { id: "L3", level: "1.0", weight: "20.43", conc: "203.89", area: "5165.33", actualLevel: "101.95" },
+        { id: "L4", level: "1.1", weight: "22.74", conc: "226.95", area: "5753.92", actualLevel: "113.47" },
+        { id: "L5", level: "1.2", weight: "12.90", conc: "257.48", area: "6551.63", actualLevel: "128.74" },
+      ],
+      statsN: "5",
+      statsR: "0.999785",
+      statsSlope: "25.4869",
+      statsIntercept: "-17.1752",
+      statsPercentIntercept: "0.33%",
+      statsRSS: "1430.23",
+      equation: "y=25.4869x-17.1752",
+      conclusion: "符合规定"
+    },
+    precision: {
+      sequenceId: "20240909",
+      stdWeight: "20.48",
+      stdAssay: "0.998",
+      stdVolume: "100",
+      stdAvgArea: "5209.3848",
+      splVolume: "50",
+      rows: [
+        { id: "P1", name: "Precision-1", weight: "10.46", area: "5354.984", assay: "100.43" },
+        { id: "P2", name: "Precision-2", weight: "10.41", area: "5368.216", assay: "101.16" },
+        { id: "P3", name: "Precision-3", weight: "10.98", area: "5576.019", assay: "99.62" },
+        { id: "P4", name: "Precision-4", weight: "10.72", area: "5419.397", assay: "99.17" },
+        { id: "P5", name: "Precision-5", weight: "10.32", area: "5211.439", assay: "99.07" },
+        { id: "P6", name: "Precision-6", weight: "10.66", area: "5393.563", assay: "99.26" },
+      ],
+      avgAssay: "99.79",
+      rsd: "0.84",
+      conclusion: "符合规定"
+    },
+    accuracy: {
+      sequenceId: "20240909",
+      slope: "25.4869",
+      intercept: "-17.1752",
+      precAvgAssay: "99.79",
+      splVolume: "50",
+      rows: [
+        { id: "P1", name: "Precision-1", weight: "10.46", area: "5354.984", detConc: "210.78", detQty: "10539.05", theoQty: "10437.63", rec: "100.97" },
+        { id: "P2", name: "Precision-2", weight: "10.41", area: "5368.216", detConc: "211.30", detQty: "10565.01", theoQty: "10387.74", rec: "101.71" },
+        { id: "P3", name: "Precision-3", weight: "10.98", area: "5576.019", detConc: "219.45", detQty: "10972.68", theoQty: "10956.52", rec: "100.15" },
+        { id: "P4", name: "Precision-4", weight: "10.72", area: "5419.397", detConc: "213.31", detQty: "10665.42", theoQty: "10697.07", rec: "99.70" },
+        { id: "P5", name: "Precision-5", weight: "10.32", area: "5211.439", detConc: "205.15", detQty: "10257.45", theoQty: "10297.93", rec: "99.61" },
+        { id: "P6", name: "Precision-6", weight: "10.66", area: "5393.563", detConc: "212.29", detQty: "10614.74", theoQty: "10637.20", rec: "99.79" },
+      ],
+      rsd: "0.84",
+      conclusion: "符合规定"
+    },
+    stability: {
+      stdSequenceId: "20240909",
+      splSequenceId: "20240909",
+      stdCondition: "对照品溶液 (5℃±3℃)",
+      splCondition: "供试品溶液 (5℃±3℃)",
+      stdPoints: [
+        { time: "0", area: "5212.520", recovery: "" },
+        { time: "4", area: "5223.806", recovery: "100.2" },
+        { time: "10", area: "5204.029", recovery: "99.8" },
+        { time: "16", area: "5219.927", recovery: "100.1" },
+      ],
+      splPoints: [
+        { time: "0", area: "5201.603", recovery: "" },
+        { time: "6", area: "5173.402", recovery: "99.5" },
+        { time: "12", area: "5174.082", recovery: "99.5" },
+      ],
+      stdAcceptanceCriteria: `对照品溶液在5±3℃条件下，密闭保存，分别于0h、12h、24h、36h进样，考察HY130225的峰面积，与0h相比，HY130225峰面积的回收率应在98.0%~102.0%之间。\nStandard solution: Sealed and stored at 5±3℃ condition，the solution should be injected at the each point 0h、12h、24h、36h, the peak area of HY130225 should be evaluated, The recovery for peak area of HY130225 at each point should be 98.0%~102.0% compared with that of 0h.`,
+      stdConclusion: `对照品溶液在5±3℃条件下，密闭保存16h稳定。\nThe standard solution was stable when sealed and stored under the 5±3℃condition for 16h.`,
+      splAcceptanceCriteria: `供试品溶液在5±3℃条件下，密闭保存，分别于0h、12h、24h、36h进样，考察HY130225的峰面积，与0h相比，HY130225峰面积的回收率应在98.0%~102.0%之间。\nSample solution: Sealed and stored at 5±3℃ condition，the solution should be injected at the each point 0h、12h、24h、36h, the peak area of HY130225 should be evaluated, The recovery for peak area of HY130225 at each point should be 98.0%~102.0% compared with that of 0h.`,
+      conclusion: `供试品溶液在5±3℃条件下，密闭保存12h稳定。\nThe sample solution was stable when sealed and stored under the 5±3℃ condition for 12h.`
+    }
   });
 
   // Update productId in nested states when it changes
@@ -474,6 +623,8 @@ const App: React.FC = () => {
       return "Report Document";
     } else if (currentView === 'dictionary') {
       return "Data Mapping Dictionary";
+    } else if (currentView === 'prd') {
+      return "Report PRD";
     } else {
       return "Experimental Data Document";
     }
@@ -549,7 +700,13 @@ const App: React.FC = () => {
               // Pass column serials
               reportColumnSerials={reportColumnSerials}
               setReportColumnSerials={setReportColumnSerials}
-              // Pass prerequisites for columns
+              // Pass report reagents state
+              reportReagentValues={reportReagentValues}
+              setReportReagentValues={setReportReagentValues}
+              // Pass report sample & RS state
+              reportSampleRS={reportSampleRS}
+              setReportSampleRS={setReportSampleRS}
+              // Pass prerequisites for columns and reagents
               prerequisiteState={prerequisiteState}
               // Pass state required for Method Description in Report
               chemicalFormula={chemicalFormula}
@@ -572,11 +729,30 @@ const App: React.FC = () => {
               setCalculationState={setCalculationState}
               acceptanceCriteria={acceptanceCriteria}
               setAcceptanceCriteria={setAcceptanceCriteria}
+              // Pass experimental data to report
+              experimentalData={experimentalData}
+              // Pass specificity state to report
+              specificityState={specificityState}
+              // Pass accuracy state
+              accuracyState={accuracyState}
+              // Pass stability state
+              stabilityState={stabilityState}
+              // Pass precision state
+              precisionState={precisionState}
+              // Pass report history state
+              reportHistoryDate={reportHistoryDate}
+              setReportHistoryDate={setReportHistoryDate}
             />
           ) : currentView === 'dictionary' ? (
             <DataMappingDictionary />
+          ) : currentView === 'prd' ? (
+            <ReportDocumentPRD />
           ) : (
-            <DocumentPage />
+            <DocumentPage 
+              data={experimentalData}
+              setData={setExperimentalData}
+              productId={productId}
+            />
           )}
         </main>
       </div>

@@ -1,15 +1,15 @@
 
 import React from 'react';
 import { NavItem } from '../types';
-import { Database, FileText, ClipboardList, File } from 'lucide-react';
+import { Database, FileText, ClipboardList, File, BookOpen } from 'lucide-react';
 
 interface SidebarProps {
   navItems: NavItem[];
   activeId: string;
   onSelect: (id: string) => void;
   isOpen: boolean;
-  currentView: 'protocol' | 'dictionary' | 'report' | 'document';
-  onChangeView: (view: 'protocol' | 'dictionary' | 'report' | 'document') => void;
+  currentView: 'protocol' | 'dictionary' | 'report' | 'document' | 'prd';
+  onChangeView: (view: 'protocol' | 'dictionary' | 'report' | 'document' | 'prd') => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ navItems, activeId, onSelect, isOpen, currentView, onChangeView }) => {
@@ -63,7 +63,18 @@ export const Sidebar: React.FC<SidebarProps> = ({ navItems, activeId, onSelect, 
           }`}
         >
           <File size={18} />
-          实验数据文档 Experimental Data Document
+          实验数据文档 Data Doc
+        </button>
+        <button
+          onClick={() => onChangeView('prd')}
+          className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+            currentView === 'prd'
+              ? 'bg-blue-600 text-white shadow-sm'
+              : 'text-gray-700 hover:bg-gray-100'
+          }`}
+        >
+          <BookOpen size={18} />
+          报告文档 PRD
         </button>
       </div>
 
@@ -99,10 +110,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ navItems, activeId, onSelect, 
             查看所有系统变量与前端映射关系。<br/>
             View all system variables and their UI mappings.
           </div>
-        ) : (
+        ) : currentView === 'document' ? (
           <div className="px-4 py-4 text-sm text-gray-500 text-center">
             查看实验数据文档内容。<br/>
             View experimental data document content.
+          </div>
+        ) : (
+          <div className="px-4 py-4 text-sm text-gray-500 text-center">
+            产品需求文档。<br/>
+            Product Requirements Document.
           </div>
         )}
       </div>
