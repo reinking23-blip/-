@@ -310,7 +310,7 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
       <div className="max-w-6xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden border border-gray-200 p-12">
         
         {/* Header Table */}
-        <table className="w-full border-collapse border border-gray-400 mb-10 text-sm">
+        <table id="report-cover" className="w-full border-collapse border border-gray-400 mb-10 text-sm scroll-mt-24">
             <tbody>
               <tr>
                 <td className="border border-gray-400 p-3 bg-gray-50 font-bold w-32 align-middle">
@@ -364,7 +364,7 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
         </div>
 
         {/* 1. Objective */}
-        <div className="mb-8 pt-8 border-t-2 border-dashed border-gray-200">
+        <div id="report-objective" className="mb-8 pt-8 border-t-2 border-dashed border-gray-200 scroll-mt-24">
            <h3 className="font-bold text-xl mb-4 text-gray-800 border-b pb-2">1. 目的 Objective</h3>
            <div className="bg-green-100 p-4 border-l-4 border-green-500 text-sm space-y-4">
               <p>
@@ -377,7 +377,7 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
         </div>
 
         {/* 2. Scope */}
-        <div className="mb-8">
+        <div id="report-scope" className="mb-8 scroll-mt-24">
            <h3 className="font-bold text-xl mb-4 text-gray-800 border-b pb-2">2. 范围 Scope</h3>
            <div className="text-sm space-y-4 text-gray-700">
               <p>
@@ -390,7 +390,7 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
         </div>
 
         {/* 3. Results For Validation */}
-        <div className="mb-8">
+        <div id="report-results" className="mb-8 scroll-mt-24">
            <h3 className="font-bold text-xl mb-4 text-gray-800 border-b pb-2">3. 验证结果综述 Results For Validation</h3>
            <table className="w-full border-collapse border border-gray-400 text-sm table-fixed">
             <thead>
@@ -689,7 +689,7 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
         </div>
 
         {/* 4. Test Method Description (Dynamic Read-Only Section) */}
-        <div className="mb-8 pt-8 border-t-2 border-dashed border-gray-200">
+        <div id="report-method" className="mb-8 pt-8 border-t-2 border-dashed border-gray-200 scroll-mt-24">
           <h3 className="font-bold text-xl mb-6 text-gray-800 border-b pb-2">4. 检验方法描述 Test Method Description</h3>
           <TestMethodSection
             readOnly={true}
@@ -721,11 +721,11 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
         </div>
 
         {/* 5. Validation Content (New Section) */}
-        <div className="mb-8 pt-8 border-t-2 border-dashed border-gray-200">
+        <div id="report-validation-content" className="mb-8 pt-8 border-t-2 border-dashed border-gray-200 scroll-mt-24">
           <h3 className="font-bold text-xl mb-4 text-gray-800 border-b pb-2">5. 验证内容 Validation content</h3>
           
           {/* 5.1 Training Confirmation */}
-          <div className="mb-6">
+          <div id="report-val-training" className="mb-6 scroll-mt-24">
             <h4 className="font-bold text-lg text-gray-800 mb-2">5.1 培训确认 Training Confirmation</h4>
             <div className="text-sm text-gray-700 mb-4 space-y-1">
               <p>所有相关人员均已接受培训，培训记录完整。</p>
@@ -765,7 +765,7 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
           </div>
 
           {/* 5.2 Equipment and Reagent Confirmation */}
-          <div className="mb-6">
+          <div id="report-val-equipment" className="mb-6 scroll-mt-24">
             <h4 className="font-bold text-lg text-gray-800 mb-2">5.2 仪器和试剂确认 Equipment and Reagent confirmation</h4>
             
             <div className="mb-4">
@@ -962,7 +962,7 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
           </div>
 
           {/* 5.3 System Suitability */}
-          <div className="mb-6">
+          <div id="report-val-sys-suit" className="mb-6 scroll-mt-24">
             <h4 className="font-bold text-lg text-gray-800 mb-2">5.3 系统适用性 System suitability</h4>
             <div className="mb-4 text-sm space-y-2 pl-2">
                <p>
@@ -1159,7 +1159,7 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
           </div>
 
           {/* 5.4 Specificity */}
-          <div className="mb-6">
+          <div id="report-val-specificity" className="mb-6 scroll-mt-24">
             <h4 className="font-bold text-lg text-gray-800 mb-2">5.4 专属性 Specificity</h4>
             
             <div className="mb-4 text-sm pl-2">
@@ -1238,7 +1238,7 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
           </div>
 
           {/* 5.5 Linearity and Range (New Section) */}
-          <div className="mb-6">
+          <div id="report-val-linearity" className="mb-6 scroll-mt-24">
             <h4 className="font-bold text-lg text-gray-800 mb-2">5.5 线性和范围 Linearity and Range</h4>
             <div className="mb-4 text-sm pl-2">
                {/* Chinese Block */}
@@ -1348,7 +1348,7 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
           </div>
 
           {/* 5.6 Precision (Repeatability) */}
-          <div className="mb-6">
+          <div id="report-val-precision" className="mb-6 scroll-mt-24">
             <h4 className="font-bold text-lg text-gray-800 mb-2">5.6 精密度（重复性） Precision（repeatability）</h4>
             
             <div className="mb-4 text-sm pl-2">
@@ -1440,7 +1440,7 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
           </div>
 
           {/* 5.7 Accuracy */}
-          <div className="mb-6">
+          <div id="report-val-accuracy" className="mb-6 scroll-mt-24">
             <h4 className="font-bold text-lg text-gray-800 mb-2">5.7 准确度Accuracy</h4>
             
             <div className="mb-4 text-sm pl-2">
@@ -1524,7 +1524,7 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
           </div>
 
           {/* 5.8 Solution Stability */}
-          <div className="mb-6">
+          <div id="report-val-stability" className="mb-6 scroll-mt-24">
             <h4 className="font-bold text-lg text-gray-800 mb-2">5.8 溶液稳定性 Solution Stability</h4>
             
             <div className="mb-4 text-sm pl-2">
@@ -1626,7 +1626,7 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
         </div>
 
         {/* 6. Summary of Deviations */}
-        <div className="mb-8 pt-8 border-t-2 border-dashed border-gray-200">
+        <div id="report-deviations" className="mb-8 pt-8 border-t-2 border-dashed border-gray-200 scroll-mt-24">
            <h3 className="font-bold text-xl mb-4 text-gray-800 border-b pb-2">6. 偏差摘要 SUMMARY OF DEVIATIONS</h3>
            <div className="w-full relative group">
               <textarea
@@ -1642,7 +1642,7 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
         </div>
 
         {/* 7. Conclusion */}
-        <div className="mb-8 pt-8 border-t-2 border-dashed border-gray-200">
+        <div id="report-conclusion" className="mb-8 pt-8 border-t-2 border-dashed border-gray-200 scroll-mt-24">
            <h3 className="font-bold text-xl mb-4 text-gray-800 border-b pb-2">7. 结论 CONCLUSION</h3>
            <div className="text-sm space-y-4 leading-relaxed">
              <p>
@@ -1655,7 +1655,7 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
         </div>
 
         {/* 8. History of Change */}
-        <div className="mb-8 pt-8 border-t-2 border-dashed border-gray-200">
+        <div id="report-history" className="mb-8 pt-8 border-t-2 border-dashed border-gray-200 scroll-mt-24">
            <h3 className="font-bold text-xl mb-4 text-gray-800 border-b pb-2">8. 变更历史 History of Change</h3>
            <table className="w-full border-collapse border border-gray-400 text-sm text-center">
              <thead>

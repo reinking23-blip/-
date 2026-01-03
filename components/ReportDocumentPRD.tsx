@@ -1,446 +1,359 @@
 
 import React from 'react';
-import { FileText, Layers, Code, Database, AlertCircle, Cpu } from 'lucide-react';
+import { FileText, Database, CheckSquare, Edit3, Lock, PieChart, AlertTriangle, Calendar, ChevronRight } from 'lucide-react';
 
 export const ReportDocumentPRD: React.FC = () => {
   return (
     <div className="p-8 bg-gray-50 min-h-full">
-      <div className="max-w-6xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden border border-gray-200">
+      <div className="max-w-7xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden border border-gray-200">
         
         {/* Header */}
-        <div className="bg-gradient-to-r from-slate-800 to-slate-900 p-8 text-white">
-          <div className="flex items-center gap-3 mb-2 opacity-80">
-            <span className="px-2 py-0.5 border border-white/30 rounded text-xs uppercase tracking-wider">Technical Spec</span>
-            <span className="text-xs">Ver 2.0</span>
+        <div className="bg-slate-900 p-8 text-white border-b-4 border-blue-600">
+          <div className="flex justify-between items-start">
+            <div>
+              <div className="flex items-center gap-2 mb-2 opacity-80">
+                <span className="px-2 py-0.5 bg-blue-600 rounded text-xs font-bold uppercase tracking-wider">Detailed Spec</span>
+                <span className="text-xs">Ver 3.0 (Granular)</span>
+              </div>
+              <h1 className="text-3xl font-bold mb-2">检验方法验证报告 - 详细功能规格说明书</h1>
+              <p className="text-slate-300">Test Method Validation Report - Detailed Functional Specifications</p>
+            </div>
+            <div className="text-right text-xs text-slate-400 max-w-md">
+              本文档详细定义了报告模块中每个章节的数据来源、编辑权限、交互逻辑及校验规则，供开发人员逐项实现。
+            </div>
           </div>
-          <h1 className="text-3xl font-bold mb-2">检验方法验证报告 (Report Document) - 技术功能说明书</h1>
-          <p className="text-slate-300">面向开发的技术规格与逻辑定义 (Technical Functional Specification)</p>
         </div>
 
         <div className="p-8 space-y-12 text-gray-800">
 
-          {/* 1. UI Structure */}
+          {/* 0. 页眉与签署 (Header & Signatures) */}
           <section>
-            <div className="flex items-center gap-2 mb-6 border-b border-gray-200 pb-2">
-              <Layers className="text-blue-600" />
-              <h2 className="text-xl font-bold">1. 页面/组件结构 (UI Structure)</h2>
+            <div className="flex items-center gap-2 mb-4 border-b border-gray-200 pb-2">
+              <div className="bg-slate-100 p-1 rounded"><FileText className="text-slate-700" size={20} /></div>
+              <h2 className="text-xl font-bold">0. 页眉、封面与签署 (Header & Signatures)</h2>
             </div>
-            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+            <div className="overflow-hidden border border-gray-200 rounded-lg">
               <table className="w-full text-sm text-left">
-                <thead className="bg-gray-50 text-gray-700 font-semibold border-b border-gray-200">
+                <thead className="bg-gray-100 text-gray-700 font-semibold">
                   <tr>
-                    <th className="p-3 w-1/5">组件名称</th>
-                    <th className="p-3 w-1/6">层级</th>
-                    <th className="p-3">描述</th>
-                    <th className="p-3 w-1/4">对应文件</th>
+                    <th className="p-3 border-r w-1/4">功能模块</th>
+                    <th className="p-3 border-r w-1/4">数据字段/输入项</th>
+                    <th className="p-3 border-r w-1/4">逻辑与交互 (Logic & Interaction)</th>
+                    <th className="p-3">数据来源 (Source)</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   <tr>
-                    <td className="p-3 font-mono text-blue-600 font-bold">ReportDocument</td>
-                    <td className="p-3"><span className="px-2 py-0.5 bg-blue-100 text-blue-800 rounded text-xs">Container</span></td>
-                    <td className="p-3">报告生成主视图，接收所有业务数据 Props，负责布局编排。</td>
-                    <td className="p-3 font-mono text-xs text-gray-500">components/ReportDocument.tsx</td>
+                    <td className="p-3 font-medium">页眉 (Global Header)</td>
+                    <td className="p-3 text-xs">
+                      Product ID (Logo Area)<br/>
+                      Protocol Number (Combined)<br/>
+                      Page Number
+                    </td>
+                    <td className="p-3 text-xs">
+                      <ul className="list-disc pl-4 space-y-1">
+                        <li><strong>自动拼接:</strong> 方案号格式为 <code className="bg-gray-100 px-1">AVP-{'{Code}'}-{'{Ver}'}.{'{Proj}'}</code>。</li>
+                        <li><strong>只读:</strong> 页眉内容不可在报告页直接修改，需从方案页同步。</li>
+                      </ul>
+                    </td>
+                    <td className="p-3 text-xs font-mono text-gray-500">props.protocolCode<br/>props.productId</td>
                   </tr>
                   <tr>
-                    <td className="p-3 font-mono text-purple-600 font-bold pl-6">├── StatusSelect</td>
-                    <td className="p-3"><span className="px-2 py-0.5 bg-purple-100 text-purple-800 rounded text-xs">Atom</span></td>
-                    <td className="p-3">结果判定下拉组件 (Pass/Fail)，受控组件。</td>
-                    <td className="p-3 font-mono text-xs text-gray-500">Internal</td>
-                  </tr>
-                  <tr>
-                    <td className="p-3 font-mono text-purple-600 font-bold pl-6">├── BorderedInput</td>
-                    <td className="p-3"><span className="px-2 py-0.5 bg-purple-100 text-purple-800 rounded text-xs">Atom</span></td>
-                    <td className="p-3">带边框的表单输入组件，用于日期、批号录入。</td>
-                    <td className="p-3 font-mono text-xs text-gray-500">Internal</td>
-                  </tr>
-                  <tr>
-                    <td className="p-3 font-mono text-purple-600 font-bold pl-6">├── InlineInput</td>
-                    <td className="p-3"><span className="px-2 py-0.5 bg-purple-100 text-purple-800 rounded text-xs">Atom</span></td>
-                    <td className="p-3">无边框/透明背景输入组件，用于表格内数据修正或展示。</td>
-                    <td className="p-3 font-mono text-xs text-gray-500">Internal</td>
-                  </tr>
-                  <tr>
-                    <td className="p-3 font-mono text-green-600 font-bold pl-6">├── TestMethodSection</td>
-                    <td className="p-3"><span className="px-2 py-0.5 bg-green-100 text-green-800 rounded text-xs">Component</span></td>
-                    <td className="p-3">复用方案模块，强制 <code className="bg-gray-100 px-1 rounded">readOnly=true</code> 模式渲染方法描述。</td>
-                    <td className="p-3 font-mono text-xs text-gray-500">components/TestMethodSection.tsx</td>
-                  </tr>
-                  <tr>
-                    <td className="p-3 font-mono text-green-600 font-bold pl-6">└── LinearityChart</td>
-                    <td className="p-3"><span className="px-2 py-0.5 bg-green-100 text-green-800 rounded text-xs">Component</span></td>
-                    <td className="p-3">基于 SVG 的线性回归曲线可视化组件。</td>
-                    <td className="p-3 font-mono text-xs text-gray-500">components/DocumentPage.tsx</td>
+                    <td className="p-3 font-medium">封面签署区 (Signatures)</td>
+                    <td className="p-3 text-xs">
+                      人员信息表格:<br/>
+                      - Name, Dept, Position (Text)<br/>
+                      - Date (Date Picker)
+                    </td>
+                    <td className="p-3 text-xs">
+                      <ul className="list-disc pl-4 space-y-1">
+                        <li><strong>角色分离:</strong> 报告的签署人与方案的签署人数据结构分离（因为起草/审核人可能变更）。</li>
+                        <li><strong>动态渲染:</strong> 支持 <code className="bg-gray-100 px-1">textarea</code> 自适应高度，支持换行。</li>
+                        <li><strong>日期限制:</strong> 日期选择器格式为 YYYY-MM-DD。</li>
+                      </ul>
+                    </td>
+                    <td className="p-3 text-xs font-mono text-gray-500">Local State (preparer, reviewers, approver)</td>
                   </tr>
                 </tbody>
               </table>
             </div>
           </section>
 
-          {/* 2. Functional Details */}
+          {/* 1 & 2. 目的与范围 */}
           <section>
-            <div className="flex items-center gap-2 mb-6 border-b border-gray-200 pb-2">
-              <Code className="text-blue-600" />
-              <h2 className="text-xl font-bold">2. 功能逻辑细化 (Functional Details)</h2>
+            <div className="flex items-center gap-2 mb-4 border-b border-gray-200 pb-2">
+              <div className="bg-blue-100 p-1 rounded"><CheckSquare className="text-blue-700" size={20} /></div>
+              <h2 className="text-xl font-bold">1 & 2. 目的与范围 (Objective & Scope)</h2>
             </div>
-
-            <div className="space-y-8">
-              {/* 2.1 */}
-              <div>
-                <h3 className="font-bold text-gray-800 mb-3 pl-2 border-l-4 border-blue-500">2.1 页眉与签名区 (Header & Signatures)</h3>
-                <div className="mb-2 text-xs text-gray-500 font-mono bg-gray-50 p-2 rounded inline-block">
-                  数据来源: props.protocolCode, props.preparer, props.reviewers, props.approver
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm">
+              <h3 className="font-bold text-blue-900 mb-2">文本自动生成逻辑 (Dynamic Text Generation)</h3>
+              <p className="mb-2">第1章内容必须根据用户在“方案”阶段勾选的验证项目（Validation Options）动态生成字符串。</p>
+              <div className="grid grid-cols-2 gap-4 mt-3">
+                <div className="bg-white p-3 rounded border border-blue-100">
+                  <span className="block text-xs font-bold text-gray-500 mb-1">输入 (Options)</span>
+                  <code className="text-xs text-blue-700 block">
+                    systemSuitability: true<br/>
+                    specificity: true<br/>
+                    linearity: true<br/>
+                    accuracy: true
+                  </code>
                 </div>
-                <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                  <table className="w-full text-sm text-left">
-                    <thead className="bg-gray-50 text-gray-700 border-b border-gray-200">
-                      <tr>
-                        <th className="p-3 w-1/5">功能点</th>
-                        <th className="p-3 w-1/5">触发条件</th>
-                        <th className="p-3 w-1/3">前端逻辑 (Frontend Logic)</th>
-                        <th className="p-3 w-1/4">后端/数据交互</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                      <tr>
-                        <td className="p-3 font-medium">人员信息录入</td>
-                        <td className="p-3 text-gray-600">用户在 Name/Dept/Position 单元格输入文本</td>
-                        <td className="p-3">
-                          <ul className="list-disc list-inside space-y-1 text-gray-600 text-xs">
-                            <li><strong>State Change:</strong> 更新父组件 <code className="bg-gray-100 px-1 rounded">App.tsx</code> 中的 <code className="bg-gray-100 px-1 rounded">reportPreparer</code> 等对象。</li>
-                            <li><strong>Component:</strong> 使用 <code className="bg-gray-100 px-1 rounded">renderEditableCell</code> 渲染 <code className="bg-gray-100 px-1 rounded">textarea</code>。</li>
-                          </ul>
-                        </td>
-                        <td className="p-3 text-gray-600 text-xs font-mono">
-                          Input: &#123; field: 'name' | 'dept' | 'pos', value: string &#125;<br/>
-                          Sync: 实时更新 Lifted State
-                        </td>
-                      </tr>
-                      <tr>
-                        <td className="p-3 font-medium">日期签署</td>
-                        <td className="p-3 text-gray-600">用户选择/点击日期输入框</td>
-                        <td className="p-3">
-                          <ul className="list-disc list-inside space-y-1 text-gray-600 text-xs">
-                            <li><strong>Validation:</strong> 仅允许 YYYY-MM-DD 格式 (HTML5 date input)。</li>
-                          </ul>
-                        </td>
-                        <td className="p-3 text-gray-600 text-xs font-mono">Input: Date String ISO 8601</td>
-                      </tr>
-                    </tbody>
-                  </table>
+                <div className="bg-white p-3 rounded border border-blue-100">
+                  <span className="block text-xs font-bold text-gray-500 mb-1">输出 (Rendered Text)</span>
+                  <p className="text-xs text-gray-700">
+                    "...对该检验方法进行验证，包括<strong className="text-black">系统适用性、专属性、线性和范围、准确度</strong>。"
+                  </p>
                 </div>
               </div>
-
-              {/* 2.2 */}
-              <div>
-                <h3 className="font-bold text-gray-800 mb-3 pl-2 border-l-4 border-blue-500">2.2 Section 1 & 2: 目的与范围 (Objective & Scope)</h3>
-                <div className="mb-2 text-xs text-gray-500 font-mono bg-gray-50 p-2 rounded inline-block">
-                  数据来源: props.validationOptions, props.productId
-                </div>
-                <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                  <table className="w-full text-sm text-left">
-                    <thead className="bg-gray-50 text-gray-700 border-b border-gray-200">
-                      <tr>
-                        <th className="p-3 w-1/5">功能点</th>
-                        <th className="p-3 w-1/5">触发条件</th>
-                        <th className="p-3 w-1/3">前端逻辑 (Frontend Logic)</th>
-                        <th className="p-3 w-1/4">后端/数据交互</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                      <tr>
-                        <td className="p-3 font-medium">动态验证项生成</td>
-                        <td className="p-3 text-gray-600">页面加载</td>
-                        <td className="p-3">
-                          <ul className="list-disc list-inside space-y-1 text-gray-600 text-xs">
-                            <li><strong>Logic:</strong> 遍历 <code className="bg-gray-100 px-1 rounded">validationOptions</code>，提取为 <code className="bg-gray-100 px-1 rounded">true</code> 的项，拼接中英文文本 (e.g., "系统适用性 System suitability...") 插入 DOM。</li>
-                          </ul>
-                        </td>
-                        <td className="p-3 text-gray-600 text-xs font-mono">N/A (Pure Rendering)</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* 2.3 */}
-              <div>
-                <h3 className="font-bold text-gray-800 mb-3 pl-2 border-l-4 border-blue-500">2.3 Section 3: 验证结果综述 (Results Summary)</h3>
-                <div className="mb-2 text-xs text-gray-500 font-mono bg-gray-50 p-2 rounded inline-block">
-                  数据来源: props.experimentalData (Read-only), valStatus (Local State)
-                </div>
-                <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                  <table className="w-full text-sm text-left">
-                    <thead className="bg-gray-50 text-gray-700 border-b border-gray-200">
-                      <tr>
-                        <th className="p-3 w-1/5">功能点</th>
-                        <th className="p-3 w-1/5">触发条件</th>
-                        <th className="p-3 w-1/3">前端逻辑 (Frontend Logic)</th>
-                        <th className="p-3 w-1/4">后端/数据交互</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                      <tr>
-                        <td className="p-3 font-medium">结果数据展示</td>
-                        <td className="p-3 text-gray-600">页面加载</td>
-                        <td className="p-3">
-                          <ul className="list-disc list-inside space-y-1 text-gray-600 text-xs">
-                            <li><strong>Rendering:</strong> 从 <code className="bg-gray-100 px-1 rounded">experimentalData</code> 深层对象中提取关键指标 (RSD, Recovery) 填充表格，使用 <code className="bg-gray-100 px-1 rounded">InlineInput</code> 展示。</li>
-                          </ul>
-                        </td>
-                        <td className="p-3 text-gray-600 text-xs font-mono">Read-only Props</td>
-                      </tr>
-                      <tr>
-                        <td className="p-3 font-medium">合规性判定</td>
-                        <td className="p-3 text-gray-600">用户切换下拉框 (Pass/Fail)</td>
-                        <td className="p-3">
-                          <ul className="list-disc list-inside space-y-1 text-gray-600 text-xs">
-                            <li><strong>State Change:</strong> 更新组件内部状态 <code className="bg-gray-100 px-1 rounded">valStatus</code> 对象 (e.g., &#123; systemSuitability: 'Pass' &#125;)。</li>
-                            <li><strong>Effect:</strong> 该状态联动影响 Section 5 各子章节末尾的结论显示。</li>
-                          </ul>
-                        </td>
-                        <td className="p-3 text-gray-600 text-xs font-mono">Input: &#123; key: string, status: 'Pass' | 'Fail' &#125;</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* 2.4 */}
-              <div>
-                <h3 className="font-bold text-gray-800 mb-3 pl-2 border-l-4 border-blue-500">2.4 Section 4: 检验方法描述 (Test Method Description)</h3>
-                <div className="mb-2 text-xs text-gray-500 font-mono bg-gray-50 p-2 rounded inline-block">
-                  数据来源: 全量 Protocol State (solutionPreps, testingConditions 等)
-                </div>
-                <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                  <table className="w-full text-sm text-left">
-                    <thead className="bg-gray-50 text-gray-700 border-b border-gray-200">
-                      <tr>
-                        <th className="p-3 w-1/5">功能点</th>
-                        <th className="p-3 w-1/5">触发条件</th>
-                        <th className="p-3 w-1/3">前端逻辑 (Frontend Logic)</th>
-                        <th className="p-3 w-1/4">后端/数据交互</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                      <tr>
-                        <td className="p-3 font-medium">只读模式渲染</td>
-                        <td className="p-3 text-gray-600">页面加载</td>
-                        <td className="p-3">
-                          <ul className="list-disc list-inside space-y-1 text-gray-600 text-xs">
-                            <li><strong>Props Drilling:</strong> 将所有方案数据透传给 <code className="bg-gray-100 px-1 rounded">TestMethodSection</code> 组件，并强制设置 <code className="bg-gray-100 px-1 rounded">readOnly=true</code>。</li>
-                            <li><strong>UI:</strong> 所有输入框替换为 <code className="bg-gray-100 px-1 rounded">&lt;span&gt;</code> 文本，移除编辑样式 (黄色背景)。</li>
-                          </ul>
-                        </td>
-                        <td className="p-3 text-gray-600 text-xs font-mono">Read-only Props</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* 2.5 */}
-              <div>
-                <h3 className="font-bold text-gray-800 mb-3 pl-2 border-l-4 border-blue-500">2.5 Section 5.1 & 5.2: 资源确认 (Training & Resources)</h3>
-                <div className="mb-2 text-xs text-gray-500 font-mono bg-gray-50 p-2 rounded inline-block">
-                  数据来源: props.reportEquipment, props.reportReagentValues, props.reportSampleRS
-                </div>
-                <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                  <table className="w-full text-sm text-left">
-                    <thead className="bg-gray-50 text-gray-700 border-b border-gray-200">
-                      <tr>
-                        <th className="p-3 w-1/5">功能点</th>
-                        <th className="p-3 w-1/5">触发条件</th>
-                        <th className="p-3 w-1/3">前端逻辑 (Frontend Logic)</th>
-                        <th className="p-3 w-1/4">后端/数据交互</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                      <tr>
-                        <td className="p-3 font-medium">培训日期录入</td>
-                        <td className="p-3 text-gray-600">选择日期</td>
-                        <td className="p-3">
-                          <ul className="list-disc list-inside space-y-1 text-gray-600 text-xs">
-                            <li><strong>State Change:</strong> 更新 <code className="bg-gray-100 px-1 rounded">props.trainingDate</code>。</li>
-                          </ul>
-                        </td>
-                        <td className="p-3 text-gray-600 text-xs font-mono">Input: Date String</td>
-                      </tr>
-                      <tr>
-                        <td className="p-3 font-medium">仪器/试剂信息补录</td>
-                        <td className="p-3 text-gray-600">用户输入批号、有效期、设备编号</td>
-                        <td className="p-3">
-                          <ul className="list-disc list-inside space-y-1 text-gray-600 text-xs">
-                            <li><strong>State Change:</strong> 更新 <code className="bg-gray-100 px-1 rounded">App.tsx</code> 中的数组或对象状态。</li>
-                            <li><strong>UI:</strong> 使用 <code className="bg-gray-100 px-1 rounded">BorderedInput</code> 组件。</li>
-                          </ul>
-                        </td>
-                        <td className="p-3 text-gray-600 text-xs font-mono">Input: &#123; id, field, value &#125;</td>
-                      </tr>
-                      <tr>
-                        <td className="p-3 font-medium">色谱柱序列号录入</td>
-                        <td className="p-3 text-gray-600">用户输入序列号</td>
-                        <td className="p-3">
-                          <ul className="list-disc list-inside space-y-1 text-gray-600 text-xs">
-                            <li><strong>State Change:</strong> 更新 <code className="bg-gray-100 px-1 rounded">props.reportColumnSerials</code> Map。</li>
-                          </ul>
-                        </td>
-                        <td className="p-3 text-gray-600 text-xs font-mono">Input: &#123; columnId, serial &#125;</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* 2.6 */}
-              <div>
-                <h3 className="font-bold text-gray-800 mb-3 pl-2 border-l-4 border-blue-500">2.6 Section 5.3 - 5.8: 详细实验内容 (Experimental Details)</h3>
-                <div className="mb-2 text-xs text-gray-500 font-mono bg-gray-50 p-2 rounded inline-block">
-                  数据来源: props.experimentalData
-                </div>
-                <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                  <table className="w-full text-sm text-left">
-                    <thead className="bg-gray-50 text-gray-700 border-b border-gray-200">
-                      <tr>
-                        <th className="p-3 w-1/5">功能点</th>
-                        <th className="p-3 w-1/5">触发条件</th>
-                        <th className="p-3 w-1/3">前端逻辑 (Frontend Logic)</th>
-                        <th className="p-3 w-1/4">后端/数据交互</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                      <tr>
-                        <td className="p-3 font-medium">附件索引录入</td>
-                        <td className="p-3 text-gray-600">用户输入 "典型附图见..."</td>
-                        <td className="p-3">
-                          <ul className="list-disc list-inside space-y-1 text-gray-600 text-xs">
-                            <li><strong>State Change:</strong> 更新组件内部状态 <code className="bg-gray-100 px-1 rounded">attachmentRef</code> 等 (Local State)。</li>
-                          </ul>
-                        </td>
-                        <td className="p-3 text-gray-600 text-xs font-mono">Client-side only currently</td>
-                      </tr>
-                      <tr>
-                        <td className="p-3 font-medium">实验数据渲染</td>
-                        <td className="p-3 text-gray-600">页面加载</td>
-                        <td className="p-3">
-                          <ul className="list-disc list-inside space-y-1 text-gray-600 text-xs">
-                            <li><strong>Logic:</strong> 映射 <code className="bg-gray-100 px-1 rounded">experimentalData</code> 中的数组 (rows, injections) 到 HTML 表格。</li>
-                            <li><strong>Chart:</strong> Section 5.5 调用 <code className="bg-gray-100 px-1 rounded">LinearityChart</code>，传入 rows 计算 SVG 路径。</li>
-                          </ul>
-                        </td>
-                        <td className="p-3 text-gray-600 text-xs font-mono">Read-only Props</td>
-                      </tr>
-                      <tr>
-                        <td className="p-3 font-medium">结论联动</td>
-                        <td className="p-3 text-gray-600">valStatus 变更 (Sec 3)</td>
-                        <td className="p-3">
-                          <ul className="list-disc list-inside space-y-1 text-gray-600 text-xs">
-                            <li><strong>Logic:</strong> 引用 Section 3 中设定的 Pass/Fail 状态文本。</li>
-                          </ul>
-                        </td>
-                        <td className="p-3 text-gray-600 text-xs font-mono">Dependent on Local State</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* 2.7 & 2.8 */}
-              <div>
-                <h3 className="font-bold text-gray-800 mb-3 pl-2 border-l-4 border-blue-500">2.7 - 2.8 偏差与历史 (Deviations & History)</h3>
-                <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
-                  <table className="w-full text-sm text-left">
-                    <thead className="bg-gray-50 text-gray-700 border-b border-gray-200">
-                      <tr>
-                        <th className="p-3 w-1/5">功能点</th>
-                        <th className="p-3 w-1/5">触发条件</th>
-                        <th className="p-3 w-1/3">前端逻辑</th>
-                        <th className="p-3 w-1/4">交互</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                      <tr>
-                        <td className="p-3 font-medium">偏差描述</td>
-                        <td className="p-3 text-gray-600">用户输入文本域</td>
-                        <td className="p-3 text-xs text-gray-600">
-                          State Change: 更新 <code className="bg-gray-100 px-1 rounded">deviationSummary</code>。
-                          <br/>Default: 默认为 "无偏差/No deviation"。
-                        </td>
-                        <td className="p-3 text-xs font-mono text-gray-600">Input: Multiline String</td>
-                      </tr>
-                      <tr>
-                        <td className="p-3 font-medium">生效日期录入</td>
-                        <td className="p-3 text-gray-600">选择日期</td>
-                        <td className="p-3 text-xs text-gray-600">
-                          State Change: 更新 <code className="bg-gray-100 px-1 rounded">reportHistoryDate</code>。
-                        </td>
-                        <td className="p-3 text-xs font-mono text-gray-600">Input: Date String</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
             </div>
           </section>
 
-          {/* 3. Edge Cases */}
+          {/* 3. 验证结果综述 */}
           <section>
-            <div className="flex items-center gap-2 mb-6 border-b border-gray-200 pb-2">
-              <AlertCircle className="text-blue-600" />
-              <h2 className="text-xl font-bold">3. 交互细节与边界情况 (Edge Cases)</h2>
+            <div className="flex items-center gap-2 mb-4 border-b border-gray-200 pb-2">
+              <div className="bg-purple-100 p-1 rounded"><Database className="text-purple-700" size={20} /></div>
+              <h2 className="text-xl font-bold">3. 验证结果综述 (Results Summary Dashboard)</h2>
             </div>
-            <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+            <p className="text-sm text-gray-600 mb-3">此表格是报告的核心摘要，汇集关键数据并提供最终判定入口。</p>
+            <div className="overflow-hidden border border-gray-200 rounded-lg">
               <table className="w-full text-sm text-left">
-                <thead className="bg-gray-50 text-gray-700 border-b border-gray-200">
+                <thead className="bg-gray-100 text-gray-700 font-semibold">
                   <tr>
-                    <th className="p-3 w-1/4">场景</th>
-                    <th className="p-3 w-3/4">UI 表现 / 逻辑处理</th>
+                    <th className="p-3 border-r w-1/5">验证项 (Row)</th>
+                    <th className="p-3 border-r w-1/3">关键数据提取 (Data Binding)</th>
+                    <th className="p-3 border-r">交互功能 (Interaction)</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   <tr>
-                    <td className="p-3 font-medium text-gray-800">Loading 状态</td>
-                    <td className="p-3 text-gray-600">
-                      若 <code className="bg-gray-100 px-1 rounded">props.experimentalData</code> 为 undefined，组件应返回 <code className="bg-gray-100 px-1 rounded">&lt;div&gt;Loading Report Data...&lt;/div&gt;</code> 或骨架屏，避免白屏崩溃。
+                    <td className="p-3 font-medium">系统适用性<br/>(System Suitability)</td>
+                    <td className="p-3 text-xs">
+                      自动读取实验数据：<br/>
+                      - 理论板数 (Theoretical Plates)<br/>
+                      - 拖尾因子 (Tailing Factor)<br/>
+                      - 峰面积/保留时间 RSD<br/>
+                      - 回收率 (Recovery)
                     </td>
-                  </tr>
-                  <tr>
-                    <td className="p-3 font-medium text-gray-800">空数据展示</td>
-                    <td className="p-3 text-gray-600">
-                      <ul className="list-disc list-inside space-y-1">
-                        <li><strong>数值:</strong> 若后端返回 <code className="bg-gray-100 px-1 rounded">null</code> 或空串，表格单元格渲染为空白或 <code className="bg-gray-100 px-1 rounded">-</code>。</li>
-                        <li><strong>图表:</strong> 若线性数据点 &lt; 2 个，图表区域显示 "Insufficient data for chart"。</li>
+                    <td className="p-3 text-xs border-l border-purple-100 bg-purple-50" rowSpan={6}>
+                      <div className="font-bold text-purple-800 mb-1">Pass/Fail 判定下拉框</div>
+                      <ul className="list-disc pl-4 space-y-1">
+                        <li><strong>组件:</strong> <code className="bg-white px-1 border rounded">StatusSelect</code></li>
+                        <li><strong>行为:</strong> 用户手动选择 Pass 或 Fail。</li>
+                        <li><strong>联动:</strong> 此处的状态将<strong>直接决定</strong>第5章各子章节末尾的“结论”文字。</li>
+                        <li><strong>默认值:</strong> Pass</li>
                       </ul>
                     </td>
                   </tr>
                   <tr>
-                    <td className="p-3 font-medium text-gray-800">文本溢出</td>
-                    <td className="p-3 text-gray-600">
-                      表格内的 <code className="bg-gray-100 px-1 rounded">textarea</code> 设置 <code className="bg-gray-100 px-1 rounded">rows</code> 属性自适应高度，禁用 <code className="bg-gray-100 px-1 rounded">resize</code>，防止破坏打印版式。
+                    <td className="p-3 font-medium">专属性<br/>(Specificity)</td>
+                    <td className="p-3 text-xs">
+                      - 相对保留时间偏差 (RT Deviation)<br/>
+                      - 峰纯度因子 (Peak Purity)
                     </td>
                   </tr>
                   <tr>
-                    <td className="p-3 font-medium text-gray-800">打印样式</td>
-                    <td className="p-3 text-gray-600">
-                      CSS <code className="bg-gray-100 px-1 rounded">@media print</code>: 隐藏 Sidebar、Header 导航、操作按钮 (Add/Delete)；确保 <code className="bg-gray-100 px-1 rounded">break-after: page</code> 在主要章节 (如 Section 4 后) 生效。
+                    <td className="p-3 font-medium">线性<br/>(Linearity)</td>
+                    <td className="p-3 text-xs">
+                      - 相关系数 (r)<br/>
+                      - 截距比例 (% y-intercept)<br/>
+                      - 线性方程 (Equation)<br/>
+                      - 残差平方和 (RSS)
                     </td>
                   </tr>
                   <tr>
-                    <td className="p-3 font-medium text-gray-800">数据同步延迟</td>
-                    <td className="p-3 text-gray-600">
-                      由于采用 Lifted State，<code className="bg-gray-100 px-1 rounded">App.tsx</code> 更新可能导致全页重绘。需使用 <code className="bg-gray-100 px-1 rounded">React.memo</code> 优化子组件以防输入卡顿。
+                    <td className="p-3 font-medium">精密度<br/>(Precision)</td>
+                    <td className="p-3 text-xs">
+                      - 6针样品的 RSD%
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="p-3 font-medium">准确度<br/>(Accuracy)</td>
+                    <td className="p-3 text-xs">
+                      - 平均回收率范围 (Recovery Range)<br/>
+                      - RSD%
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="p-3 font-medium">稳定性<br/>(Stability)</td>
+                    <td className="p-3 text-xs">
+                      - 各时间点回收率 (Timepoint Recovery)
                     </td>
                   </tr>
                 </tbody>
               </table>
+            </div>
+          </section>
+
+          {/* 4. 方法描述 */}
+          <section>
+            <div className="flex items-center gap-2 mb-4 border-b border-gray-200 pb-2">
+              <div className="bg-gray-100 p-1 rounded"><Lock className="text-gray-700" size={20} /></div>
+              <h2 className="text-xl font-bold">4. 检验方法描述 (Test Method - Read Only)</h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="p-4 border border-gray-200 rounded-lg">
+                <h4 className="font-bold text-sm mb-2">组件复用逻辑</h4>
+                <p className="text-xs text-gray-600 mb-2">
+                  直接复用方案模块的 <code className="bg-gray-100 px-1 rounded">TestMethodSection</code> 组件，但传入 <code className="bg-gray-100 px-1 rounded">readOnly=true</code> 属性。
+                </p>
+                <div className="bg-gray-50 p-2 rounded text-xs border border-gray-200">
+                  <strong>表现差异:</strong><br/>
+                  1. 所有 <code className="text-yellow-600">bg-yellow-300</code> 输入框背景移除，变为透明。<br/>
+                  2. 输入框替换为纯文本 (<code className="text-blue-600">&lt;span&gt;</code>) 展示。<br/>
+                  3. 隐藏“新增行”、“删除行”等操作按钮。<br/>
+                  4. 数据实时同步自 App 全局状态（即方案中修改，报告中自动更新）。
+                </div>
+              </div>
+              <div className="p-4 border border-gray-200 rounded-lg">
+                <h4 className="font-bold text-sm mb-2">包含的数据子项</h4>
+                <ul className="text-xs text-gray-600 space-y-1 list-disc pl-4">
+                  <li>4.1 产品描述 (化学式、名称)</li>
+                  <li>4.2 仪器及条件 (色谱柱、流速、波长、梯度表)</li>
+                  <li>4.3 溶液配制 (详细文本描述、称样量)</li>
+                  <li>4.4 进样序列 (系统适用性针数定义)</li>
+                  <li>4.5 系统适用性标准 (理论板数、RSD限度)</li>
+                  <li>4.7 计算公式 (校正因子选项)</li>
+                  <li>4.8 接受标准 (总限度)</li>
+                </ul>
+              </div>
+            </div>
+          </section>
+
+          {/* 5. 验证内容详情 */}
+          <section>
+            <div className="flex items-center gap-2 mb-4 border-b border-gray-200 pb-2">
+              <div className="bg-green-100 p-1 rounded"><Edit3 className="text-green-700" size={20} /></div>
+              <h2 className="text-xl font-bold">5. 验证内容详情 (Validation Content - Editable)</h2>
+            </div>
+            <p className="text-sm text-gray-600 mb-4">此部分混合了只读的实验数据引用和需要用户补录的现场记录。</p>
+
+            {/* 5.1 & 5.2 Resources */}
+            <div className="mb-6">
+              <h3 className="font-bold text-gray-800 mb-2 border-l-4 border-green-500 pl-2">5.1 - 5.2 资源确认 (Resources)</h3>
+              <table className="w-full text-sm text-left border border-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="p-2 border-r">子章节</th>
+                    <th className="p-2 border-r">需补录字段 (User Input)</th>
+                    <th className="p-2">校验规则</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  <tr>
+                    <td className="p-2 text-xs font-medium">5.1 培训确认</td>
+                    <td className="p-2 text-xs">培训日期 (Training Date)</td>
+                    <td className="p-2 text-xs text-gray-500">日期格式</td>
+                  </tr>
+                  <tr>
+                    <td className="p-2 text-xs font-medium">5.2.1 仪器确认</td>
+                    <td className="p-2 text-xs">厂家 (Supplier), 设备编号 (ID), 型号 (Model), 有效期 (Retest Date)</td>
+                    <td className="p-2 text-xs text-gray-500">有效期不得早于当前日期（逻辑校验非强制）</td>
+                  </tr>
+                  <tr>
+                    <td className="p-2 text-xs font-medium">5.2.2 色谱柱</td>
+                    <td className="p-2 text-xs">色谱柱序列号 (Serial Number)</td>
+                    <td className="p-2 text-xs text-gray-500">必填，关联具体仪器</td>
+                  </tr>
+                  <tr>
+                    <td className="p-2 text-xs font-medium">5.2.3 试剂</td>
+                    <td className="p-2 text-xs">批号 (Batch), 厂家 (Supplier), 有效期 (Expiry)</td>
+                    <td className="p-2 text-xs text-gray-500">支持多行试剂录入</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            {/* 5.3+ Experiments */}
+            <div className="mb-6">
+              <h3 className="font-bold text-gray-800 mb-2 border-l-4 border-blue-500 pl-2">5.3 - 5.8 实验数据展示 (Experimental Data)</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                
+                {/* Visuals */}
+                <div className="border p-3 rounded bg-white shadow-sm">
+                  <div className="flex items-center gap-2 mb-2 text-blue-600 font-bold text-sm">
+                    <PieChart size={16} /> 可视化图表
+                  </div>
+                  <p className="text-xs text-gray-600 mb-2">在 <strong>5.5 线性和范围</strong> 章节：</p>
+                  <ul className="list-disc pl-4 text-xs text-gray-600 space-y-1">
+                    <li>调用 <code className="bg-gray-100">LinearityChart</code> 组件。</li>
+                    <li><strong>X轴:</strong> 浓度 (Concentration)。</li>
+                    <li><strong>Y轴:</strong> 峰面积 (Area)。</li>
+                    <li><strong>数据源:</strong> <code className="bg-gray-100">experimentalData.linearity.rows</code>。</li>
+                    <li><strong>渲染:</strong> SVG 实时绘制回归线和 R² 值。</li>
+                  </ul>
+                </div>
+
+                {/* Attachments */}
+                <div className="border p-3 rounded bg-white shadow-sm">
+                  <div className="flex items-center gap-2 mb-2 text-orange-600 font-bold text-sm">
+                    <FileText size={16} /> 附件索引 (Inputs)
+                  </div>
+                  <p className="text-xs text-gray-600 mb-2">每个实验子章节头部需包含：</p>
+                  <ul className="list-disc pl-4 text-xs text-gray-600 space-y-1">
+                    <li>"典型附图见附件 [输入框]"</li>
+                    <li><strong>功能:</strong> 允许用户输入图谱编号（如 "5.5-1"）。</li>
+                    <li><strong>状态:</strong> 独立 Local State 管理。</li>
+                  </ul>
+                </div>
+
+                {/* Conclusion Logic */}
+                <div className="border p-3 rounded bg-white shadow-sm">
+                  <div className="flex items-center gap-2 mb-2 text-green-600 font-bold text-sm">
+                    <CheckSquare size={16} /> 结论联动
+                  </div>
+                  <p className="text-xs text-gray-600 mb-2">子章节末尾的“结论”行：</p>
+                  <ul className="list-disc pl-4 text-xs text-gray-600 space-y-1">
+                    <li><strong>只读展示:</strong> 用户不可直接编辑。</li>
+                    <li><strong>内容来源:</strong> 引用第3章 (Results Summary) 中用户选择的 Pass/Fail 状态。</li>
+                    <li>Pass → "符合规定 / Pass"</li>
+                    <li>Fail → "不符合规定 / Fail"</li>
+                  </ul>
+                </div>
+
+              </div>
+            </div>
+          </section>
+
+          {/* 6, 7, 8 Footer Sections */}
+          <section>
+            <div className="flex items-center gap-2 mb-4 border-b border-gray-200 pb-2">
+              <div className="bg-orange-100 p-1 rounded"><AlertTriangle className="text-orange-700" size={20} /></div>
+              <h2 className="text-xl font-bold">6, 7, 8. 偏差、结论与历史 (Footer Sections)</h2>
+            </div>
+            <div className="grid grid-cols-1 gap-4">
+              
+              <div className="flex gap-4 items-start p-3 border-b border-gray-100">
+                <div className="w-32 font-bold text-sm shrink-0">6. 偏差摘要<br/>(Deviations)</div>
+                <div className="text-xs text-gray-600">
+                  <p className="mb-1"><strong>交互:</strong> 多行文本域 (Textarea)。</p>
+                  <p className="mb-1"><strong>默认值:</strong> "在验证过程中未发生偏差。\nNo deviation occurred during the validation."</p>
+                  <p><strong>样式:</strong> 灰色背景，Focus时变白，支持拖拽调整高度。</p>
+                </div>
+              </div>
+
+              <div className="flex gap-4 items-start p-3 border-b border-gray-100">
+                <div className="w-32 font-bold text-sm shrink-0">7. 结论<br/>(Conclusion)</div>
+                <div className="text-xs text-gray-600">
+                  <p className="mb-1"><strong>内容:</strong> 固定话术。</p>
+                  <p>"该检验方法可以稳定可靠地用于 [ProductID] 含量和鉴别的检验..."</p>
+                </div>
+              </div>
+
+              <div className="flex gap-4 items-start p-3">
+                <div className="w-32 font-bold text-sm shrink-0">8. 变更历史<br/>(History)</div>
+                <div className="text-xs text-gray-600">
+                  <p className="mb-1"><strong>交互:</strong> "生效日期" (Effective Date) 为日期选择器输入。</p>
+                  <p><strong>表格内容:</strong> 版本号(00), 变更原因(New) 为固定首版内容。</p>
+                </div>
+              </div>
+
             </div>
           </section>
 
         </div>
         
-        <div className="bg-gray-100 p-4 text-center text-xs text-gray-500 border-t border-gray-200">
-          Generated by Technical PM • Internal Use Only
+        <div className="bg-slate-50 p-4 text-center text-xs text-slate-400 border-t border-gray-200">
+          Internal Document • Engineering Department • Confidential
         </div>
       </div>
     </div>

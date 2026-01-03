@@ -7,6 +7,7 @@ import { DataMappingDictionary } from './components/DataMappingDictionary';
 import { ReportDocument } from './components/ReportDocument';
 import { DocumentPage } from './components/DocumentPage';
 import { ReportDocumentPRD } from './components/ReportDocumentPRD';
+import { ProtocolDocumentPRD } from './components/ProtocolDocumentPRD';
 import { Menu } from 'lucide-react';
 import { 
   NavItem, 
@@ -35,7 +36,7 @@ import {
 } from './types';
 
 const App: React.FC = () => {
-  const [currentView, setCurrentView] = useState<'protocol' | 'dictionary' | 'report' | 'document' | 'prd'>('protocol');
+  const [currentView, setCurrentView] = useState<'protocol' | 'dictionary' | 'report' | 'document' | 'prd' | 'protocol_prd'>('protocol');
   const [activeSectionId, setActiveSectionId] = useState<string>('cover');
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [productId, setProductId] = useState<string>("HY130225");
@@ -546,7 +547,7 @@ const App: React.FC = () => {
     }
   ), [productId, protocolCode, protocolVersion, projectNumber, preparerName, preparerDept, preparerPosition, rev1Name, rev1Dept, rev1Pos, rev2Name, rev2Dept, rev2Pos, rev3Name, rev3Dept, rev3Pos, approverName, approverDept, approverPos, validationOptions, chemicalFormula, chemicalName, gradientData, testingConditions, solutionPreps, solDetail, sequenceState, valProcSysSuitState, valProcPrecisionState, sysSuitability, calculationState, acceptanceCriteria, specificityState, linearityState, precisionState, accuracyState, stabilityState, prerequisiteState]);
 
-  const filteredNavItems = useMemo(() => {
+  const protocolNavItems = useMemo(() => {
     const items: NavItem[] = [
       { id: 'cover', label: '封面 Cover' },
       { id: 'objective', label: '1. 目的 Objective' },
@@ -585,6 +586,39 @@ const App: React.FC = () => {
 
     return items;
   }, [validationOptions]);
+
+  const reportNavItems = useMemo(() => {
+    const items: NavItem[] = [
+      { id: 'report-cover', label: '封面 Cover' },
+      { id: 'report-objective', label: '1. 目的 Objective' },
+      { id: 'report-scope', label: '2. 范围 Scope' },
+      { id: 'report-results', label: '3. 验证结果 Results' },
+      { id: 'report-method', label: '4. 方法描述 Method' },
+      { id: 'report-validation-content', label: '5. 验证内容 Content' },
+      { id: 'report-val-training', label: '5.1 培训确认 Training', isSubItem: true },
+      { id: 'report-val-equipment', label: '5.2 仪器试剂 Equipment', isSubItem: true },
+    ];
+
+    if (validationOptions.systemSuitability) items.push({ id: 'report-val-sys-suit', label: '5.3 系统适用性 Sys Suit', isSubItem: true });
+    if (validationOptions.specificity) items.push({ id: 'report-val-specificity', label: '5.4 专属性 Specificity', isSubItem: true });
+    if (validationOptions.linearity) items.push({ id: 'report-val-linearity', label: '5.5 线性 Linearity', isSubItem: true });
+    if (validationOptions.precision) items.push({ id: 'report-val-precision', label: '5.6 精密度 Precision', isSubItem: true });
+    if (validationOptions.accuracy) items.push({ id: 'report-val-accuracy', label: '5.7 准确度 Accuracy', isSubItem: true });
+    if (validationOptions.stability) items.push({ id: 'report-val-stability', label: '5.8 稳定性 Stability', isSubItem: true });
+
+    items.push(
+      { id: 'report-deviations', label: '6. 偏差 Deviations' },
+      { id: 'report-conclusion', label: '7. 结论 Conclusion' },
+      { id: 'report-history', label: '8. 变更历史 History' }
+    );
+    return items;
+  }, [validationOptions]);
+
+  const filteredNavItems = useMemo(() => {
+    if (currentView === 'report') return reportNavItems;
+    if (currentView === 'protocol') return protocolNavItems;
+    return [];
+  }, [currentView, reportNavItems, protocolNavItems]);
   
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
@@ -596,8 +630,8 @@ const App: React.FC = () => {
   };
 
   useEffect(() => {
-    // Only set up observer if we are in protocol view
-    if (currentView !== 'protocol') return;
+    // Only set up observer if we are in protocol or report view
+    if (currentView !== 'protocol' && currentView !== 'report') return;
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -608,13 +642,14 @@ const App: React.FC = () => {
       { rootMargin: '-20% 0px -60% 0px', threshold: 0 }
     );
 
-    sections.forEach((section) => {
-      const element = document.getElementById(section.id);
+    // Observe elements based on current nav items (works for both Protocol and Report)
+    filteredNavItems.forEach((item) => {
+      const element = document.getElementById(item.id);
       if (element) observer.observe(element);
     });
 
     return () => observer.disconnect();
-  }, [sections, currentView]);
+  }, [filteredNavItems, currentView]);
 
   const currentSectionTitle = useMemo(() => {
     if (currentView === 'protocol') {
@@ -625,6 +660,8 @@ const App: React.FC = () => {
       return "Data Mapping Dictionary";
     } else if (currentView === 'prd') {
       return "Report PRD";
+    } else if (currentView === 'protocol_prd') {
+      return "Protocol PRD";
     } else {
       return "Experimental Data Document";
     }
@@ -747,6 +784,8 @@ const App: React.FC = () => {
             <DataMappingDictionary />
           ) : currentView === 'prd' ? (
             <ReportDocumentPRD />
+          ) : currentView === 'protocol_prd' ? (
+            <ProtocolDocumentPRD />
           ) : (
             <DocumentPage 
               data={experimentalData}
