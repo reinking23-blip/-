@@ -40,6 +40,40 @@ interface TestMethodSectionProps {
   setAcceptanceCriteria: React.Dispatch<React.SetStateAction<AcceptanceCriterion[]>>;
 }
 
+// --- Helper Components defined OUTSIDE the main component to prevent remounting/focus loss ---
+
+const SmartInput = ({ value, onChange, placeholder, width = "w-full", className = "", readOnly }: { value: string, onChange: (v: string) => void, placeholder?: string, width?: string, className?: string, readOnly: boolean }) => {
+  if (readOnly) {
+    return <span className={`font-semibold px-1 ${className}`}>{value || 'N/A'}</span>;
+  }
+  return (
+    <input
+      type="text"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+      className={`${width} bg-yellow-300 border-b border-black outline-none px-1 text-center font-bold mx-1 inline-block ${className}`}
+      placeholder={placeholder}
+    />
+  );
+};
+
+const SmartTextarea = ({ value, onChange, placeholder, className = "", readOnly }: { value: string, onChange: (v: string) => void, placeholder?: string, className?: string, readOnly: boolean }) => {
+  if (readOnly) {
+    return <span className={`font-medium whitespace-pre-wrap ${className}`}>{value || 'N/A'}</span>;
+  }
+  return (
+    <div className={`inline-block ${className}`}>
+      <textarea
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className="bg-yellow-300 border-b border-black outline-none px-1 py-0.5 text-black resize-none min-h-[1.5rem] font-bold align-middle w-full h-full"
+        placeholder={placeholder}
+        rows={1}
+      />
+    </div>
+  );
+};
+
 export const TestMethodSection: React.FC<TestMethodSectionProps> = ({
   readOnly,
   productId,
@@ -69,40 +103,6 @@ export const TestMethodSection: React.FC<TestMethodSectionProps> = ({
 }) => {
   const displayId = productId || "N/A";
 
-  // --- Helper Components for ReadOnly/Editable Mode ---
-
-  const SmartInput = ({ value, onChange, placeholder, width = "w-full", className = "" }: { value: string, onChange: (v: string) => void, placeholder?: string, width?: string, className?: string }) => {
-    if (readOnly) {
-      return <span className={`font-semibold px-1 ${className}`}>{value || 'N/A'}</span>;
-    }
-    return (
-      <input
-        type="text"
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className={`${width} bg-yellow-300 border-b border-black outline-none px-1 text-center font-bold mx-1 inline-block ${className}`}
-        placeholder={placeholder}
-      />
-    );
-  };
-
-  const SmartTextarea = ({ value, onChange, placeholder, className = "" }: { value: string, onChange: (v: string) => void, placeholder?: string, className?: string }) => {
-    if (readOnly) {
-      return <span className={`font-medium whitespace-pre-wrap ${className}`}>{value || 'N/A'}</span>;
-    }
-    return (
-      <div className={`inline-block ${className}`}>
-        <textarea
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="bg-yellow-300 border-b border-black outline-none px-1 py-0.5 text-black resize-none min-h-[1.5rem] font-bold align-middle w-full h-full"
-          placeholder={placeholder}
-          rows={1}
-        />
-      </div>
-    );
-  };
-
   const calculateConc = (w: string, v: string) => {
     const weight = parseFloat(w);
     const volume = parseFloat(v);
@@ -128,6 +128,8 @@ export const TestMethodSection: React.FC<TestMethodSectionProps> = ({
               <SmartTextarea 
                 value={solutionPreps[key].descZh} 
                 onChange={(v) => setSolutionPreps(prev => ({ ...prev, [key]: { ...prev[key], descZh: v } }))}
+                className="w-full"
+                readOnly={readOnly}
               />
            </div>
         </div>
@@ -140,7 +142,8 @@ export const TestMethodSection: React.FC<TestMethodSectionProps> = ({
               <SmartTextarea 
                 value={solutionPreps[key].descEn} 
                 onChange={(v) => setSolutionPreps(prev => ({ ...prev, [key]: { ...prev[key], descEn: v } }))}
-                className="italic"
+                className="italic w-full"
+                readOnly={readOnly}
               />
            </div>
         </div>
@@ -152,6 +155,7 @@ export const TestMethodSection: React.FC<TestMethodSectionProps> = ({
             value={solutionPreps[key].detail}
             onChange={(v) => setSolutionPreps(prev => ({ ...prev, [key]: { ...prev[key], detail: v } }))}
             className="w-full"
+            readOnly={readOnly}
          />
       </div>
     </div>
@@ -162,50 +166,50 @@ export const TestMethodSection: React.FC<TestMethodSectionProps> = ({
        <p>1) 空白在主峰出峰处应无干扰；<br/>The blank should have no interference at the main peak;</p>
        <p>
          2) 对照品溶液1第一针中，主峰理论板数应不低于 
-         <SmartInput value={sysSuitability.plateNumber} onChange={(v) => setSysSuitability(prev => ({ ...prev, plateNumber: v }))} width="w-16" />
+         <SmartInput value={sysSuitability.plateNumber} onChange={(v) => setSysSuitability(prev => ({ ...prev, plateNumber: v }))} width="w-16" readOnly={readOnly} />
          ，拖尾因子应不大于 
-         <SmartInput value={sysSuitability.tailingFactor} onChange={(v) => setSysSuitability(prev => ({ ...prev, tailingFactor: v }))} width="w-12" />
+         <SmartInput value={sysSuitability.tailingFactor} onChange={(v) => setSysSuitability(prev => ({ ...prev, tailingFactor: v }))} width="w-12" readOnly={readOnly} />
          ；<br/>
          The theoretical plate number of the principal peak in the first injection of STD1 should be not less than 
-         <SmartInput value={sysSuitability.plateNumber} onChange={(v) => setSysSuitability(prev => ({ ...prev, plateNumber: v }))} width="w-16" />
+         <SmartInput value={sysSuitability.plateNumber} onChange={(v) => setSysSuitability(prev => ({ ...prev, plateNumber: v }))} width="w-16" readOnly={readOnly} />
          , the trailing factor should not be more than 
-         <SmartInput value={sysSuitability.tailingFactor} onChange={(v) => setSysSuitability(prev => ({ ...prev, tailingFactor: v }))} width="w-12" />
+         <SmartInput value={sysSuitability.tailingFactor} onChange={(v) => setSysSuitability(prev => ({ ...prev, tailingFactor: v }))} width="w-12" readOnly={readOnly} />
          ；
        </p>
        <p>
          3) 对照品溶液1连续进样 
-         <SmartInput value={sysSuitability.injectionCount} onChange={(v) => setSysSuitability(prev => ({ ...prev, injectionCount: v }))} width="w-10" />
+         <SmartInput value={sysSuitability.injectionCount} onChange={(v) => setSysSuitability(prev => ({ ...prev, injectionCount: v }))} width="w-10" readOnly={readOnly} />
          针，主峰峰面积的RSD应≤ 
-         <SmartInput value={sysSuitability.areaRSD} onChange={(v) => setSysSuitability(prev => ({ ...prev, areaRSD: v }))} width="w-12" />
+         <SmartInput value={sysSuitability.areaRSD} onChange={(v) => setSysSuitability(prev => ({ ...prev, areaRSD: v }))} width="w-12" readOnly={readOnly} />
          %，保留时间的RSD应≤ 
-         <SmartInput value={sysSuitability.retentionRSD} onChange={(v) => setSysSuitability(prev => ({ ...prev, retentionRSD: v }))} width="w-12" />
+         <SmartInput value={sysSuitability.retentionRSD} onChange={(v) => setSysSuitability(prev => ({ ...prev, retentionRSD: v }))} width="w-12" readOnly={readOnly} />
          %；<br/>
          For 
-         <SmartInput value={sysSuitability.injectionCount} onChange={(v) => setSysSuitability(prev => ({ ...prev, injectionCount: v }))} width="w-10" />
+         <SmartInput value={sysSuitability.injectionCount} onChange={(v) => setSysSuitability(prev => ({ ...prev, injectionCount: v }))} width="w-10" readOnly={readOnly} />
          consecutive standard solution1, the RSD of the main peak area should be NMT 
-         <SmartInput value={sysSuitability.areaRSD} onChange={(v) => setSysSuitability(prev => ({ ...prev, areaRSD: v }))} width="w-12" />
+         <SmartInput value={sysSuitability.areaRSD} onChange={(v) => setSysSuitability(prev => ({ ...prev, areaRSD: v }))} width="w-12" readOnly={readOnly} />
          %, the RSD of the retention time should be NMT 
-         <SmartInput value={sysSuitability.retentionRSD} onChange={(v) => setSysSuitability(prev => ({ ...prev, retentionRSD: v }))} width="w-12" />
+         <SmartInput value={sysSuitability.retentionRSD} onChange={(v) => setSysSuitability(prev => ({ ...prev, retentionRSD: v }))} width="w-12" readOnly={readOnly} />
          %;
        </p>
        <p>
          4) 对照品溶液2与对照品溶液1的回收率在 
-         <SmartInput value={sysSuitability.recoveryRange} onChange={(v) => setSysSuitability(prev => ({ ...prev, recoveryRange: v }))} width="w-32" />
+         <SmartInput value={sysSuitability.recoveryRange} onChange={(v) => setSysSuitability(prev => ({ ...prev, recoveryRange: v }))} width="w-32" readOnly={readOnly} />
          之间；<br/>
          The recovery of reference solution 2 to reference solution 1 was between 
-         <SmartInput value={sysSuitability.recoveryRange} onChange={(v) => setSysSuitability(prev => ({ ...prev, recoveryRange: v }))} width="w-32" />
+         <SmartInput value={sysSuitability.recoveryRange} onChange={(v) => setSysSuitability(prev => ({ ...prev, recoveryRange: v }))} width="w-32" readOnly={readOnly} />
          ；
        </p>
        <p>
          5) 若有随行对照，取随行对照1针和对照品溶液1连续 
-         <SmartInput value={sysSuitability.controlInjectionCount} onChange={(v) => setSysSuitability(prev => ({ ...prev, controlInjectionCount: v }))} width="w-10" />
+         <SmartInput value={sysSuitability.controlInjectionCount} onChange={(v) => setSysSuitability(prev => ({ ...prev, controlInjectionCount: v }))} width="w-10" readOnly={readOnly} />
          针的主峰峰面积的RSD应≤ 
-         <SmartInput value={sysSuitability.controlAreaRSD} onChange={(v) => setSysSuitability(prev => ({ ...prev, controlAreaRSD: v }))} width="w-12" />
+         <SmartInput value={sysSuitability.controlAreaRSD} onChange={(v) => setSysSuitability(prev => ({ ...prev, controlAreaRSD: v }))} width="w-12" readOnly={readOnly} />
          %。<br/>
          If have contrast check solution. GRSD(Global %RSD)of the peak area of check solution and 
-         <SmartInput value={sysSuitability.controlInjectionCount} onChange={(v) => setSysSuitability(prev => ({ ...prev, controlInjectionCount: v }))} width="w-10" />
+         <SmartInput value={sysSuitability.controlInjectionCount} onChange={(v) => setSysSuitability(prev => ({ ...prev, controlInjectionCount: v }))} width="w-10" readOnly={readOnly} />
          consecutive standard solution 1 should be NMT
-         <SmartInput value={sysSuitability.controlAreaRSD} onChange={(v) => setSysSuitability(prev => ({ ...prev, controlAreaRSD: v }))} width="w-12" />
+         <SmartInput value={sysSuitability.controlAreaRSD} onChange={(v) => setSysSuitability(prev => ({ ...prev, controlAreaRSD: v }))} width="w-12" readOnly={readOnly} />
          %.
        </p>
     </div>
@@ -291,13 +295,13 @@ export const TestMethodSection: React.FC<TestMethodSectionProps> = ({
           <div className="flex items-center gap-2">
             <span className="font-semibold shrink-0">化学式 Formula:</span> 
             <div className="flex-1">
-              <SmartInput value={chemicalFormula} onChange={setChemicalFormula} placeholder="请输入化学式" />
+              <SmartInput value={chemicalFormula} onChange={setChemicalFormula} placeholder="请输入化学式" readOnly={readOnly} />
             </div>
           </div>
           <div className="flex items-center gap-2">
             <span className="font-semibold shrink-0">化学名称 Chemical name:</span> 
             <div className="flex-1">
-              <SmartInput value={chemicalName} onChange={setChemicalName} placeholder="请输入化学名称" />
+              <SmartInput value={chemicalName} onChange={setChemicalName} placeholder="请输入化学名称" readOnly={readOnly} />
             </div>
           </div>
         </div>
@@ -533,24 +537,24 @@ export const TestMethodSection: React.FC<TestMethodSectionProps> = ({
               <div className={`p-3 border border-green-200 rounded leading-relaxed ${readOnly ? 'bg-white' : 'bg-white'}`}>
                 <p className="mb-2">
                   取 {productId} 对照品约 
-                  <SmartInput value={solDetail.stdWeight} onChange={(v) => setSolDetail(prev => ({...prev, stdWeight: v}))} width="w-24" /> 
+                  <SmartInput value={solDetail.stdWeight} onChange={(v) => setSolDetail(prev => ({...prev, stdWeight: v}))} width="w-24" readOnly={readOnly} /> 
                   mg，精密称定，置 
-                  <SmartInput value={solDetail.stdVolume} onChange={(v) => setSolDetail(prev => ({...prev, stdVolume: v}))} width="w-24" /> 
+                  <SmartInput value={solDetail.stdVolume} onChange={(v) => setSolDetail(prev => ({...prev, stdVolume: v}))} width="w-24" readOnly={readOnly} /> 
                   ml 量瓶中，
-                  <SmartTextarea value={solDetail.stdMethodZh} onChange={(v) => setSolDetail(prev => ({...prev, stdMethodZh: v}))} className="w-64" />
+                  <SmartTextarea value={solDetail.stdMethodZh} onChange={(v) => setSolDetail(prev => ({...prev, stdMethodZh: v}))} className="w-64" readOnly={readOnly} />
                   ，摇匀，平行配制 
-                  <SmartInput value={solDetail.stdCount} onChange={(v) => setSolDetail(prev => ({...prev, stdCount: v}))} width="w-10" /> 
+                  <SmartInput value={solDetail.stdCount} onChange={(v) => setSolDetail(prev => ({...prev, stdCount: v}))} width="w-10" readOnly={readOnly} /> 
                   份。（{stdConc} mg/ml）
                 </p>
                 <p className="italic text-gray-600">
                   Accurately weigh about 
-                  <SmartInput value={solDetail.stdWeight} onChange={(v) => setSolDetail(prev => ({...prev, stdWeight: v}))} width="w-24" className={readOnly ? "" : "text-black border-b border-black px-1 mx-1 bg-yellow-300 font-bold"} />
+                  <SmartInput value={solDetail.stdWeight} onChange={(v) => setSolDetail(prev => ({...prev, stdWeight: v}))} width="w-24" className={readOnly ? "" : "text-black border-b border-black px-1 mx-1 bg-yellow-300 font-bold"} readOnly={readOnly} />
                   mg of {productId} reference standard into a 
-                  <SmartInput value={solDetail.stdVolume} onChange={(v) => setSolDetail(prev => ({...prev, stdVolume: v}))} width="w-24" className={readOnly ? "" : "text-black border-b border-black px-1 mx-1 bg-yellow-300 font-bold"} />
+                  <SmartInput value={solDetail.stdVolume} onChange={(v) => setSolDetail(prev => ({...prev, stdVolume: v}))} width="w-24" className={readOnly ? "" : "text-black border-b border-black px-1 mx-1 bg-yellow-300 font-bold"} readOnly={readOnly} />
                   ml volumetric flask, 
-                  <SmartTextarea value={solDetail.stdMethodEn} onChange={(v) => setSolDetail(prev => ({...prev, stdMethodEn: v}))} className="w-64 italic" />
+                  <SmartTextarea value={solDetail.stdMethodEn} onChange={(v) => setSolDetail(prev => ({...prev, stdMethodEn: v}))} className="w-64 italic" readOnly={readOnly} />
                   , mix well. Prepare 
-                  <SmartInput value={solDetail.stdCount} onChange={(v) => setSolDetail(prev => ({...prev, stdCount: v}))} width="w-10" className={readOnly ? "" : "text-black border-b border-black px-1 mx-1 bg-yellow-300 font-bold"} />
+                  <SmartInput value={solDetail.stdCount} onChange={(v) => setSolDetail(prev => ({...prev, stdCount: v}))} width="w-10" className={readOnly ? "" : "text-black border-b border-black px-1 mx-1 bg-yellow-300 font-bold"} readOnly={readOnly} />
                   solutions in parallel. ({stdConc} mg/ml)
                 </p>
               </div>
@@ -562,24 +566,24 @@ export const TestMethodSection: React.FC<TestMethodSectionProps> = ({
               <div className={`p-3 border border-green-200 rounded leading-relaxed ${readOnly ? 'bg-white' : 'bg-white'}`}>
                 <p className="mb-2">
                   取供试品约 
-                  <SmartInput value={solDetail.splWeight} onChange={(v) => setSolDetail(prev => ({...prev, splWeight: v}))} width="w-24" />
+                  <SmartInput value={solDetail.splWeight} onChange={(v) => setSolDetail(prev => ({...prev, splWeight: v}))} width="w-24" readOnly={readOnly} />
                   mg，精密称定，置 
-                  <SmartInput value={solDetail.splVolume} onChange={(v) => setSolDetail(prev => ({...prev, splVolume: v}))} width="w-24" />
+                  <SmartInput value={solDetail.splVolume} onChange={(v) => setSolDetail(prev => ({...prev, splVolume: v}))} width="w-24" readOnly={readOnly} />
                   ml 量瓶中，
-                  <SmartTextarea value={solDetail.splMethodZh} onChange={(v) => setSolDetail(prev => ({...prev, splMethodZh: v}))} className="w-64" />
+                  <SmartTextarea value={solDetail.splMethodZh} onChange={(v) => setSolDetail(prev => ({...prev, splMethodZh: v}))} className="w-64" readOnly={readOnly} />
                   ，摇匀，平行配制 
-                  <SmartInput value={solDetail.splCount} onChange={(v) => setSolDetail(prev => ({...prev, splCount: v}))} width="w-10" />
+                  <SmartInput value={solDetail.splCount} onChange={(v) => setSolDetail(prev => ({...prev, splCount: v}))} width="w-10" readOnly={readOnly} />
                   份。（{splConc} mg/ml）
                 </p>
                 <p className="italic text-gray-600">
                   Accurately weigh about 
-                  <SmartInput value={solDetail.splWeight} onChange={(v) => setSolDetail(prev => ({...prev, splWeight: v}))} width="w-24" className={readOnly ? "" : "text-black border-b border-black px-1 mx-1 bg-yellow-300 font-bold"} />
+                  <SmartInput value={solDetail.splWeight} onChange={(v) => setSolDetail(prev => ({...prev, splWeight: v}))} width="w-24" className={readOnly ? "" : "text-black border-b border-black px-1 mx-1 bg-yellow-300 font-bold"} readOnly={readOnly} />
                   mg of Sample into a 
-                  <SmartInput value={solDetail.splVolume} onChange={(v) => setSolDetail(prev => ({...prev, splVolume: v}))} width="w-24" className={readOnly ? "" : "text-black border-b border-black px-1 mx-1 bg-yellow-300 font-bold"} />
+                  <SmartInput value={solDetail.splVolume} onChange={(v) => setSolDetail(prev => ({...prev, splVolume: v}))} width="w-24" className={readOnly ? "" : "text-black border-b border-black px-1 mx-1 bg-yellow-300 font-bold"} readOnly={readOnly} />
                   ml volumetric flask, 
-                  <SmartTextarea value={solDetail.splMethodEn} onChange={(v) => setSolDetail(prev => ({...prev, splMethodEn: v}))} className="w-64 italic" />
+                  <SmartTextarea value={solDetail.splMethodEn} onChange={(v) => setSolDetail(prev => ({...prev, splMethodEn: v}))} className="w-64 italic" readOnly={readOnly} />
                   , mix well. Prepare 
-                  <SmartInput value={solDetail.splCount} onChange={(v) => setSolDetail(prev => ({...prev, splCount: v}))} width="w-10" className={readOnly ? "" : "text-black border-b border-black px-1 mx-1 bg-yellow-300 font-bold"} />
+                  <SmartInput value={solDetail.splCount} onChange={(v) => setSolDetail(prev => ({...prev, splCount: v}))} width="w-10" className={readOnly ? "" : "text-black border-b border-black px-1 mx-1 bg-yellow-300 font-bold"} readOnly={readOnly} />
                   solutions in parallel. ({splConc} mg/ml)
                 </p>
               </div>
@@ -722,6 +726,7 @@ export const TestMethodSection: React.FC<TestMethodSectionProps> = ({
                           setAcceptanceCriteria(newRows);
                       }}
                       className="w-full min-h-[5rem]"
+                      readOnly={readOnly}
                     />
                   </td>
                   <td className="border border-gray-300 p-1 bg-white align-top">
@@ -733,6 +738,7 @@ export const TestMethodSection: React.FC<TestMethodSectionProps> = ({
                           setAcceptanceCriteria(newRows);
                       }}
                       className="w-full min-h-[5rem]"
+                      readOnly={readOnly}
                     />
                   </td>
                   {!readOnly && (
