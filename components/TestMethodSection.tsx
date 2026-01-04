@@ -95,7 +95,7 @@ export const TestMethodSection: React.FC<TestMethodSectionProps> = ({
         <textarea
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          className="bg-yellow-300 border-b border-black outline-none px-1 py-0.5 text-black resize-none min-h-[1.5rem] font-bold align-middle w-full"
+          className="bg-yellow-300 border-b border-black outline-none px-1 py-0.5 text-black resize-none min-h-[1.5rem] font-bold align-middle w-full h-full"
           placeholder={placeholder}
           rows={1}
         />
@@ -446,9 +446,14 @@ export const TestMethodSection: React.FC<TestMethodSectionProps> = ({
               {gradientData.map((row, i) => {
                 const phaseAVal = parseFloat(row.phaseA);
                 const isPhaseAEmpty = row.phaseA.trim() === "";
+                
+                // For Protocol view (readOnly=false), display integer. For Report (readOnly=true), keep original decimal format if preferred, 
+                // but usually consistency is good. Given the user requirement strictly for Protocol view change, we branch here.
+                const displayVal = !readOnly ? (100 - phaseAVal).toString() : (100 - phaseAVal).toFixed(1);
+
                 const phaseB = isPhaseAEmpty 
                   ? <span className="text-red-500 font-bold">N/A</span> 
-                  : (isNaN(phaseAVal) ? <span className="text-red-400 font-bold">Error</span> : (100 - phaseAVal).toFixed(1));
+                  : (isNaN(phaseAVal) ? <span className="text-red-400 font-bold">Error</span> : displayVal);
 
                 return (
                   <tr key={i} className="hover:bg-gray-50">
@@ -528,9 +533,9 @@ export const TestMethodSection: React.FC<TestMethodSectionProps> = ({
               <div className={`p-3 border border-green-200 rounded leading-relaxed ${readOnly ? 'bg-white' : 'bg-white'}`}>
                 <p className="mb-2">
                   取 {productId} 对照品约 
-                  <SmartInput value={solDetail.stdWeight} onChange={(v) => setSolDetail(prev => ({...prev, stdWeight: v}))} /> 
+                  <SmartInput value={solDetail.stdWeight} onChange={(v) => setSolDetail(prev => ({...prev, stdWeight: v}))} width="w-24" /> 
                   mg，精密称定，置 
-                  <SmartInput value={solDetail.stdVolume} onChange={(v) => setSolDetail(prev => ({...prev, stdVolume: v}))} /> 
+                  <SmartInput value={solDetail.stdVolume} onChange={(v) => setSolDetail(prev => ({...prev, stdVolume: v}))} width="w-24" /> 
                   ml 量瓶中，
                   <SmartTextarea value={solDetail.stdMethodZh} onChange={(v) => setSolDetail(prev => ({...prev, stdMethodZh: v}))} className="w-64" />
                   ，摇匀，平行配制 
@@ -539,13 +544,13 @@ export const TestMethodSection: React.FC<TestMethodSectionProps> = ({
                 </p>
                 <p className="italic text-gray-600">
                   Accurately weigh about 
-                  <SmartInput value={solDetail.stdWeight} onChange={(v) => setSolDetail(prev => ({...prev, stdWeight: v}))} className={readOnly ? "" : "text-black border-b border-black px-1 mx-1 bg-yellow-300 font-bold"} />
+                  <SmartInput value={solDetail.stdWeight} onChange={(v) => setSolDetail(prev => ({...prev, stdWeight: v}))} width="w-24" className={readOnly ? "" : "text-black border-b border-black px-1 mx-1 bg-yellow-300 font-bold"} />
                   mg of {productId} reference standard into a 
-                  <SmartInput value={solDetail.stdVolume} onChange={(v) => setSolDetail(prev => ({...prev, stdVolume: v}))} className={readOnly ? "" : "text-black border-b border-black px-1 mx-1 bg-yellow-300 font-bold"} />
+                  <SmartInput value={solDetail.stdVolume} onChange={(v) => setSolDetail(prev => ({...prev, stdVolume: v}))} width="w-24" className={readOnly ? "" : "text-black border-b border-black px-1 mx-1 bg-yellow-300 font-bold"} />
                   ml volumetric flask, 
                   <SmartTextarea value={solDetail.stdMethodEn} onChange={(v) => setSolDetail(prev => ({...prev, stdMethodEn: v}))} className="w-64 italic" />
                   , mix well. Prepare 
-                  <SmartInput value={solDetail.stdCount} onChange={(v) => setSolDetail(prev => ({...prev, stdCount: v}))} className={readOnly ? "" : "text-black border-b border-black px-1 mx-1 bg-yellow-300 font-bold"} />
+                  <SmartInput value={solDetail.stdCount} onChange={(v) => setSolDetail(prev => ({...prev, stdCount: v}))} width="w-10" className={readOnly ? "" : "text-black border-b border-black px-1 mx-1 bg-yellow-300 font-bold"} />
                   solutions in parallel. ({stdConc} mg/ml)
                 </p>
               </div>
@@ -557,9 +562,9 @@ export const TestMethodSection: React.FC<TestMethodSectionProps> = ({
               <div className={`p-3 border border-green-200 rounded leading-relaxed ${readOnly ? 'bg-white' : 'bg-white'}`}>
                 <p className="mb-2">
                   取供试品约 
-                  <SmartInput value={solDetail.splWeight} onChange={(v) => setSolDetail(prev => ({...prev, splWeight: v}))} />
+                  <SmartInput value={solDetail.splWeight} onChange={(v) => setSolDetail(prev => ({...prev, splWeight: v}))} width="w-24" />
                   mg，精密称定，置 
-                  <SmartInput value={solDetail.splVolume} onChange={(v) => setSolDetail(prev => ({...prev, splVolume: v}))} />
+                  <SmartInput value={solDetail.splVolume} onChange={(v) => setSolDetail(prev => ({...prev, splVolume: v}))} width="w-24" />
                   ml 量瓶中，
                   <SmartTextarea value={solDetail.splMethodZh} onChange={(v) => setSolDetail(prev => ({...prev, splMethodZh: v}))} className="w-64" />
                   ，摇匀，平行配制 
@@ -568,13 +573,13 @@ export const TestMethodSection: React.FC<TestMethodSectionProps> = ({
                 </p>
                 <p className="italic text-gray-600">
                   Accurately weigh about 
-                  <SmartInput value={solDetail.splWeight} onChange={(v) => setSolDetail(prev => ({...prev, splWeight: v}))} className={readOnly ? "" : "text-black border-b border-black px-1 mx-1 bg-yellow-300 font-bold"} />
+                  <SmartInput value={solDetail.splWeight} onChange={(v) => setSolDetail(prev => ({...prev, splWeight: v}))} width="w-24" className={readOnly ? "" : "text-black border-b border-black px-1 mx-1 bg-yellow-300 font-bold"} />
                   mg of Sample into a 
-                  <SmartInput value={solDetail.splVolume} onChange={(v) => setSolDetail(prev => ({...prev, splVolume: v}))} className={readOnly ? "" : "text-black border-b border-black px-1 mx-1 bg-yellow-300 font-bold"} />
+                  <SmartInput value={solDetail.splVolume} onChange={(v) => setSolDetail(prev => ({...prev, splVolume: v}))} width="w-24" className={readOnly ? "" : "text-black border-b border-black px-1 mx-1 bg-yellow-300 font-bold"} />
                   ml volumetric flask, 
                   <SmartTextarea value={solDetail.splMethodEn} onChange={(v) => setSolDetail(prev => ({...prev, splMethodEn: v}))} className="w-64 italic" />
                   , mix well. Prepare 
-                  <SmartInput value={solDetail.splCount} onChange={(v) => setSolDetail(prev => ({...prev, splCount: v}))} className={readOnly ? "" : "text-black border-b border-black px-1 mx-1 bg-yellow-300 font-bold"} />
+                  <SmartInput value={solDetail.splCount} onChange={(v) => setSolDetail(prev => ({...prev, splCount: v}))} width="w-10" className={readOnly ? "" : "text-black border-b border-black px-1 mx-1 bg-yellow-300 font-bold"} />
                   solutions in parallel. ({splConc} mg/ml)
                 </p>
               </div>
@@ -716,7 +721,7 @@ export const TestMethodSection: React.FC<TestMethodSectionProps> = ({
                           newRows[index].name = v;
                           setAcceptanceCriteria(newRows);
                       }}
-                      className="min-h-[3rem]"
+                      className="w-full min-h-[5rem]"
                     />
                   </td>
                   <td className="border border-gray-300 p-1 bg-white align-top">
@@ -727,7 +732,7 @@ export const TestMethodSection: React.FC<TestMethodSectionProps> = ({
                           newRows[index].criteria = v;
                           setAcceptanceCriteria(newRows);
                       }}
-                      className="min-h-[3rem]"
+                      className="w-full min-h-[5rem]"
                     />
                   </td>
                   {!readOnly && (
