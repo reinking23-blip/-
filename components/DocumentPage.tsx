@@ -581,6 +581,10 @@ export const DocumentPage: React.FC<DocumentPageProps> = ({ data, setData, produ
                 <TableCell colSpan={5} className="bg-gray-50 text-right font-bold italic">RSS (Residual sum of square)</TableCell>
                 <TableCell colSpan={3}><EditableDataField value={data.linearity.statsRSS} onChange={(v) => updateNested('linearity', 'statsRSS', v)} name="lin.stats.rss" /></TableCell>
               </tr>
+              <tr>
+                <TableCell colSpan={5} className="bg-gray-50 text-right font-bold italic">Equation</TableCell>
+                <TableCell colSpan={3}><EditableDataField value={data.linearity.equation} onChange={(v) => updateNested('linearity', 'equation', v)} name="lin.equation" /></TableCell>
+              </tr>
               
               {/* Inserted Chart Row */}
               <tr>

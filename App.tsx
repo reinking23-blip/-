@@ -4,11 +4,12 @@ import { getSections } from './data/protocolData';
 import { Sidebar } from './components/Sidebar';
 import { ProtocolHeader } from './components/ProtocolHeader';
 import { DataMappingDictionary } from './components/DataMappingDictionary';
+import { ReportDataMappingDictionary } from './components/ReportDataMappingDictionary';
 import { ReportDocument } from './components/ReportDocument';
 import { DocumentPage } from './components/DocumentPage';
 import { ReportDocumentPRD } from './components/ReportDocumentPRD';
 import { ProtocolDocumentPRD } from './components/ProtocolDocumentPRD';
-import { Menu } from 'lucide-react';
+import { Menu, Download } from 'lucide-react';
 import { 
   NavItem, 
   Personnel, 
@@ -36,7 +37,7 @@ import {
 } from './types';
 
 const App: React.FC = () => {
-  const [currentView, setCurrentView] = useState<'protocol' | 'dictionary' | 'report' | 'document' | 'prd' | 'protocol_prd'>('protocol');
+  const [currentView, setCurrentView] = useState<'protocol' | 'dictionary' | 'report' | 'document' | 'prd' | 'protocol_prd' | 'report_dictionary'>('protocol');
   const [activeSectionId, setActiveSectionId] = useState<string>('cover');
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [productId, setProductId] = useState<string>("HY130225");
@@ -246,7 +247,7 @@ const App: React.FC = () => {
   // Accuracy State for 6.x
   const [accuracyState, setAccuracyState] = useState<AccuracyState>({
     recoveryRange: "98.0%-102.0%",
-    rsdLimit: "2.0%"
+    rsdLimit: "2.0"
   });
 
   // Stability State for 6.x
@@ -325,7 +326,7 @@ const App: React.FC = () => {
       statsR: "0.999785",
       statsSlope: "25.4869",
       statsIntercept: "-17.1752",
-      statsPercentIntercept: "0.33%",
+      statsPercentIntercept: "0.33",
       statsRSS: "1430.23",
       equation: "y=25.4869x-17.1752",
       conclusion: "符合规定"
@@ -548,6 +549,7 @@ const App: React.FC = () => {
   ), [productId, protocolCode, protocolVersion, projectNumber, preparerName, preparerDept, preparerPosition, rev1Name, rev1Dept, rev1Pos, rev2Name, rev2Dept, rev2Pos, rev3Name, rev3Dept, rev3Pos, approverName, approverDept, approverPos, validationOptions, chemicalFormula, chemicalName, gradientData, testingConditions, solutionPreps, solDetail, sequenceState, valProcSysSuitState, valProcPrecisionState, sysSuitability, calculationState, acceptanceCriteria, specificityState, linearityState, precisionState, accuracyState, stabilityState, prerequisiteState]);
 
   const protocolNavItems = useMemo(() => {
+    // ... [Original Nav Items Logic] ...
     const items: NavItem[] = [
       { id: 'cover', label: '封面 Cover' },
       { id: 'objective', label: '1. 目的 Objective' },
@@ -588,6 +590,7 @@ const App: React.FC = () => {
   }, [validationOptions]);
 
   const reportNavItems = useMemo(() => {
+    // ... [Original Report Nav Items Logic] ...
     const items: NavItem[] = [
       { id: 'report-cover', label: '封面 Cover' },
       { id: 'report-objective', label: '1. 目的 Objective' },
@@ -599,12 +602,13 @@ const App: React.FC = () => {
       { id: 'report-val-equipment', label: '5.2 仪器试剂 Equipment', isSubItem: true },
     ];
 
-    if (validationOptions.systemSuitability) items.push({ id: 'report-val-sys-suit', label: '5.3 系统适用性 Sys Suit', isSubItem: true });
-    if (validationOptions.specificity) items.push({ id: 'report-val-specificity', label: '5.4 专属性 Specificity', isSubItem: true });
-    if (validationOptions.linearity) items.push({ id: 'report-val-linearity', label: '5.5 线性 Linearity', isSubItem: true });
-    if (validationOptions.precision) items.push({ id: 'report-val-precision', label: '5.6 精密度 Precision', isSubItem: true });
-    if (validationOptions.accuracy) items.push({ id: 'report-val-accuracy', label: '5.7 准确度 Accuracy', isSubItem: true });
-    if (validationOptions.stability) items.push({ id: 'report-val-stability', label: '5.8 稳定性 Stability', isSubItem: true });
+    let subIndex = 3;
+    if (validationOptions.systemSuitability) items.push({ id: 'report-val-sys-suit', label: `5.${subIndex++} 系统适用性 Sys Suit`, isSubItem: true });
+    if (validationOptions.specificity) items.push({ id: 'report-val-specificity', label: `5.${subIndex++} 专属性 Specificity`, isSubItem: true });
+    if (validationOptions.linearity) items.push({ id: 'report-val-linearity', label: `5.${subIndex++} 线性 Linearity`, isSubItem: true });
+    if (validationOptions.precision) items.push({ id: 'report-val-precision', label: `5.${subIndex++} 精密度 Precision`, isSubItem: true });
+    if (validationOptions.accuracy) items.push({ id: 'report-val-accuracy', label: `5.${subIndex++} 准确度 Accuracy`, isSubItem: true });
+    if (validationOptions.stability) items.push({ id: 'report-val-stability', label: `5.${subIndex++} 稳定性 Stability`, isSubItem: true });
 
     items.push(
       { id: 'report-deviations', label: '6. 偏差 Deviations' },
@@ -615,7 +619,7 @@ const App: React.FC = () => {
   }, [validationOptions]);
 
   const filteredNavItems = useMemo(() => {
-    if (currentView === 'report') return reportNavItems;
+    if (currentView === 'report' || currentView === 'report_dictionary') return reportNavItems;
     if (currentView === 'protocol') return protocolNavItems;
     return [];
   }, [currentView, reportNavItems, protocolNavItems]);
@@ -630,7 +634,6 @@ const App: React.FC = () => {
   };
 
   useEffect(() => {
-    // Only set up observer if we are in protocol or report view
     if (currentView !== 'protocol' && currentView !== 'report') return;
 
     const observer = new IntersectionObserver(
@@ -642,7 +645,6 @@ const App: React.FC = () => {
       { rootMargin: '-20% 0px -60% 0px', threshold: 0 }
     );
 
-    // Observe elements based on current nav items (works for both Protocol and Report)
     filteredNavItems.forEach((item) => {
       const element = document.getElementById(item.id);
       if (element) observer.observe(element);
@@ -658,6 +660,8 @@ const App: React.FC = () => {
       return "Report Document";
     } else if (currentView === 'dictionary') {
       return "Data Mapping Dictionary";
+    } else if (currentView === 'report_dictionary') {
+      return "Report Data Mapping Dictionary";
     } else if (currentView === 'prd') {
       return "Report PRD";
     } else if (currentView === 'protocol_prd') {
@@ -666,6 +670,128 @@ const App: React.FC = () => {
       return "Experimental Data Document";
     }
   }, [currentView, sections, activeSectionId]);
+
+  const exportToWord = () => {
+    const element = document.getElementById('main-content');
+    if (!element) return;
+
+    const clone = element.cloneNode(true) as HTMLElement;
+
+    // 1. Sync Input values to clone
+    const origInputs = element.querySelectorAll('input');
+    const cloneInputs = clone.querySelectorAll('input');
+    origInputs.forEach((orig, i) => {
+        if (cloneInputs[i]) {
+            if (orig.type === 'checkbox' || orig.type === 'radio') {
+                if (orig.checked) cloneInputs[i].setAttribute('checked', 'checked');
+                else cloneInputs[i].removeAttribute('checked');
+            } else {
+                cloneInputs[i].setAttribute('value', orig.value);
+            }
+        }
+    });
+    
+    // 2. Sync Textarea values
+    const origTextareas = element.querySelectorAll('textarea');
+    const cloneTextareas = clone.querySelectorAll('textarea');
+    origTextareas.forEach((orig, i) => {
+        if (cloneTextareas[i]) {
+            cloneTextareas[i].textContent = orig.value;
+        }
+    });
+    
+    // 3. Sync Select values
+    const origSelects = element.querySelectorAll('select');
+    const cloneSelects = clone.querySelectorAll('select');
+    origSelects.forEach((orig, i) => {
+        if (cloneSelects[i]) {
+             const idx = orig.selectedIndex;
+             (cloneSelects[i] as any).selectedText = orig.options[idx]?.text;
+        }
+    });
+
+    // Replace inputs with spans/divs for better Word compatibility
+    clone.querySelectorAll('input[type="checkbox"]').forEach((cb: any) => {
+        const span = document.createElement('span');
+        span.textContent = cb.hasAttribute('checked') ? '☑' : '☐';
+        span.style.fontSize = '1.2em';
+        span.style.fontFamily = 'serif';
+        cb.parentNode?.replaceChild(span, cb);
+    });
+
+    clone.querySelectorAll('input').forEach((input: any) => {
+        if (!input.parentNode) return;
+        const span = document.createElement('span');
+        span.textContent = input.getAttribute('value') || '';
+        
+        if (input.classList.contains('bg-yellow-300')) {
+             span.style.backgroundColor = '#FFFF00'; 
+             span.style.borderBottom = '1px solid #000';
+             span.style.fontWeight = 'bold';
+             span.style.padding = '0 4px';
+        } else {
+             // Optional: add minimal styling for standard inputs if needed
+        }
+        input.parentNode?.replaceChild(span, input);
+    });
+
+    clone.querySelectorAll('textarea').forEach((textarea: any) => {
+        const div = document.createElement('div');
+        div.innerHTML = (textarea.textContent || '').replace(/\n/g, '<br/>');
+        if (textarea.classList.contains('bg-yellow-300')) {
+             div.style.backgroundColor = '#FFFF00';
+             div.style.borderBottom = '1px solid #000';
+             div.style.fontWeight = 'bold';
+        }
+        textarea.parentNode?.replaceChild(div, textarea);
+    });
+
+    clone.querySelectorAll('select').forEach((select: any) => {
+        const span = document.createElement('span');
+        span.textContent = (select as any).selectedText || '';
+        select.parentNode?.replaceChild(span, select);
+    });
+
+    // Remove buttons and icons
+    clone.querySelectorAll('button').forEach(btn => btn.remove());
+    clone.querySelectorAll('svg').forEach(svg => svg.remove());
+
+    const htmlContent = `
+        <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+        <head>
+            <meta charset="utf-8">
+            <title>Export</title>
+            <style>
+                body { font-family: 'Times New Roman', serif; font-size: 10.5pt; }
+                table { border-collapse: collapse; width: 100%; margin-bottom: 12px; }
+                td, th { border: 1px solid #000; padding: 4px 8px; vertical-align: top; text-align: center; }
+                td.text-left { text-align: left; }
+                td.text-right { text-align: right; }
+                .bg-gray-100, .bg-gray-50 { background-color: #F2F2F2; }
+                .font-bold { font-weight: bold; }
+                .text-xs { font-size: 9pt; }
+                .text-sm { font-size: 10.5pt; }
+                .text-lg { font-size: 14pt; }
+                .text-xl { font-size: 16pt; }
+                h1, h2, h3, h4 { color: #000; margin-top: 12px; margin-bottom: 6px; }
+            </style>
+        </head>
+        <body>
+            ${clone.innerHTML}
+        </body>
+        </html>
+    `;
+
+    const blob = new Blob(['\ufeff', htmlContent], { type: 'application/msword' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    const timestamp = new Date().toISOString().split('T')[0];
+    link.download = `Export_${currentView}_${timestamp}.doc`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
     <div className="flex h-screen bg-gray-100 overflow-hidden text-gray-900">
@@ -682,7 +808,7 @@ const App: React.FC = () => {
         onChangeView={setCurrentView}
       />
 
-      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
         <div className="md:hidden flex items-center justify-between bg-white border-b border-gray-200 p-4 shrink-0 z-10">
           <button onClick={() => setSidebarOpen(true)} className="p-1 rounded-md hover:bg-gray-100">
             <Menu className="w-6 h-6 text-gray-600" />
@@ -691,7 +817,17 @@ const App: React.FC = () => {
           <div className="w-6" />
         </div>
 
-        <main className="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth">
+        {/* Floating Export Button */}
+        <button 
+            onClick={exportToWord}
+            className="fixed bottom-8 right-8 z-50 bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg transition-colors flex items-center gap-2"
+            title="Export to Word"
+        >
+            <Download size={24} />
+            <span className="font-semibold hidden md:inline">Export Word</span>
+        </button>
+
+        <main id="main-content" className="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth">
           {currentView === 'protocol' ? (
             <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg flex flex-col mb-8">
               <div className="p-8 md:p-12">
@@ -782,6 +918,8 @@ const App: React.FC = () => {
             />
           ) : currentView === 'dictionary' ? (
             <DataMappingDictionary />
+          ) : currentView === 'report_dictionary' ? (
+            <ReportDataMappingDictionary />
           ) : currentView === 'prd' ? (
             <ReportDocumentPRD />
           ) : currentView === 'protocol_prd' ? (

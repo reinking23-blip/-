@@ -39,7 +39,6 @@ export const ProtocolDocumentPRD: React.FC = () => {
                   <div>
                     <h4 className="font-bold text-sm mb-2 text-blue-900">模块结构 (Structure)</h4>
                     <ul className="list-disc pl-4 text-xs text-gray-600 space-y-1">
-                      <li><strong>视图切换区：</strong> 包含“方案文档”、“方案PRD”、“报告文档”、“数据字典”等一级导航按钮。</li>
                       <li><strong>目录树 (TOC)：</strong> 动态渲染的方案章节列表（如：封面、1. 目的、4. 方法描述...）。</li>
                       <li><strong>子目录项：</strong> 缩进显示的二级标题（如：6.1 系统适用性）。</li>
                     </ul>

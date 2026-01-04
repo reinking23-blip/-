@@ -8,8 +8,8 @@ interface SidebarProps {
   activeId: string;
   onSelect: (id: string) => void;
   isOpen: boolean;
-  currentView: 'protocol' | 'dictionary' | 'report' | 'document' | 'prd' | 'protocol_prd';
-  onChangeView: (view: 'protocol' | 'dictionary' | 'report' | 'document' | 'prd' | 'protocol_prd') => void;
+  currentView: 'protocol' | 'dictionary' | 'report' | 'document' | 'prd' | 'protocol_prd' | 'report_dictionary';
+  onChangeView: (view: 'protocol' | 'dictionary' | 'report' | 'document' | 'prd' | 'protocol_prd' | 'report_dictionary') => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ navItems, activeId, onSelect, isOpen, currentView, onChangeView }) => {
@@ -35,7 +35,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ navItems, activeId, onSelect, 
         <button
           onClick={() => onChangeView('report')}
           className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-            currentView === 'report' || currentView === 'prd'
+            currentView === 'report' || currentView === 'prd' || currentView === 'report_dictionary'
               ? 'bg-blue-600 text-white shadow-sm'
               : 'text-gray-700 hover:bg-gray-100'
           }`}
@@ -136,7 +136,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ navItems, activeId, onSelect, 
               </div>
             )}
           </>
-        ) : (currentView === 'report' || currentView === 'prd') ? (
+        ) : (currentView === 'report' || currentView === 'prd' || currentView === 'report_dictionary') ? (
           <>
             <div className="px-4 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider">
               文档结构 Structure
@@ -165,6 +165,18 @@ export const Sidebar: React.FC<SidebarProps> = ({ navItems, activeId, onSelect, 
                 <span>规格说明书 PRD</span>
                 {currentView === 'prd' && <ChevronRight size={14} />}
               </button>
+
+              <button
+                onClick={() => onChangeView('report_dictionary')}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-sm transition-colors ${
+                  currentView === 'report_dictionary'
+                    ? 'bg-white text-blue-700 shadow-sm border border-gray-200 font-semibold'
+                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                }`}
+              >
+                <span>数据映射字典 Dictionary</span>
+                {currentView === 'report_dictionary' && <ChevronRight size={14} />}
+              </button>
             </nav>
             
             {currentView === 'report' ? (
@@ -188,6 +200,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ navItems, activeId, onSelect, 
                   ))}
                 </nav>
               </>
+            ) : currentView === 'report_dictionary' ? (
+              <div className="px-4 py-4 mt-4 text-xs text-gray-400 border-t border-gray-100">
+                <p>Mapping dictionary for Report variables, data sources, and user inputs.</p>
+              </div>
             ) : (
               <div className="px-4 py-4 mt-4 text-xs text-gray-400 border-t border-gray-100">
                 <p>Contains validation report content and its corresponding functional requirements.</p>

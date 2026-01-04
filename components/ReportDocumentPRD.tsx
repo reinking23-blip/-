@@ -1,182 +1,327 @@
 
 import React from 'react';
-import { FileText, Database, CheckSquare, Edit3, Lock, PieChart, AlertTriangle, Calendar, ChevronRight } from 'lucide-react';
+import { 
+  FileText, 
+  Database, 
+  CheckSquare, 
+  Edit3, 
+  Lock, 
+  PieChart, 
+  AlertTriangle, 
+  ShieldCheck, 
+  Server,
+  MousePointer2,
+  Cpu,
+  Layers,
+  Activity,
+  GitCommit,
+  ArrowRightLeft
+} from 'lucide-react';
 
 export const ReportDocumentPRD: React.FC = () => {
   return (
-    <div className="p-8 bg-gray-50 min-h-full">
-      <div className="max-w-7xl mx-auto bg-white shadow-lg rounded-lg overflow-hidden border border-gray-200">
+    <div className="p-8 bg-slate-50 min-h-full font-sans text-slate-800">
+      <div className="max-w-7xl mx-auto bg-white shadow-xl rounded-xl overflow-hidden border border-slate-200">
         
-        {/* Header */}
-        <div className="bg-slate-900 p-8 text-white border-b-4 border-blue-600">
+        {/* Document Header */}
+        <div className="bg-slate-900 p-8 text-white border-b-4 border-indigo-500">
           <div className="flex justify-between items-start">
             <div>
               <div className="flex items-center gap-2 mb-2 opacity-80">
-                <span className="px-2 py-0.5 bg-blue-600 rounded text-xs font-bold uppercase tracking-wider">Detailed Spec</span>
-                <span className="text-xs">Ver 3.0 (Granular)</span>
+                <span className="px-2 py-0.5 bg-indigo-600 rounded text-xs font-bold uppercase tracking-wider">FSD v5.1</span>
+                <span className="text-xs font-mono">Module: Validation Report Generator</span>
               </div>
-              <h1 className="text-3xl font-bold mb-2">检验方法验证报告 - 详细功能规格说明书</h1>
-              <p className="text-slate-300">Test Method Validation Report - Detailed Functional Specifications</p>
+              <h1 className="text-3xl font-bold mb-2">检验方法验证报告 - 详细功能需求说明书 (FSD)</h1>
+              <p className="text-slate-300 text-sm">Test Method Validation Report - Detailed Functional Specifications</p>
             </div>
-            <div className="text-right text-xs text-slate-400 max-w-md">
-              本文档详细定义了报告模块中每个章节的数据来源、编辑权限、交互逻辑及校验规则，供开发人员逐项实现。
+            <div className="text-right text-xs text-slate-400 max-w-md leading-relaxed">
+              <strong>文档密级：</strong> 内部绝密 (Confidential)<br/>
+              <strong>适用对象：</strong> FE (Frontend), BE (Backend), QA<br/>
+              <strong>核心目标：</strong> 实验数据自动化聚合、判定逻辑状态流转、报告标准化输出。
             </div>
           </div>
         </div>
 
-        <div className="p-8 space-y-12 text-gray-800">
+        <div className="p-8 space-y-12">
 
-          {/* 0. 页眉与签署 (Header & Signatures) */}
+          {/* Module 1: Report Metadata & Header */}
           <section>
-            <div className="flex items-center gap-2 mb-4 border-b border-gray-200 pb-2">
-              <div className="bg-slate-100 p-1 rounded"><FileText className="text-slate-700" size={20} /></div>
-              <h2 className="text-xl font-bold">0. 页眉、封面与签署 (Header & Signatures)</h2>
+            <div className="flex items-center gap-2 mb-4 border-b border-slate-200 pb-2">
+              <div className="bg-slate-100 p-1.5 rounded"><FileText className="text-slate-700" size={20} /></div>
+              <h2 className="text-xl font-bold">1. 报告元数据与表头模块 (Report Metadata & Header)</h2>
             </div>
-            <div className="overflow-hidden border border-gray-200 rounded-lg">
+            
+            <div className="border border-slate-200 rounded-lg p-5 hover:shadow-md transition-shadow bg-white">
+              <h3 className="font-bold text-sm text-slate-900 mb-3 flex items-center gap-2">
+                <span className="w-1.5 h-4 bg-indigo-600 rounded-full"></span>
+                表头信息矩阵 (Header Matrix)
+              </h3>
+              <ul className="space-y-3 text-xs text-slate-600">
+                <li>
+                  <strong>模块结构 (Structure)：</strong> 
+                  <br/>固定布局的 Key-Value 表格，包含题目、报告编号、适用范围。
+                </li>
+                <li>
+                  <strong>功能点 (Features)：</strong>
+                  <ul className="pl-4 mt-1 border-l-2 border-slate-100 space-y-1">
+                    <li><strong>报告编号生成规则：</strong> 自动拼接 `AVR-&#123;ProtocolCode&#125;-&#123;Version&#125;.&#123;Project#&#125;`。注意前缀为 "AVR" (Report) 而非 "AVP" (Protocol)。</li>
+                    <li><strong>适用范围动态插值：</strong> 模板文本中需自动嵌入当前的 `Product ID`。</li>
+                  </ul>
+                </li>
+                <li>
+                  <strong>数据来源 (Data Source)：</strong> 
+                  <span className="ml-1 px-1.5 py-0.5 bg-purple-100 text-purple-700 rounded font-mono">Inherited Context</span>
+                  <br/>直接继承自方案配置 (Protocol Config)，本页面不可编辑，确保源头唯一性 (SSOT)。
+                </li>
+                <li>
+                  <strong>交互方式 (Interaction)：</strong> 
+                  <br/>全只读展示。若需修改基础信息，需通过全局导航跳转回“方案封面”模块。
+                </li>
+              </ul>
+            </div>
+          </section>
+
+          {/* Module 2: Workflow Signatures */}
+          <section>
+            <div className="flex items-center gap-2 mb-4 border-b border-slate-200 pb-2">
+              <div className="bg-slate-100 p-1.5 rounded"><Edit3 className="text-slate-700" size={20} /></div>
+              <h2 className="text-xl font-bold">2. 审批流签署模块 (Workflow Signatures)</h2>
+            </div>
+            
+            <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
               <table className="w-full text-sm text-left">
-                <thead className="bg-gray-100 text-gray-700 font-semibold">
+                <thead className="bg-slate-50 text-slate-700 font-semibold border-b border-slate-200">
                   <tr>
-                    <th className="p-3 border-r w-1/4">功能模块</th>
-                    <th className="p-3 border-r w-1/4">数据字段/输入项</th>
-                    <th className="p-3 border-r w-1/4">逻辑与交互 (Logic & Interaction)</th>
-                    <th className="p-3">数据来源 (Source)</th>
+                    <th className="p-4 w-1/4">子组件</th>
+                    <th className="p-4 w-1/4">功能逻辑 (Logic)</th>
+                    <th className="p-4 w-1/4">数据来源 (Data Source)</th>
+                    <th className="p-4 w-1/4">交互细节 (Interaction)</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-slate-100">
                   <tr>
-                    <td className="p-3 font-medium">页眉 (Global Header)</td>
-                    <td className="p-3 text-xs">
-                      Product ID (Logo Area)<br/>
-                      Protocol Number (Combined)<br/>
-                      Page Number
+                    <td className="p-4 font-medium">人员信息网格<br/>(Personnel Grid)</td>
+                    <td className="p-4 text-xs text-slate-600">
+                      包含起草人(1)、审核人(N)、批准人(1)。<br/>
+                      需支持审核人列表的动态渲染（当前版本固定为3人）。
                     </td>
-                    <td className="p-3 text-xs">
-                      <ul className="list-disc pl-4 space-y-1">
-                        <li><strong>自动拼接:</strong> 方案号格式为 <code className="bg-gray-100 px-1">AVP-{'{Code}'}-{'{Ver}'}.{'{Proj}'}</code>。</li>
-                        <li><strong>只读:</strong> 页眉内容不可在报告页直接修改，需从方案页同步。</li>
-                      </ul>
+                    <td className="p-4 text-xs font-mono text-blue-600">
+                      Local State: ReportPersonnel[]
                     </td>
-                    <td className="p-3 text-xs font-mono text-gray-500">props.protocolCode<br/>props.productId</td>
+                    <td className="p-4 text-xs text-slate-600">
+                      输入框支持自动高度伸缩 (Auto-grow Textarea)，以适应长职位名称。
+                    </td>
                   </tr>
                   <tr>
-                    <td className="p-3 font-medium">封面签署区 (Signatures)</td>
-                    <td className="p-3 text-xs">
-                      人员信息表格:<br/>
-                      - Name, Dept, Position (Text)<br/>
-                      - Date (Date Picker)
+                    <td className="p-4 font-medium">签署日期控件<br/>(Date Picker)</td>
+                    <td className="p-4 text-xs text-slate-600">
+                      独立于方案日期的报告签署日期。<br/>
+                      格式强制：`YYYY-MM-DD`。
                     </td>
-                    <td className="p-3 text-xs">
-                      <ul className="list-disc pl-4 space-y-1">
-                        <li><strong>角色分离:</strong> 报告的签署人与方案的签署人数据结构分离（因为起草/审核人可能变更）。</li>
-                        <li><strong>动态渲染:</strong> 支持 <code className="bg-gray-100 px-1">textarea</code> 自适应高度，支持换行。</li>
-                        <li><strong>日期限制:</strong> 日期选择器格式为 YYYY-MM-DD。</li>
-                      </ul>
+                    <td className="p-4 text-xs font-mono text-blue-600">
+                      Local State: DateString
                     </td>
-                    <td className="p-3 text-xs font-mono text-gray-500">Local State (preparer, reviewers, approver)</td>
+                    <td className="p-4 text-xs text-slate-600">
+                      使用原生日期选择器。建议增加“今天”快捷按钮（Feature Request）。
+                    </td>
                   </tr>
                 </tbody>
               </table>
             </div>
           </section>
 
-          {/* 1 & 2. 目的与范围 */}
+          {/* Module 3: Results Matrix (The Dashboard) */}
           <section>
-            <div className="flex items-center gap-2 mb-4 border-b border-gray-200 pb-2">
-              <div className="bg-blue-100 p-1 rounded"><CheckSquare className="text-blue-700" size={20} /></div>
-              <h2 className="text-xl font-bold">1 & 2. 目的与范围 (Objective & Scope)</h2>
+            <div className="flex items-center gap-2 mb-4 border-b border-slate-200 pb-2">
+              <div className="bg-emerald-100 p-1.5 rounded"><Activity className="text-emerald-700" size={20} /></div>
+              <h2 className="text-xl font-bold">3. 验证结果综述仪表盘 (Results Executive Summary)</h2>
             </div>
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm">
-              <h3 className="font-bold text-blue-900 mb-2">文本自动生成逻辑 (Dynamic Text Generation)</h3>
-              <p className="mb-2">第1章内容必须根据用户在“方案”阶段勾选的验证项目（Validation Options）动态生成字符串。</p>
-              <div className="grid grid-cols-2 gap-4 mt-3">
-                <div className="bg-white p-3 rounded border border-blue-100">
-                  <span className="block text-xs font-bold text-gray-500 mb-1">输入 (Options)</span>
-                  <code className="text-xs text-blue-700 block">
-                    systemSuitability: true<br/>
-                    specificity: true<br/>
-                    linearity: true<br/>
-                    accuracy: true
-                  </code>
+            
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 gap-6">
+                <div className="border border-slate-200 rounded-lg p-5 bg-emerald-50/30">
+                  <div className="flex justify-between items-center mb-4">
+                    <h3 className="font-bold text-sm text-slate-900">核心逻辑：数据聚合与判定 (Aggregation & Decision)</h3>
+                    <span className="px-2 py-1 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded uppercase">Core Logic</span>
+                  </div>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {/* Logic 1 */}
+                    <div className="bg-white p-4 rounded border border-slate-200 shadow-sm relative overflow-hidden">
+                      <div className="absolute top-0 right-0 w-16 h-16 bg-blue-50 rounded-bl-full -mr-8 -mt-8"></div>
+                      <div className="flex items-center gap-2 mb-2 relative z-10">
+                        <Server size={16} className="text-blue-500"/>
+                        <span className="font-bold text-xs">数据源穿透 (Data Penetration)</span>
+                      </div>
+                      <p className="text-[10px] text-slate-500 leading-relaxed relative z-10">
+                        本模块不存储原始数据，而是作为<strong>视图层 (View Layer)</strong>，实时从 `Experimental Data Document` 中抓取关键指标（如 RSD%、回收率范围）。
+                        <br/><strong>规则：</strong> 若原始数据变更，此处必须即时重绘，严禁数据不同步。
+                      </p>
+                    </div>
+
+                    {/* Logic 2 */}
+                    <div className="bg-white p-4 rounded border border-slate-200 shadow-sm relative overflow-hidden">
+                      <div className="absolute top-0 right-0 w-16 h-16 bg-orange-50 rounded-bl-full -mr-8 -mt-8"></div>
+                      <div className="flex items-center gap-2 mb-2 relative z-10">
+                        <ShieldCheck size={16} className="text-orange-500"/>
+                        <span className="font-bold text-xs">限度对齐 (Criteria Alignment)</span>
+                      </div>
+                      <p className="text-[10px] text-slate-500 leading-relaxed relative z-10">
+                        “可接受标准”列的内容必须与 Protocol 中的定义完全一致。
+                        <br/><strong>数据流：</strong> Protocol State -> Report View。
+                        <br/><strong>异常流：</strong> 若标准未定义，显示缺省占位符。
+                      </p>
+                    </div>
+
+                    {/* Logic 3 */}
+                    <div className="bg-white p-4 rounded border border-slate-200 shadow-sm relative overflow-hidden">
+                      <div className="absolute top-0 right-0 w-16 h-16 bg-purple-50 rounded-bl-full -mr-8 -mt-8"></div>
+                      <div className="flex items-center gap-2 mb-2 relative z-10">
+                        <MousePointer2 size={16} className="text-purple-500"/>
+                        <span className="font-bold text-xs">人工判定 (Human Decision)</span>
+                      </div>
+                      <p className="text-[10px] text-slate-500 leading-relaxed relative z-10">
+                        系统不进行自动 Pass/Fail 判定，而是提供下拉选单由 QA 人工确认。
+                        <br/><strong>状态流转：</strong> 此处的判定结果将作为 Payload 同步至第5章各子项的“结论”段落。
+                      </p>
+                    </div>
+                  </div>
                 </div>
-                <div className="bg-white p-3 rounded border border-blue-100">
-                  <span className="block text-xs font-bold text-gray-500 mb-1">输出 (Rendered Text)</span>
-                  <p className="text-xs text-gray-700">
-                    "...对该检验方法进行验证，包括<strong className="text-black">系统适用性、专属性、线性和范围、准确度</strong>。"
+              </div>
+
+              {/* Module Mapping & Dynamic Logic */}
+              <div className="border border-slate-200 rounded-lg overflow-hidden">
+                <div className="bg-slate-100 px-4 py-3 border-b border-slate-200 flex justify-between items-center">
+                  <h3 className="font-bold text-sm text-slate-800 flex items-center gap-2">
+                    <ArrowRightLeft size={16} className="text-slate-600"/>
+                    模块对应关系与动态展示逻辑 (Module Mapping & Dynamic Logic)
+                  </h3>
+                </div>
+                <table className="w-full text-xs text-left">
+                  <thead className="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200">
+                    <tr>
+                      <th className="p-3 w-[25%]">报告模块 (Report Module)</th>
+                      <th className="p-3 w-[25%]">方案对应源头 (Protocol Source)</th>
+                      <th className="p-3 w-[50%]">动态展示逻辑 (Dynamic Display Logic)</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-slate-700">
+                    <tr className="hover:bg-slate-50">
+                      <td className="p-3 font-medium">System Suitability 行</td>
+                      <td className="p-3 text-slate-500">Protocol 1. Objective (Checkbox) <br/>& Protocol 6.1 (Criteria)</td>
+                      <td className="p-3"><code className="bg-red-50 text-red-600 px-1 rounded">Always Visible</code> 系统适用性为强制项，此行永远显示。</td>
+                    </tr>
+                    <tr className="hover:bg-slate-50">
+                      <td className="p-3 font-medium">Specificity 行</td>
+                      <td className="p-3 text-slate-500">Protocol 1. Objective (Checkbox) <br/>& Protocol 6.x Specificity</td>
+                      <td className="p-3">仅当方案中 <code className="bg-blue-50 text-blue-600 px-1 rounded">validationOptions.specificity === true</code> 时渲染。否则整行 Unmount。</td>
+                    </tr>
+                    <tr className="hover:bg-slate-50">
+                      <td className="p-3 font-medium">Linearity 行</td>
+                      <td className="p-3 text-slate-500">Protocol 1. Objective (Checkbox) <br/>& Protocol 6.x Linearity</td>
+                      <td className="p-3">仅当方案中 <code className="bg-blue-50 text-blue-600 px-1 rounded">validationOptions.linearity === true</code> 时渲染。否则整行 Unmount。</td>
+                    </tr>
+                    <tr className="hover:bg-slate-50">
+                      <td className="p-3 font-medium">Repeatability 行</td>
+                      <td className="p-3 text-slate-500">Protocol 1. Objective (Checkbox) <br/>& Protocol 6.x Precision</td>
+                      <td className="p-3">仅当方案中 <code className="bg-blue-50 text-blue-600 px-1 rounded">validationOptions.precision === true</code> 时渲染。否则整行 Unmount。</td>
+                    </tr>
+                    <tr className="hover:bg-slate-50">
+                      <td className="p-3 font-medium">Accuracy 行</td>
+                      <td className="p-3 text-slate-500">Protocol 1. Objective (Checkbox) <br/>& Protocol 6.x Accuracy</td>
+                      <td className="p-3">仅当方案中 <code className="bg-blue-50 text-blue-600 px-1 rounded">validationOptions.accuracy === true</code> 时渲染。否则整行 Unmount。</td>
+                    </tr>
+                    <tr className="hover:bg-slate-50">
+                      <td className="p-3 font-medium">Stability 行</td>
+                      <td className="p-3 text-slate-500">Protocol 1. Objective (Checkbox) <br/>& Protocol 6.x Stability</td>
+                      <td className="p-3">仅当方案中 <code className="bg-blue-50 text-blue-600 px-1 rounded">validationOptions.stability === true</code> 时渲染。否则整行 Unmount。</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </section>
+
+          {/* Module 4: Method Snapshot */}
+          <section>
+            <div className="flex items-center gap-2 mb-4 border-b border-slate-200 pb-2">
+              <div className="bg-gray-100 p-1.5 rounded"><Lock className="text-gray-700" size={20} /></div>
+              <h2 className="text-xl font-bold">4. 方法快照模块 (Method Snapshot - Read Only)</h2>
+            </div>
+            <div className="border border-slate-200 rounded-lg p-5">
+              <div className="flex gap-4">
+                <div className="w-1/3 border-r border-slate-100 pr-4">
+                  <h4 className="font-bold text-sm text-slate-900 mb-2">组件复用策略</h4>
+                  <p className="text-xs text-slate-600 leading-relaxed">
+                    完整复用 Protocol 中的方法描述组件。
+                    <br/><strong>Prop 配置：</strong> `readOnly={true}`。
                   </p>
                 </div>
+                <div className="w-2/3">
+                  <h4 className="font-bold text-sm text-slate-900 mb-2">只读态 UI 规范</h4>
+                  <ul className="grid grid-cols-2 gap-y-2 text-xs text-slate-600 list-disc pl-4">
+                    <li>隐藏所有 CRUD 操作按钮（新增/删除行）。</li>
+                    <li>输入框转换为纯文本渲染，移除编辑态样式（如下划线、背景色）。</li>
+                    <li>Select/Checkbox 控件置为 Disabled 状态。</li>
+                    <li>梯度表、溶液配制表保持布局一致性，仅锁定内容。</li>
+                  </ul>
+                </div>
               </div>
             </div>
           </section>
 
-          {/* 3. 验证结果综述 */}
+          {/* Module 5: Resource Verification */}
           <section>
-            <div className="flex items-center gap-2 mb-4 border-b border-gray-200 pb-2">
-              <div className="bg-purple-100 p-1 rounded"><Database className="text-purple-700" size={20} /></div>
-              <h2 className="text-xl font-bold">3. 验证结果综述 (Results Summary Dashboard)</h2>
+            <div className="flex items-center gap-2 mb-4 border-b border-slate-200 pb-2">
+              <div className="bg-blue-100 p-1.5 rounded"><CheckSquare className="text-blue-700" size={20} /></div>
+              <h2 className="text-xl font-bold">5. 资源确认模块 (Resource Verification)</h2>
             </div>
-            <p className="text-sm text-gray-600 mb-3">此表格是报告的核心摘要，汇集关键数据并提供最终判定入口。</p>
-            <div className="overflow-hidden border border-gray-200 rounded-lg">
+            
+            <div className="overflow-hidden border border-slate-200 rounded-lg">
               <table className="w-full text-sm text-left">
-                <thead className="bg-gray-100 text-gray-700 font-semibold">
+                <thead className="bg-slate-50 text-slate-700 font-semibold">
                   <tr>
-                    <th className="p-3 border-r w-1/5">验证项 (Row)</th>
-                    <th className="p-3 border-r w-1/3">关键数据提取 (Data Binding)</th>
-                    <th className="p-3 border-r">交互功能 (Interaction)</th>
+                    <th className="p-3 w-1/5">子模块 (Sub-module)</th>
+                    <th className="p-3 w-1/3">输入字段 (Input Fields)</th>
+                    <th className="p-3 w-1/4">数据映射逻辑 (Mapping Logic)</th>
+                    <th className="p-3">异常处理 (Exception Handling)</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-100">
+                <tbody className="divide-y divide-slate-100">
                   <tr>
-                    <td className="p-3 font-medium">系统适用性<br/>(System Suitability)</td>
-                    <td className="p-3 text-xs">
-                      自动读取实验数据：<br/>
-                      - 理论板数 (Theoretical Plates)<br/>
-                      - 拖尾因子 (Tailing Factor)<br/>
-                      - 峰面积/保留时间 RSD<br/>
-                      - 回收率 (Recovery)
+                    <td className="p-3 font-medium">5.1 培训确认</td>
+                    <td className="p-3 text-xs">培训日期</td>
+                    <td className="p-3 text-xs text-slate-500">无预填充，完全由用户现场录入。</td>
+                    <td className="p-3 text-xs text-red-500">导出校验：日期不可为空。</td>
+                  </tr>
+                  <tr>
+                    <td className="p-3 font-medium">5.2.1 仪器确认</td>
+                    <td className="p-3 text-xs">厂家, 设备编号, 型号, 有效期</td>
+                    <td className="p-3 text-xs text-slate-500">
+                      默认初始化两行空数据 (天平/HPLC)。<br/>
+                      支持用户直接编辑 Local State。
                     </td>
-                    <td className="p-3 text-xs border-l border-purple-100 bg-purple-50" rowSpan={6}>
-                      <div className="font-bold text-purple-800 mb-1">Pass/Fail 判定下拉框</div>
-                      <ul className="list-disc pl-4 space-y-1">
-                        <li><strong>组件:</strong> <code className="bg-white px-1 border rounded">StatusSelect</code></li>
-                        <li><strong>行为:</strong> 用户手动选择 Pass 或 Fail。</li>
-                        <li><strong>联动:</strong> 此处的状态将<strong>直接决定</strong>第5章各子章节末尾的“结论”文字。</li>
-                        <li><strong>默认值:</strong> Pass</li>
-                      </ul>
+                    <td className="p-3 text-xs">有效期格式校验。</td>
+                  </tr>
+                  <tr>
+                    <td className="p-3 font-medium">5.2.2 色谱柱确认</td>
+                    <td className="p-3 text-xs">色谱柱序列号 (Serial #)</td>
+                    <td className="p-3 text-xs font-mono text-purple-600">
+                      Key: Protocol defined columns<br/>
+                      Value: Report input serials
+                    </td>
+                    <td className="p-3 text-xs">
+                      若 Protocol 新增了色谱柱，此处需自动扩展行，防止漏填。
                     </td>
                   </tr>
                   <tr>
-                    <td className="p-3 font-medium">专属性<br/>(Specificity)</td>
-                    <td className="p-3 text-xs">
-                      - 相对保留时间偏差 (RT Deviation)<br/>
-                      - 峰纯度因子 (Peak Purity)
+                    <td className="p-3 font-medium">5.2.3 试剂确认</td>
+                    <td className="p-3 text-xs">批号, 厂家, 有效期</td>
+                    <td className="p-3 text-xs font-mono text-purple-600">
+                      Map: Protocol Reagents -> Report Fields
                     </td>
-                  </tr>
-                  <tr>
-                    <td className="p-3 font-medium">线性<br/>(Linearity)</td>
                     <td className="p-3 text-xs">
-                      - 相关系数 (r)<br/>
-                      - 截距比例 (% y-intercept)<br/>
-                      - 线性方程 (Equation)<br/>
-                      - 残差平方和 (RSS)
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="p-3 font-medium">精密度<br/>(Precision)</td>
-                    <td className="p-3 text-xs">
-                      - 6针样品的 RSD%
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="p-3 font-medium">准确度<br/>(Accuracy)</td>
-                    <td className="p-3 text-xs">
-                      - 平均回收率范围 (Recovery Range)<br/>
-                      - RSD%
-                    </td>
-                  </tr>
-                  <tr>
-                    <td className="p-3 font-medium">稳定性<br/>(Stability)</td>
-                    <td className="p-3 text-xs">
-                      - 各时间点回收率 (Timepoint Recovery)
+                      试剂名称只读，不可在报告中修改，需回溯方案修改。
                     </td>
                   </tr>
                 </tbody>
@@ -184,176 +329,176 @@ export const ReportDocumentPRD: React.FC = () => {
             </div>
           </section>
 
-          {/* 4. 方法描述 */}
+          {/* Module 6: Experimental Data Detail */}
           <section>
-            <div className="flex items-center gap-2 mb-4 border-b border-gray-200 pb-2">
-              <div className="bg-gray-100 p-1 rounded"><Lock className="text-gray-700" size={20} /></div>
-              <h2 className="text-xl font-bold">4. 检验方法描述 (Test Method - Read Only)</h2>
+            <div className="flex items-center gap-2 mb-4 border-b border-slate-200 pb-2">
+              <div className="bg-rose-100 p-1.5 rounded"><Layers className="text-rose-700" size={20} /></div>
+              <h2 className="text-xl font-bold">6. 实验数据详情模块 (Experimental Data Details)</h2>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="p-4 border border-gray-200 rounded-lg">
-                <h4 className="font-bold text-sm mb-2">组件复用逻辑</h4>
-                <p className="text-xs text-gray-600 mb-2">
-                  直接复用方案模块的 <code className="bg-gray-100 px-1 rounded">TestMethodSection</code> 组件，但传入 <code className="bg-gray-100 px-1 rounded">readOnly=true</code> 属性。
-                </p>
-                <div className="bg-gray-50 p-2 rounded text-xs border border-gray-200">
-                  <strong>表现差异:</strong><br/>
-                  1. 所有 <code className="text-yellow-600">bg-yellow-300</code> 输入框背景移除，变为透明。<br/>
-                  2. 输入框替换为纯文本 (<code className="text-blue-600">&lt;span&gt;</code>) 展示。<br/>
-                  3. 隐藏“新增行”、“删除行”等操作按钮。<br/>
-                  4. 数据实时同步自 App 全局状态（即方案中修改，报告中自动更新）。
-                </div>
-              </div>
-              <div className="p-4 border border-gray-200 rounded-lg">
-                <h4 className="font-bold text-sm mb-2">包含的数据子项</h4>
-                <ul className="text-xs text-gray-600 space-y-1 list-disc pl-4">
-                  <li>4.1 产品描述 (化学式、名称)</li>
-                  <li>4.2 仪器及条件 (色谱柱、流速、波长、梯度表)</li>
-                  <li>4.3 溶液配制 (详细文本描述、称样量)</li>
-                  <li>4.4 进样序列 (系统适用性针数定义)</li>
-                  <li>4.5 系统适用性标准 (理论板数、RSD限度)</li>
-                  <li>4.7 计算公式 (校正因子选项)</li>
-                  <li>4.8 接受标准 (总限度)</li>
-                </ul>
-              </div>
-            </div>
-          </section>
-
-          {/* 5. 验证内容详情 */}
-          <section>
-            <div className="flex items-center gap-2 mb-4 border-b border-gray-200 pb-2">
-              <div className="bg-green-100 p-1 rounded"><Edit3 className="text-green-700" size={20} /></div>
-              <h2 className="text-xl font-bold">5. 验证内容详情 (Validation Content - Editable)</h2>
-            </div>
-            <p className="text-sm text-gray-600 mb-4">此部分混合了只读的实验数据引用和需要用户补录的现场记录。</p>
-
-            {/* 5.1 & 5.2 Resources */}
-            <div className="mb-6">
-              <h3 className="font-bold text-gray-800 mb-2 border-l-4 border-green-500 pl-2">5.1 - 5.2 资源确认 (Resources)</h3>
-              <table className="w-full text-sm text-left border border-gray-200">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="p-2 border-r">子章节</th>
-                    <th className="p-2 border-r">需补录字段 (User Input)</th>
-                    <th className="p-2">校验规则</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  <tr>
-                    <td className="p-2 text-xs font-medium">5.1 培训确认</td>
-                    <td className="p-2 text-xs">培训日期 (Training Date)</td>
-                    <td className="p-2 text-xs text-gray-500">日期格式</td>
-                  </tr>
-                  <tr>
-                    <td className="p-2 text-xs font-medium">5.2.1 仪器确认</td>
-                    <td className="p-2 text-xs">厂家 (Supplier), 设备编号 (ID), 型号 (Model), 有效期 (Retest Date)</td>
-                    <td className="p-2 text-xs text-gray-500">有效期不得早于当前日期（逻辑校验非强制）</td>
-                  </tr>
-                  <tr>
-                    <td className="p-2 text-xs font-medium">5.2.2 色谱柱</td>
-                    <td className="p-2 text-xs">色谱柱序列号 (Serial Number)</td>
-                    <td className="p-2 text-xs text-gray-500">必填，关联具体仪器</td>
-                  </tr>
-                  <tr>
-                    <td className="p-2 text-xs font-medium">5.2.3 试剂</td>
-                    <td className="p-2 text-xs">批号 (Batch), 厂家 (Supplier), 有效期 (Expiry)</td>
-                    <td className="p-2 text-xs text-gray-500">支持多行试剂录入</td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-
-            {/* 5.3+ Experiments */}
-            <div className="mb-6">
-              <h3 className="font-bold text-gray-800 mb-2 border-l-4 border-blue-500 pl-2">5.3 - 5.8 实验数据展示 (Experimental Data)</h3>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                
-                {/* Visuals */}
-                <div className="border p-3 rounded bg-white shadow-sm">
-                  <div className="flex items-center gap-2 mb-2 text-blue-600 font-bold text-sm">
-                    <PieChart size={16} /> 可视化图表
-                  </div>
-                  <p className="text-xs text-gray-600 mb-2">在 <strong>5.5 线性和范围</strong> 章节：</p>
-                  <ul className="list-disc pl-4 text-xs text-gray-600 space-y-1">
-                    <li>调用 <code className="bg-gray-100">LinearityChart</code> 组件。</li>
-                    <li><strong>X轴:</strong> 浓度 (Concentration)。</li>
-                    <li><strong>Y轴:</strong> 峰面积 (Area)。</li>
-                    <li><strong>数据源:</strong> <code className="bg-gray-100">experimentalData.linearity.rows</code>。</li>
-                    <li><strong>渲染:</strong> SVG 实时绘制回归线和 R² 值。</li>
-                  </ul>
-                </div>
-
-                {/* Attachments */}
-                <div className="border p-3 rounded bg-white shadow-sm">
-                  <div className="flex items-center gap-2 mb-2 text-orange-600 font-bold text-sm">
-                    <FileText size={16} /> 附件索引 (Inputs)
-                  </div>
-                  <p className="text-xs text-gray-600 mb-2">每个实验子章节头部需包含：</p>
-                  <ul className="list-disc pl-4 text-xs text-gray-600 space-y-1">
-                    <li>"典型附图见附件 [输入框]"</li>
-                    <li><strong>功能:</strong> 允许用户输入图谱编号（如 "5.5-1"）。</li>
-                    <li><strong>状态:</strong> 独立 Local State 管理。</li>
-                  </ul>
-                </div>
-
-                {/* Conclusion Logic */}
-                <div className="border p-3 rounded bg-white shadow-sm">
-                  <div className="flex items-center gap-2 mb-2 text-green-600 font-bold text-sm">
-                    <CheckSquare size={16} /> 结论联动
-                  </div>
-                  <p className="text-xs text-gray-600 mb-2">子章节末尾的“结论”行：</p>
-                  <ul className="list-disc pl-4 text-xs text-gray-600 space-y-1">
-                    <li><strong>只读展示:</strong> 用户不可直接编辑。</li>
-                    <li><strong>内容来源:</strong> 引用第3章 (Results Summary) 中用户选择的 Pass/Fail 状态。</li>
-                    <li>Pass → "符合规定 / Pass"</li>
-                    <li>Fail → "不符合规定 / Fail"</li>
-                  </ul>
-                </div>
-
-              </div>
-            </div>
-          </section>
-
-          {/* 6, 7, 8 Footer Sections */}
-          <section>
-            <div className="flex items-center gap-2 mb-4 border-b border-gray-200 pb-2">
-              <div className="bg-orange-100 p-1 rounded"><AlertTriangle className="text-orange-700" size={20} /></div>
-              <h2 className="text-xl font-bold">6, 7, 8. 偏差、结论与历史 (Footer Sections)</h2>
-            </div>
-            <div className="grid grid-cols-1 gap-4">
+            
+            <div className="space-y-6">
               
-              <div className="flex gap-4 items-start p-3 border-b border-gray-100">
-                <div className="w-32 font-bold text-sm shrink-0">6. 偏差摘要<br/>(Deviations)</div>
-                <div className="text-xs text-gray-600">
-                  <p className="mb-1"><strong>交互:</strong> 多行文本域 (Textarea)。</p>
-                  <p className="mb-1"><strong>默认值:</strong> "在验证过程中未发生偏差。\nNo deviation occurred during the validation."</p>
-                  <p><strong>样式:</strong> 灰色背景，Focus时变白，支持拖拽调整高度。</p>
+              {/* Section Correspondence & Dynamic Mounting */}
+              <div className="border border-slate-200 rounded-lg overflow-hidden">
+                <div className="bg-slate-100 px-4 py-3 border-b border-slate-200 flex justify-between items-center">
+                  <h3 className="font-bold text-sm text-slate-800 flex items-center gap-2">
+                    <GitCommit size={16} className="text-slate-600"/>
+                    章节对应关系与动态挂载逻辑 (Section Correspondence & Dynamic Mounting)
+                  </h3>
+                </div>
+                <table className="w-full text-xs text-left">
+                  <thead className="bg-slate-50 text-slate-500 font-semibold border-b border-slate-200">
+                    <tr>
+                      <th className="p-3 w-[25%]">报告章节 (Report Section)</th>
+                      <th className="p-3 w-[25%]">方案对应源头 (Protocol Source)</th>
+                      <th className="p-3 w-[50%]">动态展示逻辑 (Dynamic Display Logic)</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 text-slate-700">
+                    <tr className="hover:bg-slate-50">
+                      <td className="p-3 font-medium">5.3 系统适用性 System Suitability</td>
+                      <td className="p-3 text-slate-500">Protocol 6.1 (Limit) <br/>& Exp. Data: systemSuitability</td>
+                      <td className="p-3"><code className="bg-red-50 text-red-600 px-1 rounded">Always Mounted</code> 章节序号固定为 5.3 (Training 5.1, Equip 5.2)。</td>
+                    </tr>
+                    <tr className="hover:bg-slate-50">
+                      <td className="p-3 font-medium">5.x 专属性 Specificity</td>
+                      <td className="p-3 text-slate-500">Protocol 6.x (Limit) <br/>& Exp. Data: specificity</td>
+                      <td className="p-3">
+                        状态依赖: <code className="bg-blue-50 text-blue-600 px-1 rounded">validationOptions.specificity</code><br/>
+                        若为 false，该 DOM 节点完全移除。若为 true，章节号 (5.x) 自动递增。
+                      </td>
+                    </tr>
+                    <tr className="hover:bg-slate-50">
+                      <td className="p-3 font-medium">5.x 线性和范围 Linearity</td>
+                      <td className="p-3 text-slate-500">Protocol 6.x (Limit) <br/>& Exp. Data: linearity</td>
+                      <td className="p-3">
+                        状态依赖: <code className="bg-blue-50 text-blue-600 px-1 rounded">validationOptions.linearity</code><br/>
+                        包含 SVG 图表渲染，需确保数据源非空。
+                      </td>
+                    </tr>
+                    <tr className="hover:bg-slate-50">
+                      <td className="p-3 font-medium">5.x 精密度 Precision</td>
+                      <td className="p-3 text-slate-500">Protocol 6.x (Limit) <br/>& Exp. Data: precision</td>
+                      <td className="p-3">
+                        状态依赖: <code className="bg-blue-50 text-blue-600 px-1 rounded">validationOptions.precision</code><br/>
+                        表格自动渲染 6 行重复性数据。
+                      </td>
+                    </tr>
+                    <tr className="hover:bg-slate-50">
+                      <td className="p-3 font-medium">5.x 准确度 Accuracy</td>
+                      <td className="p-3 text-slate-500">Protocol 6.x (Limit) <br/>& Exp. Data: accuracy</td>
+                      <td className="p-3">
+                        状态依赖: <code className="bg-blue-50 text-blue-600 px-1 rounded">validationOptions.accuracy</code><br/>
+                        显示回收率和 RSD 统计。
+                      </td>
+                    </tr>
+                    <tr className="hover:bg-slate-50">
+                      <td className="p-3 font-medium">5.x 溶液稳定性 Stability</td>
+                      <td className="p-3 text-slate-500">Protocol 6.x (Limit) <br/>& Exp. Data: stability</td>
+                      <td className="p-3">
+                        状态依赖: <code className="bg-blue-50 text-blue-600 px-1 rounded">validationOptions.stability</code><br/>
+                        包含对照品和供试品两个子表格，列数动态适应时间点。
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Common Patterns */}
+              <div className="bg-slate-50 border border-slate-200 rounded p-4">
+                <h4 className="font-bold text-xs text-slate-500 uppercase tracking-wider mb-2">通用渲染模式 (Common Rendering Pattern for 5.3 - 5.8)</h4>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-slate-700">
+                  <div className="border-l-2 border-indigo-400 pl-3">
+                    <strong>附图索引注入：</strong>
+                    <p className="mt-1 text-slate-500">每个子章节顶部包含“典型附图见 [Input]”输入框，支持用户填写图谱编号（如 5.3-1）。</p>
+                  </div>
+                  <div className="border-l-2 border-indigo-400 pl-3">
+                    <strong>数据单向绑定：</strong>
+                    <p className="mt-1 text-slate-500">所有表格数据严格单向绑定至 <code className="font-mono">experimentalData</code>。报告页为<strong>纯展示模式</strong>，不支持修改数据。</p>
+                  </div>
+                  <div className="border-l-2 border-indigo-400 pl-3">
+                    <strong>结论联动映射：</strong>
+                    <p className="mt-1 text-slate-500">章节末尾的“结论”字段，自动读取 Module 3 中的 Pass/Fail 状态，并映射为中文描述（Pass -> 符合规定）。</p>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex gap-4 items-start p-3 border-b border-gray-100">
-                <div className="w-32 font-bold text-sm shrink-0">7. 结论<br/>(Conclusion)</div>
-                <div className="text-xs text-gray-600">
-                  <p className="mb-1"><strong>内容:</strong> 固定话术。</p>
-                  <p>"该检验方法可以稳定可靠地用于 [ProductID] 含量和鉴别的检验..."</p>
+              {/* Specific Sub-modules */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {/* Linearity */}
+                <div className="border border-slate-200 rounded-lg p-4 hover:border-rose-200 transition-colors">
+                  <h4 className="font-bold text-sm text-slate-900 mb-2 flex items-center gap-2">
+                    <PieChart size={14} className="text-rose-500"/>
+                    5.5 线性和范围 - 可视化需求
+                  </h4>
+                  <ul className="list-disc pl-4 text-xs text-slate-600 space-y-1">
+                    <li><strong>SVG 线性回归图表：</strong> 必须在客户端实时渲染。</li>
+                    <li><strong>坐标系：</strong> X轴为浓度，Y轴为峰面积。</li>
+                    <li><strong>数据驱动：</strong> 监听 <code className="font-mono">experimentalData.linearity.rows</code> 变化触发重绘。</li>
+                    <li><strong>元数据展示：</strong> 图表内需包含 R² 值和回归方程文本。</li>
+                  </ul>
+                </div>
+
+                {/* Stability */}
+                <div className="border border-slate-200 rounded-lg p-4 hover:border-rose-200 transition-colors">
+                  <h4 className="font-bold text-sm text-slate-900 mb-2 flex items-center gap-2">
+                    <Cpu size={14} className="text-rose-500"/>
+                    5.8 稳定性 - 动态列渲染
+                  </h4>
+                  <ul className="list-disc pl-4 text-xs text-slate-600 space-y-1">
+                    <li><strong>时间点自适应：</strong> 表格列数需根据实验数据中的时间点 (Time Points) 动态生成 (0h, 6h, 12h...)。</li>
+                    <li><strong>双表结构：</strong> 需分别渲染“对照品溶液”和“供试品溶液”两张独立表格。</li>
+                    <li><strong>缺省值处理：</strong> 若某时间点无数据，单元格应显示 "-" 或 "N/A"。</li>
+                  </ul>
                 </div>
               </div>
+            </div>
+          </section>
 
-              <div className="flex gap-4 items-start p-3">
-                <div className="w-32 font-bold text-sm shrink-0">8. 变更历史<br/>(History)</div>
-                <div className="text-xs text-gray-600">
-                  <p className="mb-1"><strong>交互:</strong> "生效日期" (Effective Date) 为日期选择器输入。</p>
-                  <p><strong>表格内容:</strong> 版本号(00), 变更原因(New) 为固定首版内容。</p>
-                </div>
+          {/* Module 7: Footer Attributes */}
+          <section>
+            <div className="flex items-center gap-2 mb-4 border-b border-slate-200 pb-2">
+              <div className="bg-orange-100 p-1.5 rounded"><AlertTriangle className="text-orange-700" size={20} /></div>
+              <h2 className="text-xl font-bold">7. 尾部属性模块 (Footer Attributes)</h2>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* Deviations */}
+              <div className="border border-slate-200 rounded-lg p-4 bg-white hover:shadow-sm transition-shadow">
+                <h4 className="font-bold text-sm text-slate-900 mb-2">6. 偏差摘要 (Deviations)</h4>
+                <p className="text-xs text-slate-600 mb-2">
+                  <strong>UI组件：</strong> 多行文本域 (Textarea)。<br/>
+                  <strong>缺省文案：</strong> "在验证过程中未发生偏差。No deviation occurred..."<br/>
+                  <strong>交互：</strong> 支持用户手动输入偏差编号。
+                </p>
               </div>
 
+              {/* Conclusion */}
+              <div className="border border-slate-200 rounded-lg p-4 bg-white hover:shadow-sm transition-shadow">
+                <h4 className="font-bold text-sm text-slate-900 mb-2">7. 结论 (Conclusion)</h4>
+                <p className="text-xs text-slate-600 mb-2">
+                  <strong>逻辑：</strong> 静态模板插值。<br/>
+                  <strong>插值变量：</strong> <code className="bg-slate-100 px-1 rounded">DisplayID</code><br/>
+                  <strong>风险控制：</strong> 若 Module 3 中存在 "Fail" 项，建议此处增加 UI 警示样式（如红色边框）。
+                </p>
+              </div>
+
+              {/* History */}
+              <div className="border border-slate-200 rounded-lg p-4 bg-white hover:shadow-sm transition-shadow">
+                <h4 className="font-bold text-sm text-slate-900 mb-2">8. 变更历史 (History)</h4>
+                <p className="text-xs text-slate-600 mb-2">
+                  <strong>结构：</strong> 固定表格 (版本号, 变更原因, 生效日期)。<br/>
+                  <strong>日期控件：</strong> 生效日期使用 Date Input，独立于签署日期。<br/>
+                  <strong>初始化：</strong> 默认为 "首版文件 / New"。
+                </p>
+              </div>
             </div>
           </section>
 
         </div>
         
-        <div className="bg-slate-50 p-4 text-center text-xs text-slate-400 border-t border-gray-200">
-          Internal Document • Engineering Department • Confidential
+        <div className="bg-slate-50 p-4 text-center text-xs text-slate-400 border-t border-slate-200 font-mono">
+          End of Specification • Generated by Senior PM Agent
         </div>
       </div>
     </div>

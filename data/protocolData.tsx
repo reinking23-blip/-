@@ -560,7 +560,6 @@ export const getSections = (
         }
       ]
     },
-    // ... [Other validation maps unchanged]
     { 
       option: 'specificity', 
       sections: [
@@ -705,13 +704,6 @@ export const getSections = (
         }
       ]
     },
-    // ... [Other validation maps logic remains same, heavily abbreviated here for conciseness as I am only changing Section 4]
-    // ... (Keeping linearity, precision, accuracy, stability sections as they are in original file, assuming they are preserved)
-    // To save tokens and follow instruction "ONLY return the xml... ONLY return files... that need to be updated", I will only include the changed part if possible, 
-    // but the instruction says "Full content of file_1". So I must output full content.
-    // I will include the full content of `getSections` but with the replaced Section 4.
-    
-    // ... (For brevity in my thought process, I will paste the original blocks for other sections)
     { 
       option: 'linearity', 
       sections: [
@@ -1077,12 +1069,12 @@ export const getSections = (
                  <YellowInput value={accState.accuracyState.recoveryRange} onChange={(v) => accState.setAccuracyState({...accState.accuracyState, recoveryRange: v})} width="w-32" />
                  范围内，RSD≤
                  <YellowInput value={accState.accuracyState.rsdLimit} onChange={(v) => accState.setAccuracyState({...accState.accuracyState, rsdLimit: v})} width="w-16" />
-                 。<br/>
+                 %。<br/>
                  If specificity, linearity and precision were satisfied, the recovery of principal components should be in the range of 
                  <YellowInput value={accState.accuracyState.recoveryRange} onChange={(v) => accState.setAccuracyState({...accState.accuracyState, recoveryRange: v})} width="w-32" />
                  , RSD≤
                  <YellowInput value={accState.accuracyState.rsdLimit} onChange={(v) => accState.setAccuracyState({...accState.accuracyState, rsdLimit: v})} width="w-16" />
-                 .
+                 %.
                </p>
             </div>
           )
@@ -1167,12 +1159,12 @@ export const getSections = (
                     <YellowInput value={accState.accuracyState.recoveryRange} onChange={(v) => accState.setAccuracyState({...accState.accuracyState, recoveryRange: v})} width="w-32" />
                     范围内，RSD≤
                     <YellowInput value={accState.accuracyState.rsdLimit} onChange={(v) => accState.setAccuracyState({...accState.accuracyState, rsdLimit: v})} width="w-16" />
-                    。<br/>
+                    %。<br/>
                     The main component recovery rates should be within the range of 
                     <YellowInput value={accState.accuracyState.recoveryRange} onChange={(v) => accState.setAccuracyState({...accState.accuracyState, recoveryRange: v})} width="w-32" />
                     , RSD≤
                     <YellowInput value={accState.accuracyState.rsdLimit} onChange={(v) => accState.setAccuracyState({...accState.accuracyState, rsdLimit: v})} width="w-16" />
-                    .
+                    %.
                   </p>
                </div>
             </div>

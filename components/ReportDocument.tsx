@@ -178,6 +178,9 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
     stability: 'Pass'
   });
 
+  // Counter for Section 5 dynamic subsections
+  let section5Counter = 3;
+
   const handleStatusChange = (key: keyof typeof valStatus, value: string) => {
     setValStatus(prev => ({ ...prev, [key]: value }));
   };
@@ -232,6 +235,27 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
     const selectedZh = items.filter(i => validationOptions[i.id as keyof ValidationOptions]).map(i => i.zh);
     const selectedEn = items.filter(i => validationOptions[i.id as keyof ValidationOptions]).map(i => i.en);
     return { zh: selectedZh.join('、'), en: selectedEn.join(', ') };
+  };
+
+  // Helper functions to derive ranges and stats for Section 3
+  const getLinearityRange = (field: 'conc' | 'actualLevel') => {
+    const values = experimentalData.linearity.rows.map(r => parseFloat(r[field])).filter(n => !isNaN(n));
+    if (values.length === 0) return "-";
+    return `${Math.min(...values).toFixed(1)}~${Math.max(...values).toFixed(1)}`;
+  };
+  
+  const getAccuracyRecRange = () => {
+    const values = experimentalData.accuracy.rows.map(r => parseFloat(r.rec)).filter(n => !isNaN(n));
+    if (values.length === 0) return "-";
+    return `${Math.min(...values).toFixed(1)}%~${Math.max(...values).toFixed(1)}%`;
+  };
+
+  const getControlRSDRange = () => {
+     const values = experimentalData.systemSuitability.controls.map(c => parseFloat(c.rsd)).filter(n => !isNaN(n));
+     if (values.length === 0) return "-";
+     const min = Math.min(...values).toFixed(2);
+     const max = Math.max(...values).toFixed(2);
+     return min === max ? `${min}%` : `${min}%~${max}%`;
   };
 
   const dynamicItems = getSelectedItemsText();
@@ -403,6 +427,8 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
             </thead>
             <tbody>
               {/* System Suitability */}
+              {validationOptions.systemSuitability && (
+              <>
               <tr>
                 <td className="border border-gray-400 p-2 text-center align-middle font-bold" rowSpan={4}>
                   系统适用性<br/>System suitability
@@ -413,27 +439,27 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
                 </td>
                 <td className="border border-gray-400 p-0 align-middle">
                   <div className="p-2 h-full flex flex-col justify-center">
-                    <div className="font-bold whitespace-nowrap text-left">空白无干扰;</div>
-                    <div className="text-left w-full"><InlineInput value="There was no interference in blank solution;" className="text-left w-full" /></div>
+                    <div className="font-bold whitespace-nowrap text-left text-green-700">{experimentalData.systemSuitability.blankInterference.split('\n')[0]}</div>
+                    <div className="text-left w-full"><InlineInput value={experimentalData.systemSuitability.blankInterference.split('\n')[1] || experimentalData.systemSuitability.blankInterference} className="text-left w-full italic" /></div>
                   </div>
                 </td>
                 <td className="border border-gray-400 p-0 text-center align-middle" rowSpan={4}><StatusSelect itemKey="systemSuitability" /></td>
               </tr>
               <tr>
                 <td className="border border-gray-400 p-2 text-left align-middle whitespace-pre-wrap">
-                  对照品溶液1第一针中，主峰理论板数应不低于 5000，拖尾因子应不大于 2.5；<br/>
-                  The theoretical plate number of the principal peak in the first injection of STD1 should be not less than 5000, the trailing factor should not be more than 2.5;
+                  对照品溶液1第一针中，主峰理论板数应不低于 {sysSuitability.plateNumber}，拖尾因子应不大于 {sysSuitability.tailingFactor}；<br/>
+                  The theoretical plate number of the principal peak in the first injection of STD1 should be not less than {sysSuitability.plateNumber}, the trailing factor should not be more than {sysSuitability.tailingFactor};
                 </td>
                 <td className="border border-gray-400 p-0 align-middle">
                   <table className="w-full border-collapse h-full">
                     <tbody>
                       <tr className="border-b border-gray-400">
                         <td className="p-2 w-1/2 border-r border-gray-400 text-left align-middle">理论塔板数<br/>theoretical plates</td>
-                        <td className="p-2 w-1/2 text-center align-middle"><InlineInput value="169997" /></td>
+                        <td className="p-2 w-1/2 text-center align-middle"><InlineInput value={experimentalData.systemSuitability.theoreticalPlates} /></td>
                       </tr>
                       <tr>
                         <td className="p-2 w-1/2 border-r border-gray-400 text-left align-middle">拖尾因子<br/>Trailing factor</td>
-                        <td className="p-2 w-1/2 text-center align-middle"><InlineInput value="0.9" /></td>
+                        <td className="p-2 w-1/2 text-center align-middle"><InlineInput value={experimentalData.systemSuitability.tailingFactor} /></td>
                       </tr>
                     </tbody>
                   </table>
@@ -441,24 +467,25 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
               </tr>
               <tr>
                 <td className="border border-gray-400 p-2 text-left align-middle whitespace-pre-wrap">
-                  对照品溶液1连续进样 5 针主峰的峰面积 RSD 应≤2.0%，保留时间 RSD 应≤1.0%，对照品溶液 2 与对照品溶液 1 的回收率在 98.0%~102.0%之间；<br/>
-                  For the standard solution 1, the RSD of the main peak area should be NMT 2.0%, the RSD of the retention time should be NMT 1.0%;<br/>
-                  The percent recovery of reference solution 2 to reference solution 1 was between 98.0% -102.0%.
+                  对照品溶液1连续进样 {sysSuitability.injectionCount} 针，主峰峰面积的RSD应≤ {sysSuitability.areaRSD}%，保留时间的RSD应≤ {sysSuitability.retentionRSD}%；<br/>
+                  For {sysSuitability.injectionCount} consecutive standard solution1, the RSD of the main peak area should be NMT {sysSuitability.areaRSD}%, the RSD of the retention time should be NMT {sysSuitability.retentionRSD}%;<br/>
+                  对照品溶液 2 与对照品溶液 1 的回收率在 {sysSuitability.recoveryRange}之间；<br/>
+                  The recovery of reference solution 2 to reference solution 1 was between {sysSuitability.recoveryRange};
                 </td>
                 <td className="border border-gray-400 p-0 align-middle">
                   <table className="w-full border-collapse h-full">
                     <tbody>
                       <tr className="border-b border-gray-400">
-                        <td className="p-2 w-1/2 border-r border-gray-400 text-left align-middle">峰面积 RSD<br/>RSD of the peak area</td>
-                        <td className="p-2 w-1/2 text-center align-middle"><InlineInput value="0.06%" /></td>
+                        <td className="p-2 w-1/2 border-r border-gray-400 text-left align-middle">峰面积 RSD(%)<br/>RSD of the peak area(%)</td>
+                        <td className="p-2 w-1/2 text-center align-middle"><InlineInput value={`${experimentalData.systemSuitability.std1AreaRSD}`} /></td>
                       </tr>
                       <tr className="border-b border-gray-400">
-                        <td className="p-2 w-1/2 border-r border-gray-400 text-left align-middle">保留时间 RSD<br/>the RSD of the retention time</td>
-                        <td className="p-2 w-1/2 text-center align-middle"><InlineInput value="0.04%" /></td>
+                        <td className="p-2 w-1/2 border-r border-gray-400 text-left align-middle">保留时间 RSD(%)<br/>the RSD of the retention time(%)</td>
+                        <td className="p-2 w-1/2 text-center align-middle"><InlineInput value={`${experimentalData.systemSuitability.std1RtRSD}`} /></td>
                       </tr>
                       <tr>
-                        <td className="p-2 w-1/2 border-r border-gray-400 text-left align-middle">回收率<br/>recovery</td>
-                        <td className="p-2 w-1/2 text-center align-middle"><InlineInput value="99.5%" /></td>
+                        <td className="p-2 w-1/2 border-r border-gray-400 text-left align-middle">回收率(%)<br/>recovery(%)</td>
+                        <td className="p-2 w-1/2 text-center align-middle"><InlineInput value={`${experimentalData.systemSuitability.std2Recovery}`} /></td>
                       </tr>
                     </tbody>
                   </table>
@@ -466,36 +493,40 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
               </tr>
               <tr>
                 <td className="border border-gray-400 p-2 text-left align-middle whitespace-pre-wrap">
-                  若有随行对照，取随行对照 1 针和对照品溶液 1 连续 5 针的主峰峰面积的 RSD 应≤2.0%。<br/>
-                  If have contrast check solution. GRSD(Global %RSD)of the peak area of check solution and 5 consecutive standard solution 1 should be NMT2.0%.
+                  若有随行对照，取随行对照1针和对照品溶液1连续 {sysSuitability.controlInjectionCount} 针的主峰峰面积的RSD应≤ {sysSuitability.controlAreaRSD}%。<br/>
+                  If have contrast check solution. GRSD(Global %RSD)of the peak area of check solution and {sysSuitability.controlInjectionCount} consecutive standard solution 1 should be NMT {sysSuitability.controlAreaRSD}%.
                 </td>
                 <td className="border border-gray-400 p-0 align-middle">
                   <table className="w-full border-collapse h-full">
                     <tbody>
                       <tr>
-                        <td className="p-2 w-1/2 border-r border-gray-400 text-left align-middle">峰面积 RSD<br/>RSD of the peak area</td>
-                        <td className="p-2 w-1/2 text-center align-middle"><InlineInput value="0.07%~0.13%" /></td>
+                        <td className="p-2 w-1/2 border-r border-gray-400 text-left align-middle">峰面积 RSD(%)<br/>RSD of the peak area(%)</td>
+                        <td className="p-2 w-1/2 text-center align-middle"><InlineInput value={getControlRSDRange()} /></td>
                       </tr>
                     </tbody>
                   </table>
                 </td>
               </tr>
+              </>
+              )}
 
               {/* Specificity */}
+              {validationOptions.specificity && (
+              <>
               <tr>
                 <td className="border border-gray-400 p-2 text-center align-middle font-bold" rowSpan={2}>
                   专属性<br/>Specificity
                 </td>
                 <td className="border border-gray-400 p-2 text-left align-middle whitespace-pre-wrap">
-                  供试品溶液中主峰的保留时间应与对照品溶液中主峰的保留时间一致，保留时间相对偏差应不大于 5.0%；<br/>
-                  The retention time of the main peak in the sample solution should be consistent with that of the standard solution, and the relative deviation of the retention time should be not more than 5.0%.
+                  供试品溶液中主峰的保留时间应与对照品溶液中主峰的保留时间一致，保留时间相对偏差应不大于 {specificityState.retentionDevLimit}%；<br/>
+                  The retention time of the main peak in the sample solution should be consistent with that of the standard solution, and the relative deviation of the retention time should be not more than {specificityState.retentionDevLimit}%.
                 </td>
                 <td className="border border-gray-400 p-0 align-middle">
                   <table className="w-full border-collapse h-full">
                     <tbody>
                       <tr>
-                        <td className="p-2 w-1/2 border-r border-gray-400 text-left align-middle">相对偏差<br/>Relative deviation</td>
-                        <td className="p-2 w-1/2 text-center align-middle"><InlineInput value="0.02%" /></td>
+                        <td className="p-2 w-1/2 border-r border-gray-400 text-left align-middle">相对偏差(%)<br/>Relative deviation(%)</td>
+                        <td className="p-2 w-1/2 text-center align-middle"><InlineInput value={`${experimentalData.specificity.rtDeviation}`} /></td>
                       </tr>
                     </tbody>
                   </table>
@@ -512,14 +543,17 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
                     <tbody>
                       <tr>
                         <td className="p-2 w-1/2 border-r border-gray-400 text-left align-middle">峰纯度因子<br/>Peak purity factor</td>
-                        <td className="p-2 w-1/2 text-center align-middle"><InlineInput value="1000" /></td>
+                        <td className="p-2 w-1/2 text-center align-middle"><InlineInput value={experimentalData.specificity.peakPurity} /></td>
                       </tr>
                     </tbody>
                   </table>
                 </td>
               </tr>
+              </>
+              )}
 
               {/* Linearity */}
+              {validationOptions.linearity && (
               <tr>
                 <td className="border border-gray-400 p-2 text-center align-middle font-bold">
                   线性及范围<br/>Linearity and Range
@@ -535,157 +569,168 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
                     <tbody>
                       <tr className="border-b border-gray-400">
                         <td className="p-2 w-1/2 border-r border-gray-400 text-left align-middle">相关系数<br/>Correlation coefficient r</td>
-                        <td className="p-2 w-1/2 text-center align-middle"><InlineInput value="1.000" /></td>
+                        <td className="p-2 w-1/2 text-center align-middle"><InlineInput value={experimentalData.linearity.statsR} /></td>
                       </tr>
                       <tr className="border-b border-gray-400">
-                        <td className="p-2 w-1/2 border-r border-gray-400 text-left align-middle">Y轴截距的绝对值与标准为100%时的峰面积的比值<br/>Ratio of Y-intercept to 100% response value</td>
-                        <td className="p-2 w-1/2 text-center align-middle"><InlineInput value="0.33%" /></td>
+                        <td className="p-2 w-1/2 border-r border-gray-400 text-left align-middle">Y轴截距的绝对值与标准为100%时的峰面积的比值(%)<br/>Ratio of Y-intercepet to 100% response value(%)</td>
+                        <td className="p-2 w-1/2 text-center align-middle"><InlineInput value={experimentalData.linearity.statsPercentIntercept} /></td>
                       </tr>
                       <tr className="border-b border-gray-400">
                         <td className="p-2 w-1/2 border-r border-gray-400 text-left align-middle">线性方程<br/>Linear equation</td>
-                        <td className="p-2 w-1/2 text-center align-middle"><InlineInput value="y=25.4869x-17.1752" /></td>
+                        <td className="p-2 w-1/2 text-center align-middle"><InlineInput value={experimentalData.linearity.equation} /></td>
                       </tr>
                       <tr className="border-b border-gray-400">
                         <td className="p-2 w-1/2 border-r border-gray-400 text-left align-middle">残差平方和<br/>Residual sum of squares</td>
-                        <td className="p-2 w-1/2 text-center align-middle"><InlineInput value="1430.2" /></td>
+                        <td className="p-2 w-1/2 text-center align-middle"><InlineInput value={experimentalData.linearity.statsRSS} /></td>
                       </tr>
                       <tr className="border-b border-gray-400">
                         <td className="p-2 w-1/2 border-r border-gray-400 text-left align-middle">浓度(μg/ml)<br/>Concentration(μg/ml)</td>
-                        <td className="p-2 w-1/2 text-center align-middle"><InlineInput value="163.672~257.484" /></td>
+                        <td className="p-2 w-1/2 text-center align-middle"><InlineInput value={getLinearityRange('conc')} /></td>
                       </tr>
                       <tr>
                         <td className="p-2 w-1/2 border-r border-gray-400 text-left align-middle">相对供试品溶液的浓度水平(%)<br/>Equivalent to the sample solution(%)</td>
-                        <td className="p-2 w-1/2 text-center align-middle"><InlineInput value="81.8~128.7" /></td>
+                        <td className="p-2 w-1/2 text-center align-middle"><InlineInput value={getLinearityRange('actualLevel')} /></td>
                       </tr>
                     </tbody>
                   </table>
                 </td>
                 <td className="border border-gray-400 p-0 text-center align-middle"><StatusSelect itemKey="linearity" /></td>
               </tr>
+              )}
 
               {/* Repeatability */}
+              {validationOptions.precision && (
               <tr>
                 <td className="border border-gray-400 p-2 text-center align-middle font-bold">
-                  精密度（重复性）<br/>Precision（repeatability）
+                  精密度（重复性）<br/>Repeatability
                 </td>
                 <td className="border border-gray-400 p-2 text-left align-middle whitespace-pre-wrap">
                   平行配制 6 份精密度溶液，规定条件进行测定，6 份精密度溶液检测结果应符合以下要求。<br/>
                   Repeatability: Prepare 6 sample solutions in parallel, determine the conditions, 6 samples of solution, should meet the following requirements<br/>
                   <div className="mt-2 border-t border-gray-300 pt-1 flex justify-between text-xs">
                     <span className="font-bold">名称 Name: {displayId}</span>
-                    <span className="font-bold">相对标准偏差 (RSD): NMT 2.0%</span>
+                    <span className="font-bold">相对标准偏差 (RSD): {precisionState.precisionLimit}</span>
                   </div>
                 </td>
                 <td className="border border-gray-400 p-0 align-middle">
                   <table className="w-full h-full border-collapse">
                     <tbody>
                       <tr>
-                         <td className="p-2 w-1/2 border-r border-gray-400 text-center font-bold align-middle">RSD</td>
-                         <td className="p-2 w-1/2 text-center align-middle"><InlineInput value="0.84%" /></td>
+                         <td className="p-2 w-1/2 border-r border-gray-400 text-center font-bold align-middle">RSD(%)</td>
+                         <td className="p-2 w-1/2 text-center align-middle"><InlineInput value={`${experimentalData.precision.rsd}`} /></td>
                       </tr>
                     </tbody>
                   </table>
                 </td>
                 <td className="border border-gray-400 p-0 text-center align-middle"><StatusSelect itemKey="repeatability" /></td>
               </tr>
+              )}
 
               {/* Accuracy */}
+              {validationOptions.accuracy && (
               <tr>
                 <td className="border border-gray-400 p-2 text-center align-middle font-bold">
                   准确度<br/>Accuracy
                 </td>
                 <td className="border border-gray-400 p-2 text-left align-middle whitespace-pre-wrap">
-                  在专属性、线性和精密度满足的情况推论而得，主成分回收率均应在 98.0%-102.0%范围内，RSD≤2.0%。<br/>
-                  If specificity, linearity and precision were satisfied, the recovery of principal components should be in the range of 98.0%-102.0%, RSD≤2.0%.
+                  在专属性、线性和精密度满足的情况推论而得，主成分回收率均应在 {accuracyState.recoveryRange}范围内，RSD≤{accuracyState.rsdLimit}%。<br/>
+                  If specificity, linearity and precision were satisfied, the recovery of principal components should be in the range of {accuracyState.recoveryRange}, RSD≤{accuracyState.rsdLimit}%.
                 </td>
                 <td className="border border-gray-400 p-0 align-middle">
                   <table className="w-full h-full border-collapse">
                     <tbody>
                       <tr className="border-b border-gray-400">
-                        <td className="p-2 w-1/2 border-r border-gray-400 text-center font-bold align-middle">回收率<br/>Recovery rate</td>
-                        <td className="p-2 w-1/2 text-center align-middle"><InlineInput value="99.6%~101.7%" /></td>
+                        <td className="p-2 w-1/2 border-r border-gray-400 text-center font-bold align-middle">回收率(%)<br/>Recovery rate(%)</td>
+                        <td className="p-2 w-1/2 text-center align-middle"><InlineInput value={getAccuracyRecRange()} /></td>
                       </tr>
                       <tr>
-                        <td className="p-2 w-1/2 border-r border-gray-400 text-center font-bold align-middle">RSD</td>
-                        <td className="p-2 w-1/2 text-center align-middle"><InlineInput value="0.84%" /></td>
+                        <td className="p-2 w-1/2 border-r border-gray-400 text-center font-bold align-middle">RSD(%)</td>
+                        <td className="p-2 w-1/2 text-center align-middle"><InlineInput value={`${experimentalData.accuracy.rsd}`} /></td>
                       </tr>
                     </tbody>
                   </table>
                 </td>
                 <td className="border border-gray-400 p-0 text-center align-middle"><StatusSelect itemKey="accuracy" /></td>
               </tr>
+              )}
 
               {/* Stability */}
+              {validationOptions.stability && (
+              <>
               <tr>
                 <td className="border border-gray-400 p-2 text-center align-middle font-bold" rowSpan={2}>
                   溶液稳定性<br/>Solution Stability
                 </td>
                 <td className="border border-gray-400 p-2 text-left align-middle whitespace-pre-wrap">
-                  供试品溶液在 5±3℃条件下，密闭保存，分别于 0h、12h、24h、36h 进样，考察 {displayId} 的峰面积，与 0h 相比，{displayId} 峰面积的回收率应在 98.0%~102.0%之间。<br/>
-                  Sample solution: Sealed and stored at 5±3℃ condition, the solution should be injected at the each point 0h、12h、24h、36h, the peak area of {displayId} should be evaluated. The recovery for peak area of {displayId} at each point should be 98.0%~102.0% compared with that of 0h.
+                  供试品溶液在 {stabilityState.sampleTemp}℃条件下，密闭保存，分别于各时间点进样，考察 {displayId} 的峰面积，与 0h 相比，{displayId} 峰面积的回收率应在 {stabilityState.sampleRecovery}之间。<br/>
+                  Sample solution: Sealed and stored at {stabilityState.sampleTemp}℃ condition, the solution should be injected at the each point, the peak area of {displayId} should be evaluated. The recovery for peak area of {displayId} at each point should be {stabilityState.sampleRecovery} compared with that of 0h.
                 </td>
                 <td className="border border-gray-400 p-0 align-middle">
-                  <div className="w-full text-center p-2 font-bold border-b border-gray-400">供试品溶液 Sample solution</div>
+                  <div className="w-full text-center p-2 font-bold border-b border-gray-400 bg-gray-50">供试品溶液 Sample solution</div>
                   <table className="w-full border-collapse border-b border-gray-400 text-xs">
                     <thead>
-                      <tr className="border-b border-gray-400">
-                        <th className="p-1 border-r border-gray-400 w-[25%]">时间<br/>Time(h)</th>
-                        <th className="p-1 border-r border-gray-400 w-[25%] text-center">0</th>
-                        <th className="p-1 border-r border-gray-400 w-[25%] text-center">6</th>
-                        <th className="p-1 w-[25%] text-center">12</th>
+                      <tr className="border-b border-gray-400 bg-gray-50">
+                        <th className="p-1 border-r border-gray-400">时间 Time(h)</th>
+                        {experimentalData.stability.splPoints.map((pt, i) => (
+                            <th key={i} className="p-1 border-r border-gray-400 text-center">{pt.time}</th>
+                        ))}
                       </tr>
                     </thead>
                     <tbody>
                       <tr>
-                        <td className="p-1 border-r border-gray-400 w-[25%] text-center">回收率 (%)<br/>recovery (%)</td>
-                        <td className="p-1 border-r border-gray-400 w-[25%] text-center">-</td>
-                        <td className="p-1 border-r border-gray-400 w-[25%] text-center"><InlineInput value="99.5" className="text-center w-full text-xs" /></td>
-                        <td className="p-1 w-[25%] text-center"><InlineInput value="99.5" className="text-center w-full text-xs" /></td>
+                        <td className="p-1 border-r border-gray-400 text-center">回收率（%）<br/>recovery（%）</td>
+                        {experimentalData.stability.splPoints.map((pt, i) => (
+                            <td key={i} className="p-1 border-r border-gray-400 text-center">{pt.recovery || "-"}</td>
+                        ))}
                       </tr>
                     </tbody>
                   </table>
-                  <div className="p-2 text-left text-xs">
-                    供试品溶液在5±3℃条件下，密闭保存12h稳定。<br/>
-                    The sample solution was stable when sealed and stored under the 5±3℃ condition for 12h.
+                  <div className="p-2 text-left text-xs whitespace-pre-wrap leading-relaxed">
+                    供试品溶液在{stabilityState.sampleTemp}℃条件下，密闭保存{experimentalData.stability.splPoints[experimentalData.stability.splPoints.length-1]?.time}h稳定。<br/>
+                    The sample solution was stable when sealed and stored under the {stabilityState.sampleTemp}℃ condition for {experimentalData.stability.splPoints[experimentalData.stability.splPoints.length-1]?.time}h.
                   </div>
                 </td>
                 <td className="border border-gray-400 p-0 text-center align-middle" rowSpan={2}><StatusSelect itemKey="stability" /></td>
               </tr>
               <tr>
                 <td className="border border-gray-400 p-2 text-left align-middle whitespace-pre-wrap">
-                  对照品溶液在 5±3℃条件下，密闭保存，分别于 0h、12h、24h、36h 进样，考察 {displayId} 的峰面积，与 0h 相比，{displayId} 峰面积的回收率应在 98.0%~102.0%之间。<br/>
-                  Standard solution: Sealed and stored at 5±3℃ temperature condition, the solution should be injected at the each point 0h、12h、24h、36h, the peak area of {displayId} should be evaluated, compared with that of 0h ,the recovery for peak area of {displayId} at each point should be 98.0%~102.0%.
+                  对照品溶液在 {stabilityState.standardTemp}℃条件下，密闭保存，分别于各时间点进样，考察 {displayId} 的峰面积，与 0h 相比，{displayId} 峰面积的回收率应在 {stabilityState.standardRecovery}之间。<br/>
+                  Standard solution: Sealed and stored at {stabilityState.standardTemp}℃ temperature condition, the solution should be injected at the each point, the peak area of {displayId} should be evaluated, compared with that of 0h ,the recovery for peak area of {displayId} at each point should be {stabilityState.standardRecovery}.
                 </td>
                 <td className="border border-gray-400 p-0 align-middle">
-                  <div className="w-full text-center p-2 font-bold border-b border-gray-400">对照品溶液 Standard solution</div>
+                  <div className="w-full text-center p-2 font-bold border-b border-gray-400 bg-gray-50">对照品溶液 Standard solution</div>
                   <table className="w-full border-collapse border-b border-gray-400 text-xs">
                     <thead>
-                      <tr className="border-b border-gray-400">
-                        <th className="p-1 border-r border-gray-400 w-[20%]">时间<br/>Time(h)</th>
-                        <th className="p-1 border-r border-gray-400 w-[20%] text-center">0</th>
-                        <th className="p-1 border-r border-gray-400 w-[20%] text-center">4</th>
-                        <th className="p-1 border-r border-gray-400 w-[20%] text-center">10</th>
-                        <th className="p-1 w-[20%] text-center">16</th>
+                      <tr className="border-b border-gray-400 bg-gray-50">
+                        <th className="p-1 border-r border-gray-400">时间 Time(h)</th>
+                        {experimentalData.stability.stdPoints.map((pt, i) => (
+                            <th key={i} className="p-1 border-r border-gray-400 text-center">{pt.time}</th>
+                        ))}
                       </tr>
                     </thead>
                     <tbody>
                       <tr>
-                        <td className="p-1 border-r border-gray-400 w-[20%] text-center">回收率 (%)<br/>recovery (%)</td>
-                        <td className="p-1 border-r border-gray-400 w-[20%] text-center">-</td>
-                        <td className="p-1 border-r border-gray-400 w-[20%] text-center"><InlineInput value="100.2" className="text-center w-full text-xs" /></td>
-                        <td className="p-1 border-r border-gray-400 w-[20%] text-center"><InlineInput value="99.8" className="text-center w-full text-xs" /></td>
-                        <td className="p-1 w-[20%] text-center"><InlineInput value="100.1" className="text-center w-full text-xs" /></td>
+                        <td className="p-1 border-r border-gray-400 text-center">回收率（%）<br/>recovery（%）</td>
+                        {experimentalData.stability.stdPoints.map((pt, i) => (
+                            <td key={i} className="p-1 border-r border-gray-400 text-center">{pt.recovery || "-"}</td>
+                        ))}
                       </tr>
                     </tbody>
                   </table>
-                  <div className="p-2 text-left text-xs">
-                    对照品溶液在5±3℃条件下，密闭保存16h稳定。<br/>
-                    The standard solution was stable when sealed and stored under the 5±3℃ condition for 16h.
+                  <div className="p-2 text-left text-xs whitespace-pre-wrap leading-relaxed">
+                    对照品溶液在{stabilityState.standardTemp}℃条件下，密闭保存{experimentalData.stability.stdPoints[experimentalData.stability.stdPoints.length-1]?.time}h稳定。<br/>
+                    The standard solution was stable when sealed and stored under the {stabilityState.standardTemp}℃ condition for {experimentalData.stability.stdPoints[experimentalData.stability.stdPoints.length-1]?.time}h.
+                  </div>
+                  <div className="p-2 border-t border-gray-400 text-left text-xs italic text-gray-600">
+                    注：溶液稳定性考察时长可根据实际情况进行调整。<br/>
+                    The evaluated time of solution stability can be adjusted according to the actual situation.
                   </div>
                 </td>
               </tr>
+              </>
+              )}
             </tbody>
-          </table>
+           </table>
         </div>
 
         {/* 4. Test Method Description (Dynamic Read-Only Section) */}
@@ -962,8 +1007,9 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
           </div>
 
           {/* 5.3 System Suitability */}
+          {validationOptions.systemSuitability && (
           <div id="report-val-sys-suit" className="mb-6 scroll-mt-24">
-            <h4 className="font-bold text-lg text-gray-800 mb-2">5.3 系统适用性 System suitability</h4>
+            <h4 className="font-bold text-lg text-gray-800 mb-2">5.{section5Counter++} 系统适用性 System suitability</h4>
             <div className="mb-4 text-sm space-y-2 pl-2">
                <p>
                  记录：{displayId} 含量和鉴别检验方法验证记录；<br/>
@@ -1157,10 +1203,12 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
                </tbody>
             </table>
           </div>
+          )}
 
           {/* 5.4 Specificity */}
+          {validationOptions.specificity && (
           <div id="report-val-specificity" className="mb-6 scroll-mt-24">
-            <h4 className="font-bold text-lg text-gray-800 mb-2">5.4 专属性 Specificity</h4>
+            <h4 className="font-bold text-lg text-gray-800 mb-2">5.{section5Counter++} 专属性 Specificity</h4>
             
             <div className="mb-4 text-sm pl-2">
                {/* Chinese Block */}
@@ -1236,10 +1284,12 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
               </tbody>
             </table>
           </div>
+          )}
 
           {/* 5.5 Linearity and Range (New Section) */}
+          {validationOptions.linearity && (
           <div id="report-val-linearity" className="mb-6 scroll-mt-24">
-            <h4 className="font-bold text-lg text-gray-800 mb-2">5.5 线性和范围 Linearity and Range</h4>
+            <h4 className="font-bold text-lg text-gray-800 mb-2">5.{section5Counter++} 线性和范围 Linearity and Range</h4>
             <div className="mb-4 text-sm pl-2">
                {/* Chinese Block */}
                <div className="space-y-1 mb-4">
@@ -1346,10 +1396,12 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
               </tbody>
             </table>
           </div>
+          )}
 
           {/* 5.6 Precision (Repeatability) */}
+          {validationOptions.precision && (
           <div id="report-val-precision" className="mb-6 scroll-mt-24">
-            <h4 className="font-bold text-lg text-gray-800 mb-2">5.6 精密度（重复性） Precision（repeatability）</h4>
+            <h4 className="font-bold text-lg text-gray-800 mb-2">5.{section5Counter++} 精密度（重复性） Precision（repeatability）</h4>
             
             <div className="mb-4 text-sm pl-2">
                 {/* Chinese Block */}
@@ -1438,10 +1490,12 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
               </tbody>
             </table>
           </div>
+          )}
 
           {/* 5.7 Accuracy */}
+          {validationOptions.accuracy && (
           <div id="report-val-accuracy" className="mb-6 scroll-mt-24">
-            <h4 className="font-bold text-lg text-gray-800 mb-2">5.7 准确度Accuracy</h4>
+            <h4 className="font-bold text-lg text-gray-800 mb-2">5.{section5Counter++} 准确度Accuracy</h4>
             
             <div className="mb-4 text-sm pl-2">
                 {/* Chinese Block */}
@@ -1507,8 +1561,8 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
                   <tr>
                     <td className="border border-gray-400 p-2 font-bold align-middle whitespace-pre-wrap">可接受标准<br/>Acceptance criteria</td>
                     <td className="border border-gray-400 p-2 text-left text-xs leading-relaxed" colSpan={7}>
-                       <p>主成分回收率均应在{accuracyState.recoveryRange}范围内，RSD≤{accuracyState.rsdLimit}。</p>
-                       <p>The main component recovery rates should be within the range of {accuracyState.recoveryRange}, RSD≤{accuracyState.rsdLimit}.</p>
+                       <p>主成分回收率均应在{accuracyState.recoveryRange}范围内，RSD≤{accuracyState.rsdLimit}%。</p>
+                       <p>The main component recovery rates should be within the range of {accuracyState.recoveryRange}, RSD≤{accuracyState.rsdLimit}%.</p>
                     </td>
                   </tr>
                   {/* Conclusion */}
@@ -1522,10 +1576,12 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
               </table>
             </div>
           </div>
+          )}
 
           {/* 5.8 Solution Stability */}
+          {validationOptions.stability && (
           <div id="report-val-stability" className="mb-6 scroll-mt-24">
-            <h4 className="font-bold text-lg text-gray-800 mb-2">5.8 溶液稳定性 Solution Stability</h4>
+            <h4 className="font-bold text-lg text-gray-800 mb-2">5.{section5Counter++} 溶液稳定性 Solution Stability</h4>
             
             <div className="mb-4 text-sm pl-2">
                 {/* Chinese Block */}
@@ -1622,6 +1678,7 @@ export const ReportDocument: React.FC<ReportDocumentProps> = ({
               </tbody>
             </table>
           </div>
+          )}
 
         </div>
 
