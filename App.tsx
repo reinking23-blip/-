@@ -7,6 +7,7 @@ import { DataMappingDictionary } from './components/DataMappingDictionary';
 import { ReportDataMappingDictionary } from './components/ReportDataMappingDictionary';
 import { ReportDocument } from './components/ReportDocument';
 import { DocumentPage } from './components/DocumentPage';
+import { DocumentFieldTable } from './components/DocumentFieldTable';
 import { ReportDocumentPRD } from './components/ReportDocumentPRD';
 import { ProtocolDocumentPRD } from './components/ProtocolDocumentPRD';
 import { Menu, Download } from 'lucide-react';
@@ -37,7 +38,7 @@ import {
 } from './types';
 
 const App: React.FC = () => {
-  const [currentView, setCurrentView] = useState<'protocol' | 'dictionary' | 'report' | 'document' | 'prd' | 'protocol_prd' | 'report_dictionary'>('protocol');
+  const [currentView, setCurrentView] = useState<'protocol' | 'dictionary' | 'report' | 'document' | 'document_fields' | 'prd' | 'protocol_prd' | 'report_dictionary'>('protocol');
   const [activeSectionId, setActiveSectionId] = useState<string>('cover');
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [productId, setProductId] = useState<string>("HY130225");
@@ -666,6 +667,8 @@ const App: React.FC = () => {
       return "Report PRD";
     } else if (currentView === 'protocol_prd') {
       return "Protocol PRD";
+    } else if (currentView === 'document_fields') {
+      return "Experimental Data Fields";
     } else {
       return "Experimental Data Document";
     }
@@ -924,6 +927,8 @@ const App: React.FC = () => {
             <ReportDocumentPRD />
           ) : currentView === 'protocol_prd' ? (
             <ProtocolDocumentPRD />
+          ) : currentView === 'document_fields' ? (
+            <DocumentFieldTable />
           ) : (
             <DocumentPage 
               data={experimentalData}

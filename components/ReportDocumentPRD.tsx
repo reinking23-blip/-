@@ -15,10 +15,19 @@ import {
   Layers,
   Activity,
   GitCommit,
-  ArrowRightLeft
+  ArrowRightLeft,
+  Link
 } from 'lucide-react';
 
 export const ReportDocumentPRD: React.FC = () => {
+
+  const SectionBadge = ({ label }: { label: string }) => (
+    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-indigo-50 text-indigo-700 text-[11px] font-bold uppercase tracking-wide border border-indigo-100 mb-4">
+      <Link size={12} />
+      <span>对应报告章节: {label}</span>
+    </div>
+  );
+
   return (
     <div className="p-8 bg-slate-50 min-h-full font-sans text-slate-800">
       <div className="max-w-7xl mx-auto bg-white shadow-xl rounded-xl overflow-hidden border border-slate-200">
@@ -28,7 +37,7 @@ export const ReportDocumentPRD: React.FC = () => {
           <div className="flex justify-between items-start">
             <div>
               <div className="flex items-center gap-2 mb-2 opacity-80">
-                <span className="px-2 py-0.5 bg-indigo-600 rounded text-xs font-bold uppercase tracking-wider">FSD v5.1</span>
+                <span className="px-2 py-0.5 bg-indigo-600 rounded text-xs font-bold uppercase tracking-wider">FSD v5.2</span>
                 <span className="text-xs font-mono">Module: Validation Report Generator</span>
               </div>
               <h1 className="text-3xl font-bold mb-2">检验方法验证报告 - 详细功能需求说明书 (FSD)</h1>
@@ -52,6 +61,8 @@ export const ReportDocumentPRD: React.FC = () => {
             </div>
             
             <div className="border border-slate-200 rounded-lg p-5 hover:shadow-md transition-shadow bg-white">
+              <SectionBadge label="封面 (Cover) - 题目/编号/范围 & 页眉 (Header)" />
+
               <h3 className="font-bold text-sm text-slate-900 mb-3 flex items-center gap-2">
                 <span className="w-1.5 h-4 bg-indigo-600 rounded-full"></span>
                 表头信息矩阵 (Header Matrix)
@@ -88,7 +99,9 @@ export const ReportDocumentPRD: React.FC = () => {
               <h2 className="text-xl font-bold">2. 审批流签署模块 (Workflow Signatures)</h2>
             </div>
             
-            <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+            <div className="bg-white border border-slate-200 rounded-lg p-5">
+              <SectionBadge label="封面 (Cover) - 签署表格 (Signatures)" />
+
               <table className="w-full text-sm text-left">
                 <thead className="bg-slate-50 text-slate-700 font-semibold border-b border-slate-200">
                   <tr>
@@ -140,6 +153,8 @@ export const ReportDocumentPRD: React.FC = () => {
             <div className="space-y-6">
               <div className="grid grid-cols-1 gap-6">
                 <div className="border border-slate-200 rounded-lg p-5 bg-emerald-50/30">
+                  <SectionBadge label="3. 验证结果综述 (Results For Validation)" />
+
                   <div className="flex justify-between items-center mb-4">
                     <h3 className="font-bold text-sm text-slate-900">核心逻辑：数据聚合与判定 (Aggregation & Decision)</h3>
                     <span className="px-2 py-1 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded uppercase">Core Logic</span>
@@ -249,6 +264,8 @@ export const ReportDocumentPRD: React.FC = () => {
               <h2 className="text-xl font-bold">4. 方法快照模块 (Method Snapshot - Read Only)</h2>
             </div>
             <div className="border border-slate-200 rounded-lg p-5">
+              <SectionBadge label="4. 检验方法描述 (Test Method Description)" />
+
               <div className="flex gap-4">
                 <div className="w-1/3 border-r border-slate-100 pr-4">
                   <h4 className="font-bold text-sm text-slate-900 mb-2">组件复用策略</h4>
@@ -277,7 +294,9 @@ export const ReportDocumentPRD: React.FC = () => {
               <h2 className="text-xl font-bold">5. 资源确认模块 (Resource Verification)</h2>
             </div>
             
-            <div className="overflow-hidden border border-slate-200 rounded-lg">
+            <div className="overflow-hidden border border-slate-200 rounded-lg p-5">
+              <SectionBadge label="5.1 培训确认 & 5.2 仪器和试剂确认" />
+
               <table className="w-full text-sm text-left">
                 <thead className="bg-slate-50 text-slate-700 font-semibold">
                   <tr>
@@ -339,7 +358,9 @@ export const ReportDocumentPRD: React.FC = () => {
             <div className="space-y-6">
               
               {/* Section Correspondence & Dynamic Mounting */}
-              <div className="border border-slate-200 rounded-lg overflow-hidden">
+              <div className="border border-slate-200 rounded-lg overflow-hidden p-5">
+                <SectionBadge label="5.3 ~ 5.x 实验数据详情 (Exp Data Details)" />
+
                 <div className="bg-slate-100 px-4 py-3 border-b border-slate-200 flex justify-between items-center">
                   <h3 className="font-bold text-sm text-slate-800 flex items-center gap-2">
                     <GitCommit size={16} className="text-slate-600"/>
@@ -465,6 +486,7 @@ export const ReportDocumentPRD: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {/* Deviations */}
               <div className="border border-slate-200 rounded-lg p-4 bg-white hover:shadow-sm transition-shadow">
+                <SectionBadge label="6. 偏差 (Deviations)" />
                 <h4 className="font-bold text-sm text-slate-900 mb-2">6. 偏差摘要 (Deviations)</h4>
                 <p className="text-xs text-slate-600 mb-2">
                   <strong>UI组件：</strong> 多行文本域 (Textarea)。<br/>
@@ -475,6 +497,7 @@ export const ReportDocumentPRD: React.FC = () => {
 
               {/* Conclusion */}
               <div className="border border-slate-200 rounded-lg p-4 bg-white hover:shadow-sm transition-shadow">
+                <SectionBadge label="7. 结论 (Conclusion)" />
                 <h4 className="font-bold text-sm text-slate-900 mb-2">7. 结论 (Conclusion)</h4>
                 <p className="text-xs text-slate-600 mb-2">
                   <strong>逻辑：</strong> 静态模板插值。<br/>
@@ -485,6 +508,7 @@ export const ReportDocumentPRD: React.FC = () => {
 
               {/* History */}
               <div className="border border-slate-200 rounded-lg p-4 bg-white hover:shadow-sm transition-shadow">
+                <SectionBadge label="8. 变更历史 (History)" />
                 <h4 className="font-bold text-sm text-slate-900 mb-2">8. 变更历史 (History)</h4>
                 <p className="text-xs text-slate-600 mb-2">
                   <strong>结构：</strong> 固定表格 (版本号, 变更原因, 生效日期)。<br/>

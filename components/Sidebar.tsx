@@ -8,8 +8,8 @@ interface SidebarProps {
   activeId: string;
   onSelect: (id: string) => void;
   isOpen: boolean;
-  currentView: 'protocol' | 'dictionary' | 'report' | 'document' | 'prd' | 'protocol_prd' | 'report_dictionary';
-  onChangeView: (view: 'protocol' | 'dictionary' | 'report' | 'document' | 'prd' | 'protocol_prd' | 'report_dictionary') => void;
+  currentView: 'protocol' | 'dictionary' | 'report' | 'document' | 'document_fields' | 'prd' | 'protocol_prd' | 'report_dictionary';
+  onChangeView: (view: 'protocol' | 'dictionary' | 'report' | 'document' | 'document_fields' | 'prd' | 'protocol_prd' | 'report_dictionary') => void;
 }
 
 export const Sidebar: React.FC<SidebarProps> = ({ navItems, activeId, onSelect, isOpen, currentView, onChangeView }) => {
@@ -46,7 +46,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ navItems, activeId, onSelect, 
         <button
           onClick={() => onChangeView('document')}
           className={`w-full flex items-center gap-3 px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-            currentView === 'document'
+            currentView === 'document' || currentView === 'document_fields'
               ? 'bg-blue-600 text-white shadow-sm'
               : 'text-gray-700 hover:bg-gray-100'
           }`}
@@ -210,11 +210,51 @@ export const Sidebar: React.FC<SidebarProps> = ({ navItems, activeId, onSelect, 
               </div>
             )}
           </>
-        ) : currentView === 'document' ? (
-          <div className="px-4 py-4 text-sm text-gray-500 text-center">
-            查看实验数据文档内容。<br/>
-            View experimental data document content.
-          </div>
+        ) : (currentView === 'document' || currentView === 'document_fields') ? (
+          <>
+            <div className="px-4 py-2 text-xs font-bold text-gray-400 uppercase tracking-wider">
+              文档结构 Structure
+            </div>
+            <nav className="px-2 space-y-1 mb-2">
+              <button
+                onClick={() => onChangeView('document')}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-sm transition-colors ${
+                  currentView === 'document'
+                    ? 'bg-white text-blue-700 shadow-sm border border-gray-200 font-semibold'
+                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                }`}
+              >
+                <span>数据视图 Data View</span>
+                {currentView === 'document' && <ChevronRight size={14} />}
+              </button>
+              
+              <button
+                onClick={() => onChangeView('document_fields')}
+                className={`w-full flex items-center justify-between px-3 py-2 rounded-md text-sm transition-colors ${
+                  currentView === 'document_fields'
+                    ? 'bg-white text-blue-700 shadow-sm border border-gray-200 font-semibold'
+                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                }`}
+              >
+                <span>字段表 Field Table</span>
+                {currentView === 'document_fields' && <ChevronRight size={14} />}
+              </button>
+            </nav>
+
+            {currentView === 'document' && (
+              <div className="px-4 py-4 text-sm text-gray-500 text-center border-t border-gray-100 mt-2">
+                查看并编辑实验数据文档内容。<br/>
+                View and edit experimental data content.
+              </div>
+            )}
+            
+            {currentView === 'document_fields' && (
+              <div className="px-4 py-4 text-sm text-gray-500 text-center border-t border-gray-100 mt-2">
+                查看实验数据文档的所有字段定义与结构。<br/>
+                View field definitions and schema of the experimental data document.
+              </div>
+            )}
+          </>
         ) : null}
       </div>
       <div className="p-4 border-t border-gray-200 text-xs text-gray-500 bg-white">

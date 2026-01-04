@@ -451,9 +451,9 @@ export const TestMethodSection: React.FC<TestMethodSectionProps> = ({
                 const phaseAVal = parseFloat(row.phaseA);
                 const isPhaseAEmpty = row.phaseA.trim() === "";
                 
-                // For Protocol view (readOnly=false), display integer. For Report (readOnly=true), keep original decimal format if preferred, 
-                // but usually consistency is good. Given the user requirement strictly for Protocol view change, we branch here.
-                const displayVal = !readOnly ? (100 - phaseAVal).toString() : (100 - phaseAVal).toFixed(1);
+                // Ensure Phase B displays as integer regardless of readOnly state, to meet user requirement "only display integer values".
+                // Use toFixed(0) to round to nearest integer.
+                const displayVal = (100 - phaseAVal).toFixed(0);
 
                 const phaseB = isPhaseAEmpty 
                   ? <span className="text-red-500 font-bold">N/A</span> 
