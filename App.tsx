@@ -10,7 +10,7 @@ import { DocumentPage } from './components/DocumentPage';
 import { DocumentFieldTable } from './components/DocumentFieldTable';
 import { ReportDocumentPRD } from './components/ReportDocumentPRD';
 import { ProtocolDocumentPRD } from './components/ProtocolDocumentPRD';
-import { Menu, Download } from 'lucide-react';
+import { Menu, Download, Eye, Code, FileJson } from 'lucide-react';
 import { 
   NavItem, 
   Personnel, 
@@ -39,6 +39,7 @@ import {
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<'protocol' | 'dictionary' | 'report' | 'document' | 'document_fields' | 'prd' | 'protocol_prd' | 'report_dictionary'>('protocol');
+  const [viewMode, setViewMode] = useState<'preview' | 'code'>('preview');
   const [activeSectionId, setActiveSectionId] = useState<string>('cover');
   const [isSidebarOpen, setSidebarOpen] = useState(false);
   const [productId, setProductId] = useState<string>("HY130225");
@@ -674,6 +675,71 @@ const App: React.FC = () => {
     }
   }, [currentView, sections, activeSectionId]);
 
+  // Handle view change and reset viewMode
+  const handleViewChange = (view: typeof currentView) => {
+    setCurrentView(view);
+    setViewMode('preview');
+  };
+
+  // Build data objects for Code View
+  const protocolDataObj = {
+    meta: { productId, protocolCode, protocolVersion, projectNumber },
+    personnel: { 
+        preparer: { name: preparerName, dept: preparerDept, pos: preparerPosition },
+        reviewer1: { name: rev1Name, dept: rev1Dept, pos: rev1Pos },
+        reviewer2: { name: rev2Name, dept: rev2Dept, pos: rev2Pos },
+        reviewer3: { name: rev3Name, dept: rev3Dept, pos: rev3Pos },
+        approver: { name: approverName, dept: approverDept, pos: approverPos }
+    },
+    productDetails: { chemicalFormula, chemicalName },
+    options: validationOptions,
+    method: {
+       conditions: testingConditions,
+       gradient: gradientData,
+       solutions: solutionPreps,
+       solDetail,
+       sysSuitability,
+       sequence: sequenceState,
+       calculation: calculationState,
+       criteria: acceptanceCriteria
+    },
+    validationParams: {
+       procSysSuit: valProcSysSuitState,
+       procPrecision: valProcPrecisionState,
+       specificity: specificityState,
+       linearity: linearityState,
+       precision: precisionState,
+       accuracy: accuracyState,
+       stability: stabilityState
+    },
+    prerequisites: prerequisiteState
+  };
+
+  const reportDataObj = {
+    protocolData: protocolDataObj,
+    reportSpecific: {
+       signatures: {
+           preparer: reportPreparer,
+           reviewers: reportReviewers,
+           approver: reportApprover
+       },
+       trainingDate,
+       equipment: reportEquipment,
+       columnSerials: reportColumnSerials,
+       reagents: reportReagentValues,
+       samples: reportSampleRS,
+       historyDate: reportHistoryDate
+    },
+    experimentalData: experimentalData
+  };
+
+  const getDataForCodeView = () => {
+      if (currentView === 'protocol') return protocolDataObj;
+      if (currentView === 'report') return reportDataObj;
+      if (currentView === 'document') return experimentalData;
+      return {};
+  };
+
   const exportToWord = () => {
     const element = document.getElementById('main-content');
     if (!element) return;
@@ -808,7 +874,7 @@ const App: React.FC = () => {
         onSelect={scrollToSection} 
         isOpen={isSidebarOpen} 
         currentView={currentView}
-        onChangeView={setCurrentView}
+        onChangeView={handleViewChange}
       />
 
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
@@ -820,121 +886,170 @@ const App: React.FC = () => {
           <div className="w-6" />
         </div>
 
-        {/* Floating Export Button */}
-        <button 
-            onClick={exportToWord}
-            className="fixed bottom-8 right-8 z-50 bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg transition-colors flex items-center gap-2"
-            title="Export to Word"
-        >
-            <Download size={24} />
-            <span className="font-semibold hidden md:inline">Export Word</span>
-        </button>
-
-        <main id="main-content" className="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth">
-          {currentView === 'protocol' ? (
-            <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg flex flex-col mb-8">
-              <div className="p-8 md:p-12">
-                <ProtocolHeader productId={productId} protocolNumber={protocolNumber} />
-                
-                <div className="space-y-4">
-                  {sections.map((section) => {
-                    const isSub = section.level === 2;
-                    return (
-                      <div key={section.id} id={section.id} className={`scroll-mt-8 ${!isSub ? 'border-t-2 border-dashed border-gray-200 pt-16 mt-16 first:border-t-0 first:pt-0 first:mt-0' : 'pl-6 pt-4'}`}>
-                        <h2 className={`${isSub ? 'text-lg font-semibold text-blue-700 mb-4' : 'text-2xl font-bold text-gray-800 border-b pb-2 mb-6'} ${section.id === 'cover' ? 'hidden' : ''}`}>
-                          {section.title}
-                        </h2>
-                        {section.subtitle && <h3 className="text-lg text-gray-600 mb-4">{section.subtitle}</h3>}
-                        <div className={`prose prose-sm max-w-none text-gray-800 ${isSub ? 'border-l-2 border-blue-100 pl-4' : ''}`}>
-                          {section.content}
-                        </div>
-                      </div>
-                    );
-                  })}
+        {/* View Toggle Toolbar (Desktop) */}
+        {(currentView === 'protocol' || currentView === 'report' || currentView === 'document') && (
+            <div className="hidden md:flex justify-end items-center px-8 py-2 bg-white border-b border-gray-200 gap-3 shrink-0 z-10">
+                <span className="text-xs font-bold text-gray-400 uppercase tracking-wide">View Mode:</span>
+                <div className="flex bg-gray-100 p-1 rounded-lg border border-gray-200">
+                    <button 
+                        onClick={() => setViewMode('preview')}
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${viewMode === 'preview' ? 'bg-white text-blue-600 shadow-sm ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'}`}
+                    >
+                        <Eye size={14} /> Preview
+                    </button>
+                    <button 
+                        onClick={() => setViewMode('code')}
+                        className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-xs font-medium transition-all ${viewMode === 'code' ? 'bg-white text-blue-600 shadow-sm ring-1 ring-black/5' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-200/50'}`}
+                    >
+                        <Code size={14} /> Code (JSON)
+                    </button>
                 </div>
-              </div>
             </div>
-          ) : currentView === 'report' ? (
-            <ReportDocument 
-              productId={productId}
-              protocolCode={protocolCode}
-              protocolVersion={protocolVersion}
-              projectNumber={projectNumber}
-              preparer={reportPreparer}
-              setPreparer={setReportPreparer}
-              reviewers={reportReviewers}
-              setReviewers={setReportReviewers}
-              approver={reportApprover}
-              setApprover={setReportApprover}
-              validationOptions={validationOptions}
-              // Pass training date state
-              trainingDate={trainingDate}
-              setTrainingDate={setTrainingDate}
-              // Pass report equipment state
-              reportEquipment={reportEquipment}
-              setReportEquipment={setReportEquipment}
-              // Pass column serials
-              reportColumnSerials={reportColumnSerials}
-              setReportColumnSerials={setReportColumnSerials}
-              // Pass report reagents state
-              reportReagentValues={reportReagentValues}
-              setReportReagentValues={setReportReagentValues}
-              // Pass report sample & RS state
-              reportSampleRS={reportSampleRS}
-              setReportSampleRS={setReportSampleRS}
-              // Pass prerequisites for columns and reagents
-              prerequisiteState={prerequisiteState}
-              // Pass state required for Method Description in Report
-              chemicalFormula={chemicalFormula}
-              setChemicalFormula={setChemicalFormula}
-              chemicalName={chemicalName}
-              setChemicalName={setChemicalName}
-              testingConditions={testingConditions}
-              setTestingConditions={setTestingConditions}
-              gradientData={gradientData}
-              setGradientData={setGradientData}
-              solutionPreps={solutionPreps}
-              setSolutionPreps={setSolutionPreps}
-              solDetail={solDetail}
-              setSolDetail={setSolDetail}
-              sequenceState={sequenceState}
-              setSequenceState={setSequenceState}
-              sysSuitability={sysSuitability}
-              setSysSuitability={setSysSuitability}
-              calculationState={calculationState}
-              setCalculationState={setCalculationState}
-              acceptanceCriteria={acceptanceCriteria}
-              setAcceptanceCriteria={setAcceptanceCriteria}
-              // Pass experimental data to report
-              experimentalData={experimentalData}
-              // Pass specificity state to report
-              specificityState={specificityState}
-              // Pass accuracy state
-              accuracyState={accuracyState}
-              // Pass stability state
-              stabilityState={stabilityState}
-              // Pass precision state
-              precisionState={precisionState}
-              // Pass report history state
-              reportHistoryDate={reportHistoryDate}
-              setReportHistoryDate={setReportHistoryDate}
-            />
-          ) : currentView === 'dictionary' ? (
-            <DataMappingDictionary />
-          ) : currentView === 'report_dictionary' ? (
-            <ReportDataMappingDictionary />
-          ) : currentView === 'prd' ? (
-            <ReportDocumentPRD />
-          ) : currentView === 'protocol_prd' ? (
-            <ProtocolDocumentPRD />
-          ) : currentView === 'document_fields' ? (
-            <DocumentFieldTable />
+        )}
+
+        {/* Floating Export Button (Only in Preview Mode) */}
+        {viewMode === 'preview' && (
+            <button 
+                onClick={exportToWord}
+                className="fixed bottom-8 right-8 z-50 bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-lg transition-colors flex items-center gap-2"
+                title="Export to Word"
+            >
+                <Download size={24} />
+                <span className="font-semibold hidden md:inline">Export Word</span>
+            </button>
+        )}
+
+        <main id="main-content" className="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth relative">
+          
+          {/* Conditional Rendering Logic */}
+          {viewMode === 'code' && (currentView === 'protocol' || currentView === 'report' || currentView === 'document') ? (
+             <div className="max-w-6xl mx-auto bg-slate-900 text-slate-50 rounded-lg shadow-2xl overflow-hidden border border-slate-700 flex flex-col h-full max-h-[85vh]">
+                <div className="flex justify-between items-center p-4 bg-slate-800 border-b border-slate-700">
+                   <div className="flex items-center gap-3">
+                      <div className="p-1.5 bg-blue-500/20 rounded text-blue-400"><FileJson size={20} /></div>
+                      <div>
+                        <span className="block font-bold text-sm text-slate-200">Data Source View</span>
+                        <span className="block text-[10px] text-slate-400 font-mono">Current State Snapshot (Read-Only)</span>
+                      </div>
+                   </div>
+                   <div className="text-[10px] text-slate-500 font-mono">
+                      {new Date().toISOString()}
+                   </div>
+                </div>
+                <div className="flex-1 overflow-auto p-6 bg-[#0d1117]">
+                   <pre className="font-mono text-xs leading-relaxed text-green-400 whitespace-pre-wrap break-all">
+                      {JSON.stringify(getDataForCodeView(), null, 2)}
+                   </pre>
+                </div>
+             </div>
           ) : (
-            <DocumentPage 
-              data={experimentalData}
-              setData={setExperimentalData}
-              productId={productId}
-            />
+             <>
+                {currentView === 'protocol' ? (
+                    <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-lg flex flex-col mb-8">
+                    <div className="p-8 md:p-12">
+                        <ProtocolHeader productId={productId} protocolNumber={protocolNumber} />
+                        
+                        <div className="space-y-4">
+                        {sections.map((section) => {
+                            const isSub = section.level === 2;
+                            return (
+                            <div key={section.id} id={section.id} className={`scroll-mt-8 ${!isSub ? 'border-t-2 border-dashed border-gray-200 pt-16 mt-16 first:border-t-0 first:pt-0 first:mt-0' : 'pl-6 pt-4'}`}>
+                                <h2 className={`${isSub ? 'text-lg font-semibold text-blue-700 mb-4' : 'text-2xl font-bold text-gray-800 border-b pb-2 mb-6'} ${section.id === 'cover' ? 'hidden' : ''}`}>
+                                {section.title}
+                                </h2>
+                                {section.subtitle && <h3 className="text-lg text-gray-600 mb-4">{section.subtitle}</h3>}
+                                <div className={`prose prose-sm max-w-none text-gray-800 ${isSub ? 'border-l-2 border-blue-100 pl-4' : ''}`}>
+                                {section.content}
+                                </div>
+                            </div>
+                            );
+                        })}
+                        </div>
+                    </div>
+                    </div>
+                ) : currentView === 'report' ? (
+                    <ReportDocument 
+                    productId={productId}
+                    protocolCode={protocolCode}
+                    protocolVersion={protocolVersion}
+                    projectNumber={projectNumber}
+                    preparer={reportPreparer}
+                    setPreparer={setReportPreparer}
+                    reviewers={reportReviewers}
+                    setReviewers={setReportReviewers}
+                    approver={reportApprover}
+                    setApprover={setReportApprover}
+                    validationOptions={validationOptions}
+                    // Pass training date state
+                    trainingDate={trainingDate}
+                    setTrainingDate={setTrainingDate}
+                    // Pass report equipment state
+                    reportEquipment={reportEquipment}
+                    setReportEquipment={setReportEquipment}
+                    // Pass column serials
+                    reportColumnSerials={reportColumnSerials}
+                    setReportColumnSerials={setReportColumnSerials}
+                    // Pass report reagents state
+                    reportReagentValues={reportReagentValues}
+                    setReportReagentValues={setReportReagentValues}
+                    // Pass report sample & RS state
+                    reportSampleRS={reportSampleRS}
+                    setReportSampleRS={setReportSampleRS}
+                    // Pass prerequisites for columns and reagents
+                    prerequisiteState={prerequisiteState}
+                    // Pass state required for Method Description in Report
+                    chemicalFormula={chemicalFormula}
+                    setChemicalFormula={setChemicalFormula}
+                    chemicalName={chemicalName}
+                    setChemicalName={setChemicalName}
+                    testingConditions={testingConditions}
+                    setTestingConditions={setTestingConditions}
+                    gradientData={gradientData}
+                    setGradientData={setGradientData}
+                    solutionPreps={solutionPreps}
+                    setSolutionPreps={setSolutionPreps}
+                    solDetail={solDetail}
+                    setSolDetail={setSolDetail}
+                    sequenceState={sequenceState}
+                    setSequenceState={setSequenceState}
+                    sysSuitability={sysSuitability}
+                    setSysSuitability={setSysSuitability}
+                    calculationState={calculationState}
+                    setCalculationState={setCalculationState}
+                    acceptanceCriteria={acceptanceCriteria}
+                    setAcceptanceCriteria={setAcceptanceCriteria}
+                    // Pass experimental data to report
+                    experimentalData={experimentalData}
+                    // Pass specificity state to report
+                    specificityState={specificityState}
+                    // Pass accuracy state
+                    accuracyState={accuracyState}
+                    // Pass stability state
+                    stabilityState={stabilityState}
+                    // Pass precision state
+                    precisionState={precisionState}
+                    // Pass report history state
+                    reportHistoryDate={reportHistoryDate}
+                    setReportHistoryDate={setReportHistoryDate}
+                    />
+                ) : currentView === 'dictionary' ? (
+                    <DataMappingDictionary />
+                ) : currentView === 'report_dictionary' ? (
+                    <ReportDataMappingDictionary />
+                ) : currentView === 'prd' ? (
+                    <ReportDocumentPRD />
+                ) : currentView === 'protocol_prd' ? (
+                    <ProtocolDocumentPRD />
+                ) : currentView === 'document_fields' ? (
+                    <DocumentFieldTable />
+                ) : (
+                    <DocumentPage 
+                    data={experimentalData}
+                    setData={setExperimentalData}
+                    productId={productId}
+                    />
+                )}
+             </>
           )}
         </main>
       </div>

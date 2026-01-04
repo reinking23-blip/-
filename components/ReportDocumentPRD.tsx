@@ -326,8 +326,8 @@ export const ReportDocumentPRD: React.FC = () => {
                     <td className="p-3 font-medium">5.2.2 色谱柱确认</td>
                     <td className="p-3 text-xs">色谱柱序列号 (Serial #)</td>
                     <td className="p-3 text-xs font-mono text-purple-600">
-                      Key: Protocol defined columns<br/>
-                      Value: Report input serials
+                      Key: 方案定义的色谱柱 (Protocol Columns)<br/>
+                      Value: 报告输入的序列号 (Report Serials)
                     </td>
                     <td className="p-3 text-xs">
                       若 Protocol 新增了色谱柱，此处需自动扩展行，防止漏填。
@@ -337,7 +337,7 @@ export const ReportDocumentPRD: React.FC = () => {
                     <td className="p-3 font-medium">5.2.3 试剂确认</td>
                     <td className="p-3 text-xs">批号, 厂家, 有效期</td>
                     <td className="p-3 text-xs font-mono text-purple-600">
-                      Map: Protocol Reagents -> Report Fields
+                      Map: 方案试剂 -> 报告字段 (Protocol Reagents -> Report Fields)
                     </td>
                     <td className="p-3 text-xs">
                       试剂名称只读，不可在报告中修改，需回溯方案修改。
