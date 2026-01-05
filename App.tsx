@@ -178,14 +178,14 @@ const App: React.FC = () => {
     controlCount: "1"
   });
 
-  // Independent state for Validation Procedure -> System Suitability -> 2.3 Procedure
+  // Independent state for Validation Procedure → System Suitability → 2.3 Procedure
   const [valProcSysSuitState, setValProcSysSuitState] = useState<ValProcSysSuitState>({
     std1Count: "5",
     std2Count: "1",
     controlCount: "1"
   });
 
-  // Independent state for Validation Procedure -> Precision -> 2.3 Procedure
+  // Independent state for Validation Procedure → Precision → 2.3 Procedure
   const [valProcPrecisionState, setValProcPrecisionState] = useState<ValProcPrecisionState>({
     precisionStd1Count: "5",
     precisionStd2Count: "1"
