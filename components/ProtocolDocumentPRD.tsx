@@ -76,8 +76,8 @@ export const ProtocolDocumentPRD: React.FC = () => {
                     <li><strong>动态目录生成：</strong> TOC 节点必须与“3. 验证项选择器”的状态实时绑定。若用户取消勾选“稳定性”，Sidebar 中对应的“6.x 溶液稳定性”节点应即时移除 (Unmount)。</li>
                     <li><strong>双向锚点联动：</strong> 
                       <ul className="list-circle pl-4 mt-1 text-slate-500">
-                        <li>点击目录项 &rarr; 主视图平滑滚动至对应 Section。</li>
-                        <li>主视图滚动 &rarr; `IntersectionObserver` 监听可视区域，反向高亮 Sidebar 对应项。</li>
+                        <li>点击目录项 &rArr; 主视图平滑滚动至对应 Section。</li>
+                        <li>主视图滚动 &rArr; `IntersectionObserver` 监听可视区域，反向高亮 Sidebar 对应项。</li>
                       </ul>
                     </li>
                   </ul>
@@ -288,7 +288,7 @@ export const ProtocolDocumentPRD: React.FC = () => {
                     </ul>
                   </div>
                   <div className="flex flex-col justify-center items-center">
-                    <span className="text-purple-400 mb-1">映射至 (Mapped To) &rarr;</span>
+                    <span className="text-purple-400 mb-1">映射至 (Mapped To) &rArr;</span>
                   </div>
                   <div className="bg-white p-2 rounded border border-purple-100 col-start-2 row-start-1">
                     <span className="font-bold text-gray-700 block mb-1">目标 (Target: Module 8)</span>
@@ -503,15 +503,15 @@ export const ProtocolDocumentPRD: React.FC = () => {
                 <div className="grid grid-cols-1 gap-2 text-xs text-gray-700">
                   <div className="flex gap-2 items-start">
                     <span className="bg-white border border-gray-200 px-1 rounded font-mono shrink-0">Module 4</span>
-                    <span>&rarr; Instruments & Columns: 填充 2.1 色谱条件引用 & Prerequisite 2 检查表。</span>
+                    <span>&rArr; Instruments & Columns: 填充 2.1 色谱条件引用 & Prerequisite 2 检查表。</span>
                   </div>
                   <div className="flex gap-2 items-start">
                     <span className="bg-white border border-gray-200 px-1 rounded font-mono shrink-0">Module 5</span>
-                    <span>&rarr; Solutions: 填充各步骤 2.2 溶液配制中的描述文本与称量参数。</span>
+                    <span>&rArr; Solutions: 填充各步骤 2.2 溶液配制中的描述文本与称量参数。</span>
                   </div>
                   <div className="flex gap-2 items-start">
                     <span className="bg-white border border-gray-200 px-1 rounded font-mono shrink-0">Module 6</span>
-                    <span>&rarr; Limits: 填充各步骤 3. 可接受标准中的具体数值 (如 RSD 2.0%)。</span>
+                    <span>&rArr; Limits: 填充各步骤 3. 可接受标准中的具体数值 (如 RSD 2.0%)。</span>
                   </div>
                 </div>
               </div>
