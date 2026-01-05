@@ -740,11 +740,65 @@ const App: React.FC = () => {
       return {};
   };
 
-  const exportToWord = () => {
+  const exportToWord = async () => {
     const element = document.getElementById('main-content');
     if (!element) return;
 
     const clone = element.cloneNode(true) as HTMLElement;
+
+    // 0. Handle SVGs (Rasterize to Images)
+    const originalSvgs = element.querySelectorAll('svg');
+    const cloneSvgs = clone.querySelectorAll('svg');
+    
+    // Process SVGs sequentially to avoid race conditions with canvas
+    for (let i = 0; i < originalSvgs.length; i++) {
+        const svg = originalSvgs[i];
+        const cloneSvg = cloneSvgs[i];
+        
+        try {
+            const svgString = new XMLSerializer().serializeToString(svg);
+            const blob = new Blob([svgString], {type: 'image/svg+xml'});
+            const url = URL.createObjectURL(blob);
+            
+            const img = new Image();
+            img.src = url;
+            
+            await new Promise((resolve, reject) => {
+                img.onload = resolve;
+                img.onerror = reject;
+            });
+            
+            const canvas = document.createElement('canvas');
+            // Use getBoundingClientRect for accurate dimensions including scaling
+            const rect = svg.getBoundingClientRect();
+            canvas.width = rect.width * 2; // 2x scale for better quality
+            canvas.height = rect.height * 2;
+            
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+                ctx.scale(2, 2);
+                ctx.drawImage(img, 0, 0, rect.width, rect.height);
+                const pngData = canvas.toDataURL('image/png');
+                
+                const newImg = document.createElement('img');
+                newImg.src = pngData;
+                newImg.width = rect.width;
+                newImg.height = rect.height;
+                
+                // Replace SVG in clone with the PNG image
+                if (cloneSvg && cloneSvg.parentNode) {
+                    cloneSvg.parentNode.replaceChild(newImg, cloneSvg);
+                }
+            }
+            URL.revokeObjectURL(url);
+        } catch (e) {
+            console.error("Failed to rasterize SVG for export", e);
+            // Fallback: Remove SVG from clone if rasterization fails to avoid broken XML
+            if (cloneSvg && cloneSvg.parentNode) {
+                cloneSvg.remove();
+            }
+        }
+    }
 
     // 1. Sync Input values to clone
     const origInputs = element.querySelectorAll('input');
@@ -821,8 +875,10 @@ const App: React.FC = () => {
         select.parentNode?.replaceChild(span, select);
     });
 
-    // Remove buttons and icons
+    // Remove buttons and icons (except the newly added images)
     clone.querySelectorAll('button').forEach(btn => btn.remove());
+    // Note: We already handled SVGs above, replacing them with images. 
+    // Any remaining SVGs (icons not converted) should be removed to avoid errors in Word.
     clone.querySelectorAll('svg').forEach(svg => svg.remove());
 
     const htmlContent = `
