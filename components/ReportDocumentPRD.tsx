@@ -337,7 +337,7 @@ export const ReportDocumentPRD: React.FC = () => {
                     <td className="p-3 font-medium">5.2.3 试剂确认</td>
                     <td className="p-3 text-xs">批号, 厂家, 有效期</td>
                     <td className="p-3 text-xs font-mono text-purple-600">
-                      Map: 方案试剂 -> 报告字段 (Protocol Reagents -> Report Fields)
+                      Map: 方案试剂 → 报告字段 (Protocol Reagents → Report Fields)
                     </td>
                     <td className="p-3 text-xs">
                       试剂名称只读，不可在报告中修改，需回溯方案修改。
