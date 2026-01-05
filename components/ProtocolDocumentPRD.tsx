@@ -76,8 +76,8 @@ export const ProtocolDocumentPRD: React.FC = () => {
                     <li><strong>动态目录生成：</strong> TOC 节点必须与“3. 验证项选择器”的状态实时绑定。若用户取消勾选“稳定性”，Sidebar 中对应的“6.x 溶液稳定性”节点应即时移除 (Unmount)。</li>
                     <li><strong>双向锚点联动：</strong> 
                       <ul className="list-circle pl-4 mt-1 text-slate-500">
-                        <li>点击目录项 -> 主视图平滑滚动至对应 Section。</li>
-                        <li>主视图滚动 -> `IntersectionObserver` 监听可视区域，反向高亮 Sidebar 对应项。</li>
+                        <li>点击目录项 → 主视图平滑滚动至对应 Section。</li>
+                        <li>主视图滚动 → `IntersectionObserver` 监听可视区域，反向高亮 Sidebar 对应项。</li>
                       </ul>
                     </li>
                   </ul>

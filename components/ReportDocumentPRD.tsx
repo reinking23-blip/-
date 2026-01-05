@@ -183,7 +183,7 @@ export const ReportDocumentPRD: React.FC = () => {
                       </div>
                       <p className="text-[10px] text-slate-500 leading-relaxed relative z-10">
                         “可接受标准”列的内容必须与 Protocol 中的定义完全一致。
-                        <br/><strong>数据流：</strong> Protocol State -> Report View。
+                        <br/><strong>数据流：</strong> Protocol State → Report View。
                         <br/><strong>异常流：</strong> 若标准未定义，显示缺省占位符。
                       </p>
                     </div>
@@ -439,7 +439,7 @@ export const ReportDocumentPRD: React.FC = () => {
                   </div>
                   <div className="border-l-2 border-indigo-400 pl-3">
                     <strong>结论联动映射：</strong>
-                    <p className="mt-1 text-slate-500">章节末尾的“结论”字段，自动读取 Module 3 中的 Pass/Fail 状态，并映射为中文描述（Pass -> 符合规定）。</p>
+                    <p className="mt-1 text-slate-500">章节末尾的“结论”字段，自动读取 Module 3 中的 Pass/Fail 状态，并映射为中文描述（Pass → 符合规定）。</p>
                   </div>
                 </div>
               </div>
